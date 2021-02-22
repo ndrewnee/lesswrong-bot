@@ -7,37 +7,55 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
+
+const (
+	DefaultLimit  = 12
+	BodyMaxLength = 800
+)
+
+const (
+	MessageHelp = `🤖 I'm a bot for reading articles from https://astralcodexten.substack.com
+
+Commands:
+	
+/random - Read random article
+/help - Help`
+
+	MessageRandom = `📝 %s
+
+➜ %s
+
+%s`
+)
+
+var articles []Article
 
 type Article struct {
 	Slug         string `json:"slug"`
 	Title        string `json:"title"`
 	CanonicalURL string `json:"canonical_url"`
 	BodyHTML     string `json:"body_html"`
+	Audience     string `json:"audience"`
 }
 
 func main() {
-	converter := md.NewConverter("", true, nil)
-
-	response, err := http.Get("https://astralcodexten.substack.com/api/v1/archive?sort=new&search=&offset=0&limit=12")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var articles []Article
-	if err := json.NewDecoder(response.Body).Decode(&articles); err != nil {
-		log.Fatal(err)
-	}
+	rand.Seed(time.Now().UnixNano())
+	mdConverter := md.NewConverter("", true, nil)
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TOKEN"))
 	if err != nil {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	if os.Getenv("DEBUG") == "true" {
+		bot.Debug = true
+	}
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -56,46 +74,94 @@ func main() {
 
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
-		if update.Message.IsCommand() {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		if !update.Message.IsCommand() {
+			continue
+		}
 
-			switch update.Message.Command() {
-			case "help":
-				msg.Text = "type /random"
-			case "random":
-				msg.Text = "Article not found"
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.DisableWebPagePreview = true
 
-				i := rand.Intn(len(articles))
-				if len(articles) <= i {
-					break
+		switch update.Message.Command() {
+		case "help":
+			msg.Text = MessageHelp
+		case "random":
+			msg.Text = "Article not found"
+
+			if len(articles) == 0 {
+				for offset := 0; true; offset += DefaultLimit {
+					uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%v&offset=%v",
+						DefaultLimit,
+						offset,
+					)
+
+					archiveResponse, err := http.Get(uri)
+					if err != nil {
+						log.Println("[ERROR] Get articles archive failed", err)
+						break
+					}
+
+					var newArticles []Article
+
+					if err := json.NewDecoder(archiveResponse.Body).Decode(&newArticles); err != nil {
+						log.Println("[ERROR] Unmarshal articles archive failed", err)
+						break
+					}
+
+					if len(newArticles) == 0 {
+						break
+					}
+
+					for _, article := range newArticles {
+						if article.Audience == "everyone" {
+							articles = append(articles, article)
+						}
+					}
 				}
-
-				response, err := http.Get("https://astralcodexten.substack.com/api/v1/posts/" + articles[i].Slug)
-				if err != nil {
-					log.Printf("Get article failed: %s", err)
-					continue
-				}
-
-				var article Article
-				if err := json.NewDecoder(response.Body).Decode(&article); err != nil {
-					log.Printf("Unmarshal article failed: %s", err)
-					continue
-				}
-
-				markdown, err := converter.ConvertString(article.BodyHTML)
-				if err != nil {
-					log.Printf("Convert html to markdown failed: %s", err)
-					continue
-				}
-
-				msg.Text = fmt.Sprintf("📝 %s\n\n%.1500s...\n\n➜ %s", article.Title, markdown, article.CanonicalURL)
-			default:
-				msg.Text = "I don't know that command"
 			}
 
-			if _, err := bot.Send(msg); err != nil {
-				log.Printf("[ERROR] Send message failed: %s", err)
+			if len(articles) == 0 {
+				break
 			}
+
+			i := rand.Intn(len(articles))
+			article := articles[i]
+
+			articleResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/posts/" + article.Slug)
+			if err != nil {
+				log.Println("[ERROR] Get article from server failed: ", err)
+				break
+			}
+
+			if err := json.NewDecoder(articleResponse.Body).Decode(&article); err != nil {
+				log.Println("[ERROR] Unmarshal article failed: ", err)
+				break
+			}
+
+			markdown, err := mdConverter.ConvertString(article.BodyHTML)
+			if err != nil {
+				log.Println("[ERROR] Convert html to markdown failed: ", err)
+				break
+			}
+
+			if len(markdown) > BodyMaxLength {
+				r := []rune(markdown)
+
+				n := strings.IndexByte(string(r[BodyMaxLength:]), '\n')
+				if n != -1 {
+					markdown = string(r[:BodyMaxLength+n+1])
+				} else {
+					markdown = string(r[:BodyMaxLength])
+				}
+			}
+
+			msg.Text = fmt.Sprintf(MessageRandom, article.Title, article.CanonicalURL, markdown)
+		default:
+			msg.Text = "I don't know that command"
+		}
+
+		if _, err := bot.Send(msg); err != nil {
+			log.Println("[ERROR] Send message failed: ", err)
 		}
 	}
 }

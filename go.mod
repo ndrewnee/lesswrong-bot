@@ -8,5 +8,5 @@ require (
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-	golang.org/x/net v0.0.0-20210220033124-5f55cee0dc0d // indirect
+	golang.org/x/net v0.0.0-20210222171744-9060382bd457 // indirect
 )
