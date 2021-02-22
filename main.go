@@ -2,24 +2,27 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
 
+	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 type Article struct {
-	ID           int    `json:"id"`
+	Slug         string `json:"slug"`
 	Title        string `json:"title"`
-	Subtitle     string `json:"subtitle"`
-	Description  string `json:"description"`
 	CanonicalURL string `json:"canonical_url"`
+	BodyHTML     string `json:"body_html"`
 }
 
 func main() {
-	response, err := http.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&search=&offset=0&limit=12")
+	converter := md.NewConverter("", true, nil)
+
+	response, err := http.Get("https://astralcodexten.substack.com/api/v1/archive?sort=new&search=&offset=0&limit=12")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,13 +63,32 @@ func main() {
 			case "help":
 				msg.Text = "type /random"
 			case "random":
-				text := "Article not found"
+				msg.Text = "Article not found"
 
-				if i := rand.Intn(len(articles)); i < len(articles) {
-					text = articles[i].CanonicalURL
+				i := rand.Intn(len(articles))
+				if len(articles) <= i {
+					break
 				}
 
-				msg.Text = text
+				response, err := http.Get("https://astralcodexten.substack.com/api/v1/posts/" + articles[i].Slug)
+				if err != nil {
+					log.Printf("Get article failed: %s", err)
+					continue
+				}
+
+				var article Article
+				if err := json.NewDecoder(response.Body).Decode(&article); err != nil {
+					log.Printf("Unmarshal article failed: %s", err)
+					continue
+				}
+
+				markdown, err := converter.ConvertString(article.BodyHTML)
+				if err != nil {
+					log.Printf("Convert html to markdown failed: %s", err)
+					continue
+				}
+
+				msg.Text = fmt.Sprintf("📝 %s\n\n%.1500s...\n\n➜ %s", article.Title, markdown, article.CanonicalURL)
 			default:
 				msg.Text = "I don't know that command"
 			}
