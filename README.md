@@ -1,2 +1,3 @@
 # lesswrong-bot
-Telegram bot for lesswrong.com
+
+Telegram bot for https://astralcodexten.substack.com/
