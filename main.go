@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -20,25 +21,23 @@ const (
 )
 
 const (
-	MessageHelp = `🤖 I'm a bot for reading articles from https://astralcodexten.substack.com
+	MessageHelp = `🤖 I'm a bot for reading posts from https://astralcodexten.substack.com
 
 Commands:
 	
-/random - Read random article
+/top - Top posts
+
+/random - Read random post
+
 /help - Help`
-
-	MessageRandom = `📝 %s
-
-➜ %s
-
-%s`
 )
 
-var articles []Article
+var posts []Post
 
-type Article struct {
+type Post struct {
 	Slug         string `json:"slug"`
 	Title        string `json:"title"`
+	Subtitle     string `json:"subtitle"`
 	CanonicalURL string `json:"canonical_url"`
 	BodyHTML     string `json:"body_html"`
 	Audience     string `json:"audience"`
@@ -85,10 +84,39 @@ func main() {
 		switch update.Message.Command() {
 		case "help":
 			msg.Text = MessageHelp
-		case "random":
-			msg.Text = "Article not found"
+		case "top":
+			archiveResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
+			if err != nil {
+				log.Println("[ERROR] Get posts archive failed", err)
+				break
+			}
 
-			if len(articles) == 0 {
+			var topPosts []Post
+
+			if err := json.NewDecoder(archiveResponse.Body).Decode(&topPosts); err != nil {
+				log.Println("[ERROR] Unmarshal top posts archive failed", err)
+				break
+			}
+
+			text := bytes.NewBufferString("🏆 Top posts\n\n")
+
+			for i, post := range topPosts {
+				if post.Audience == "only_paid" {
+					continue
+				}
+
+				text.WriteString(fmt.Sprintf("%v. [%s](%s)\n\n", i+1, post.Title, post.CanonicalURL))
+
+				if post.Subtitle != "" && post.Subtitle != "..." {
+					text.WriteString(fmt.Sprintf("    %s\n\n", post.Subtitle))
+				}
+			}
+
+			msg.Text = text.String()
+		case "random":
+			msg.Text = "Post not found"
+
+			if len(posts) == 0 {
 				for offset := 0; true; offset += DefaultLimit {
 					uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%v&offset=%v",
 						DefaultLimit,
@@ -97,48 +125,48 @@ func main() {
 
 					archiveResponse, err := http.Get(uri)
 					if err != nil {
-						log.Println("[ERROR] Get articles archive failed", err)
+						log.Println("[ERROR] Get posts archive failed", err)
 						break
 					}
 
-					var newArticles []Article
+					var newPosts []Post
 
-					if err := json.NewDecoder(archiveResponse.Body).Decode(&newArticles); err != nil {
-						log.Println("[ERROR] Unmarshal articles archive failed", err)
+					if err := json.NewDecoder(archiveResponse.Body).Decode(&newPosts); err != nil {
+						log.Println("[ERROR] Unmarshal new posts archive failed", err)
 						break
 					}
 
-					if len(newArticles) == 0 {
+					if len(newPosts) == 0 {
 						break
 					}
 
-					for _, article := range newArticles {
-						if article.Audience == "everyone" {
-							articles = append(articles, article)
+					for _, post := range newPosts {
+						if post.Audience != "only_paid" {
+							posts = append(posts, post)
 						}
 					}
 				}
 			}
 
-			if len(articles) == 0 {
+			if len(posts) == 0 {
 				break
 			}
 
-			i := rand.Intn(len(articles))
-			article := articles[i]
+			i := rand.Intn(len(posts))
+			post := posts[i]
 
-			articleResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/posts/" + article.Slug)
+			postResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
 			if err != nil {
-				log.Println("[ERROR] Get article from server failed: ", err)
+				log.Println("[ERROR] Get post from server failed: ", err)
 				break
 			}
 
-			if err := json.NewDecoder(articleResponse.Body).Decode(&article); err != nil {
-				log.Println("[ERROR] Unmarshal article failed: ", err)
+			if err := json.NewDecoder(postResponse.Body).Decode(&post); err != nil {
+				log.Println("[ERROR] Unmarshal post failed: ", err)
 				break
 			}
 
-			markdown, err := mdConverter.ConvertString(article.BodyHTML)
+			markdown, err := mdConverter.ConvertString(post.BodyHTML)
 			if err != nil {
 				log.Println("[ERROR] Convert html to markdown failed: ", err)
 				break
@@ -155,7 +183,7 @@ func main() {
 				}
 			}
 
-			msg.Text = fmt.Sprintf(MessageRandom, article.Title, article.CanonicalURL, markdown)
+			msg.Text = fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.CanonicalURL, markdown)
 		default:
 			msg.Text = "I don't know that command"
 		}
