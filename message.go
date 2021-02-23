@@ -35,7 +35,7 @@ func getUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesCh
 		}
 
 		if info.LastErrorDate != 0 {
-			log.Println("[ERROR] Telegram callback faileds", info.LastErrorMessage)
+			log.Println("[ERROR] Telegram callback failed", info.LastErrorMessage)
 		}
 
 		updates := bot.ListenForWebhook("/" + bot.Token)

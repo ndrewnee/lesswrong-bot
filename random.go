@@ -16,6 +16,7 @@ const (
 	PostMaxLength = 800
 )
 
+// TODO Cache posts in some storage.
 var posts []Post
 
 type Post struct {
@@ -28,7 +29,9 @@ type Post struct {
 }
 
 func commandRandom(mdConverter *md.Converter) (string, error) {
+	// Load posts for the first time.
 	if len(posts) == 0 {
+		// As substack limits list to 12 posts in one request we fetch all posts using offset.
 		for offset := 0; true; offset += DefaultLimit {
 			uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%v&offset=%v",
 				DefaultLimit,
@@ -81,9 +84,12 @@ func commandRandom(mdConverter *md.Converter) (string, error) {
 		return "", fmt.Errorf("convert html to markdown failed: %w", err)
 	}
 
+	// Cut post for preview mode.
 	if len(markdown) > PostMaxLength {
+		// Convert to runes to properly split between unicode symbols.
 		r := []rune(markdown)
 
+		// Truncate after next line end to not break markdown text.
 		n := strings.IndexByte(string(r[PostMaxLength:]), '\n')
 		if n != -1 {
 			markdown = string(r[:PostMaxLength+n+1])
