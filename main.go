@@ -66,6 +66,30 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if os.Getenv("MODE") == "production" {
+		_, err = bot.SetWebhook(tgbotapi.NewWebhook("https://lesswrong-bot.herokuapp.com/" + bot.Token))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		info, err := bot.GetWebhookInfo()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if info.LastErrorDate != 0 {
+			log.Println("[ERROR] Telegram callback faileds", info.LastErrorMessage)
+		}
+
+		updates = bot.ListenForWebhook("/" + bot.Token)
+
+		go func() {
+			if err := http.ListenAndServe("0.0.0.0:80", nil); err != nil {
+				log.Println("[ERROR] Listen and serve failed: ", err)
+			}
+		}()
+	}
+
 	for update := range updates {
 		if update.Message == nil {
 			continue
