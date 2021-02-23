@@ -17,7 +17,6 @@ const (
 	PostMaxLength = 1500
 )
 
-// TODO Cache posts in some storage.
 var (
 	astralPosts []AstralPost
 	slatePosts  []SlatePost

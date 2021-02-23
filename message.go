@@ -10,13 +10,15 @@ import (
 )
 
 const (
-	MessageHelp = `🤖 I'm a bot for reading posts from https://astralcodexten.substack.com
+	MessageHelp = `🤖 I'm a bot for reading posts from https://slatestarcodex.com (default) and https://astralcodexten.substack.com.
 
 Commands:
 	
 /top - Top posts
 
 /random - Read random post
+
+/source - Change source (1 - slatestarcodex, 2 - astralcodexten)
 
 /help - Help`
 )
@@ -26,7 +28,6 @@ const (
 	SourceAstral Source = "2"
 )
 
-// TODO Cache user sources in some storage.
 var userSource = map[int]Source{}
 
 type Source string

@@ -8,7 +8,7 @@ import (
 )
 
 // As https://slatestarcodex.com top posts won't change anymore it's much more effecient to return hardcoded list.
-const MessageTopSlate = `🏆 Top posts
+const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 1. [Beware The Man Of One Study](https://slatestarcodex.com/2014/12/12/beware-the-man-of-one-study/)
 
@@ -53,7 +53,7 @@ func CommandTopAstral() (string, error) {
 		return "", fmt.Errorf("unmarshal top posts archive failed: %w", err)
 	}
 
-	text := bytes.NewBufferString("🏆 Top posts\n\n")
+	text := bytes.NewBufferString("🏆 Top posts from https://astralcodexten.substack.com\n\n")
 
 	for i, post := range topPosts {
 		if post.Audience == "only_paid" {
