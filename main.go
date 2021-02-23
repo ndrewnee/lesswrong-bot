@@ -49,7 +49,7 @@ func main() {
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TOKEN"))
 	if err != nil {
-		log.Panic(err)
+		log.Fatal("Init telegram bot api failed: ", err)
 	}
 
 	if os.Getenv("DEBUG") == "true" {
@@ -58,23 +58,17 @@ func main() {
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
+	var updates tgbotapi.UpdatesChannel
 
-	updates, err := bot.GetUpdatesChan(u)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if os.Getenv("MODE") == "production" {
+	if os.Getenv("MODE") == "webhook" {
 		_, err = bot.SetWebhook(tgbotapi.NewWebhook("https://lesswrong-bot.herokuapp.com/" + bot.Token))
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("Set webhook failed: ", err)
 		}
 
 		info, err := bot.GetWebhookInfo()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("Get webhook info failed: ", err)
 		}
 
 		if info.LastErrorDate != 0 {
@@ -84,10 +78,27 @@ func main() {
 		updates = bot.ListenForWebhook("/" + bot.Token)
 
 		go func() {
-			if err := http.ListenAndServe("0.0.0.0:80", nil); err != nil {
+			if err := http.ListenAndServe(":80", nil); err != nil {
 				log.Println("[ERROR] Listen and serve failed: ", err)
 			}
 		}()
+	} else {
+		response, err := bot.RemoveWebhook()
+		if err != nil {
+			log.Fatal("Removed webhook failed: ", err)
+		}
+
+		if !response.Ok {
+			log.Fatal("Remove webhook response contains error: ", response)
+		}
+
+		u := tgbotapi.NewUpdate(0)
+		u.Timeout = 60
+
+		updates, err = bot.GetUpdatesChan(u)
+		if err != nil {
+			log.Fatal("Get updates chan failed: ", err)
+		}
 	}
 
 	for update := range updates {
