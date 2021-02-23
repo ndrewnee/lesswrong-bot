@@ -1,4 +1,4 @@
-module github.com/ndrewnee/lesswrong.bot
+module github.com/ndrewnee/lesswrong-bot
 
 go 1.15
 

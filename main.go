@@ -17,7 +17,7 @@ import (
 
 const (
 	DefaultLimit  = 12
-	BodyMaxLength = 800
+	PostMaxLength = 800
 )
 
 const (
@@ -172,14 +172,14 @@ func main() {
 				break
 			}
 
-			if len(markdown) > BodyMaxLength {
+			if len(markdown) > PostMaxLength {
 				r := []rune(markdown)
 
-				n := strings.IndexByte(string(r[BodyMaxLength:]), '\n')
+				n := strings.IndexByte(string(r[PostMaxLength:]), '\n')
 				if n != -1 {
-					markdown = string(r[:BodyMaxLength+n+1])
+					markdown = string(r[:PostMaxLength+n+1])
 				} else {
-					markdown = string(r[:BodyMaxLength])
+					markdown = string(r[:PostMaxLength])
 				}
 			}
 
