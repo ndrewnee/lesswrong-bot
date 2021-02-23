@@ -21,7 +21,7 @@ Commands:
 /help - Help`
 )
 
-func getUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesChannel, error) {
+func GetUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesChannel, error) {
 	if settings.Webhook {
 		webhook := tgbotapi.NewWebhook(settings.WebhookHost + "/" + bot.Token)
 
@@ -69,7 +69,7 @@ func getUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesCh
 	return updates, nil
 }
 
-func messageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
+func MessageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 	var err error
 
 	if update.Message == nil {
@@ -90,13 +90,13 @@ func messageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbo
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = commandTopSlate(mdConverter)
+		msg.Text, err = SlateCommandTop(mdConverter)
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		msg.Text, err = commandRandomSlate(mdConverter)
+		msg.Text, err = SlateCommandRandom(mdConverter)
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
 			msg.Text = "Random post not found"

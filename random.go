@@ -18,20 +18,31 @@ const (
 )
 
 // TODO Cache posts in some storage.
-var posts []Post
+var (
+	astralPosts []AstralPost
+	slatePosts  []SlatePost
+)
 
-type Post struct {
-	Slug         string `json:"slug"`
-	Title        string `json:"title"`
-	Subtitle     string `json:"subtitle"`
-	CanonicalURL string `json:"canonical_url"`
-	BodyHTML     string `json:"body_html"`
-	Audience     string `json:"audience"`
-}
+type (
+	AstralPost struct {
+		Slug         string `json:"slug"`
+		Title        string `json:"title"`
+		Subtitle     string `json:"subtitle"`
+		CanonicalURL string `json:"canonical_url"`
+		BodyHTML     string `json:"body_html"`
+		Audience     string `json:"audience"`
+	}
 
-func commandRandom(mdConverter *md.Converter) (string, error) {
+	SlatePost struct {
+		Title    string
+		URL      string
+		BodyHTML string
+	}
+)
+
+func AstralCommandRandom(mdConverter *md.Converter) (string, error) {
 	// Load posts for the first time.
-	if len(posts) == 0 {
+	if len(astralPosts) == 0 {
 		// As substack limits list to 12 posts in one request we fetch all posts using offset.
 		for offset := 0; true; offset += DefaultLimit {
 			uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%v&offset=%v",
@@ -45,7 +56,7 @@ func commandRandom(mdConverter *md.Converter) (string, error) {
 				break
 			}
 
-			var newPosts []Post
+			var newPosts []AstralPost
 
 			if err := json.NewDecoder(archiveResponse.Body).Decode(&newPosts); err != nil {
 				log.Println("[ERROR] Unmarshal new posts archive failed: ", err)
@@ -58,18 +69,18 @@ func commandRandom(mdConverter *md.Converter) (string, error) {
 
 			for _, post := range newPosts {
 				if post.Audience != "only_paid" {
-					posts = append(posts, post)
+					astralPosts = append(astralPosts, post)
 				}
 			}
 		}
 	}
 
-	if len(posts) == 0 {
+	if len(astralPosts) == 0 {
 		return "", fmt.Errorf("posts not found")
 	}
 
-	i := rand.Intn(len(posts))
-	post := posts[i]
+	i := rand.Intn(len(astralPosts))
+	post := astralPosts[i]
 
 	postResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
 	if err != nil {
@@ -93,7 +104,7 @@ func commandRandom(mdConverter *md.Converter) (string, error) {
 		// Truncate after next line end to not break markdown text.
 		n := strings.IndexByte(string(r[PostMaxLength:]), '\n')
 		if n != -1 {
-			markdown = string(r[:PostMaxLength+n+1])
+			markdown = string(r[:PostMaxLength+n])
 		} else {
 			markdown = string(r[:PostMaxLength])
 		}
@@ -102,22 +113,15 @@ func commandRandom(mdConverter *md.Converter) (string, error) {
 	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.CanonicalURL, markdown), nil
 }
 
-type PostSlate struct {
-	Title    string
-	Link     string
-	BodyHTML string
-}
-
-var slatePosts []PostSlate
-
-func commandRandomSlate(mdConverter *md.Converter) (string, error) {
+func SlateCommandRandom(mdConverter *md.Converter) (string, error) {
+	// Load posts for the first time.
 	if len(slatePosts) == 0 {
 		archiveCollector := colly.NewCollector()
 
 		archiveCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
-			slatePosts = append(slatePosts, PostSlate{
+			slatePosts = append(slatePosts, SlatePost{
 				Title: e.Text,
-				Link:  e.Attr("href"),
+				URL:   e.Attr("href"),
 			})
 		})
 
@@ -139,7 +143,7 @@ func commandRandomSlate(mdConverter *md.Converter) (string, error) {
 		post.BodyHTML, _ = e.DOM.Html()
 	})
 
-	if err := postCollector.Visit(post.Link); err != nil {
+	if err := postCollector.Visit(post.URL); err != nil {
 		return "", fmt.Errorf("get slatestarcodex post failed: %w", err)
 	}
 
@@ -162,5 +166,5 @@ func commandRandomSlate(mdConverter *md.Converter) (string, error) {
 		}
 	}
 
-	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.Link, markdown), nil
+	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.URL, markdown), nil
 }

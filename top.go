@@ -9,35 +9,6 @@ import (
 	md "github.com/JohannesKaufmann/html-to-markdown"
 )
 
-func commandTop() (string, error) {
-	archiveResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
-	if err != nil {
-		return "", fmt.Errorf("get posts archive failed: %w", err)
-	}
-
-	var topPosts []Post
-
-	if err := json.NewDecoder(archiveResponse.Body).Decode(&topPosts); err != nil {
-		return "", fmt.Errorf("unmarshal top posts archive failed: %w", err)
-	}
-
-	text := bytes.NewBufferString("🏆 Top posts\n\n")
-
-	for i, post := range topPosts {
-		if post.Audience == "only_paid" {
-			continue
-		}
-
-		text.WriteString(fmt.Sprintf("%v. [%s](%s)\n\n", i+1, post.Title, post.CanonicalURL))
-
-		if post.Subtitle != "" && post.Subtitle != "..." {
-			text.WriteString(fmt.Sprintf("    %s\n\n", post.Subtitle))
-		}
-	}
-
-	return text.String(), nil
-}
-
 // As https://slatestarcodex.com top posts won't change anymore it's much more effecient to return hardcoded list.
 const TopMessageSlate = `🏆 Top posts
 
@@ -61,6 +32,35 @@ const TopMessageSlate = `🏆 Top posts
 
 10. [Who By Very Slow Decay](https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/)`
 
-func commandTopSlate(mdConverter *md.Converter) (string, error) {
+func AstralCommandTop() (string, error) {
+	archiveResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
+	if err != nil {
+		return "", fmt.Errorf("get posts archive failed: %w", err)
+	}
+
+	var topPosts []AstralPost
+
+	if err := json.NewDecoder(archiveResponse.Body).Decode(&topPosts); err != nil {
+		return "", fmt.Errorf("unmarshal top posts archive failed: %w", err)
+	}
+
+	text := bytes.NewBufferString("🏆 Top posts\n\n")
+
+	for i, post := range topPosts {
+		if post.Audience == "only_paid" {
+			continue
+		}
+
+		text.WriteString(fmt.Sprintf("%v. [%s](%s)\n\n", i+1, post.Title, post.CanonicalURL))
+
+		if post.Subtitle != "" && post.Subtitle != "..." {
+			text.WriteString(fmt.Sprintf("    %s\n\n", post.Subtitle))
+		}
+	}
+
+	return text.String(), nil
+}
+
+func SlateCommandTop(mdConverter *md.Converter) (string, error) {
 	return TopMessageSlate, nil
 }
