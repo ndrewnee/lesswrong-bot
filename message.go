@@ -99,13 +99,16 @@ func messageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbo
 		msg.Text, err = commandRandomSlate(mdConverter)
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
-			msg.Text = "Radnom post not found"
+			msg.Text = "Random post not found"
 		}
 	default:
 		msg.Text = "I don't know that command"
 	}
 
 	if _, err := bot.Send(msg); err != nil {
+		msg.Text = "Oops, something went wrong!"
+		_, _ = bot.Send(msg)
+
 		return fmt.Errorf("send message failed: %w", err)
 	}
 

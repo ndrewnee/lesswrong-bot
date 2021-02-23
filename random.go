@@ -14,7 +14,7 @@ import (
 
 const (
 	DefaultLimit  = 12
-	PostMaxLength = 800
+	PostMaxLength = 1500
 )
 
 // TODO Cache posts in some storage.
@@ -115,11 +115,9 @@ func commandRandomSlate(mdConverter *md.Converter) (string, error) {
 		archiveCollector := colly.NewCollector()
 
 		archiveCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
-			link := e.Attr("href")
-
 			slatePosts = append(slatePosts, PostSlate{
 				Title: e.Text,
-				Link:  link,
+				Link:  e.Attr("href"),
 			})
 		})
 
@@ -137,7 +135,7 @@ func commandRandomSlate(mdConverter *md.Converter) (string, error) {
 
 	postCollector := colly.NewCollector()
 
-	postCollector.OnHTML(".post", func(e *colly.HTMLElement) {
+	postCollector.OnHTML("div .entry-content", func(e *colly.HTMLElement) {
 		post.BodyHTML, _ = e.DOM.Html()
 	})
 
@@ -158,7 +156,7 @@ func commandRandomSlate(mdConverter *md.Converter) (string, error) {
 		// Truncate after next line end to not break markdown text.
 		n := strings.IndexByte(string(r[PostMaxLength:]), '\n')
 		if n != -1 {
-			markdown = string(r[:PostMaxLength+n+1])
+			markdown = string(r[:PostMaxLength+n])
 		} else {
 			markdown = string(r[:PostMaxLength])
 		}
