@@ -1,7 +1,7 @@
 .PHONY: run install
 
 run:
-	go run main.go
+	go run .
 
 install:
 	go install

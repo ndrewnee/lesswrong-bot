@@ -7,8 +7,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -46,23 +44,23 @@ type Post struct {
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
+
+	settings := parseSettings()
 	mdConverter := md.NewConverter("", true, nil)
 
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("TOKEN"))
+	bot, err := tgbotapi.NewBotAPI(settings.Token)
 	if err != nil {
 		log.Fatal("Init telegram bot api failed: ", err)
 	}
 
-	if os.Getenv("DEBUG") == "true" {
-		bot.Debug = true
-	}
+	bot.Debug = settings.Debug
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	var updates tgbotapi.UpdatesChannel
 
-	if os.Getenv("MODE") == "webhook" {
-		_, err = bot.SetWebhook(tgbotapi.NewWebhook("https://lesswrong-bot.herokuapp.com/" + bot.Token))
+	if settings.Webhook {
+		_, err = bot.SetWebhook(tgbotapi.NewWebhook(settings.WebhookHost + "/" + bot.Token))
 		if err != nil {
 			log.Fatal("Set webhook failed: ", err)
 		}
@@ -78,15 +76,8 @@ func main() {
 
 		updates = bot.ListenForWebhook("/" + bot.Token)
 
-		port, err := strconv.Atoi(os.Getenv("PORT"))
-		if err != nil {
-			port = 9999
-		}
-
-		addr := fmt.Sprintf(":%v", port)
-
 		go func() {
-			if err := http.ListenAndServe(addr, nil); err != nil {
+			if err := http.ListenAndServe(settings.Address, nil); err != nil {
 				log.Println("[ERROR] Listen and serve failed: ", err)
 			}
 		}()
