@@ -13,7 +13,7 @@ type Settings struct {
 	Debug       bool
 }
 
-func parseSettings() Settings {
+func ParseSettings() Settings {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		port = 9999

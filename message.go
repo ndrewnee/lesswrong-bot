@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	MessageHelp = `🤖 I'm a bot for reading posts from https://astralcodexten.substack.com
+	MessageHelp = `🤖 I'm a bot for reading posts from https://slatestarcodex.com (default) and https://astralcodexten.substack.com.
 
 Commands:
 	
@@ -18,10 +18,32 @@ Commands:
 
 /random - Read random post
 
+/source - Change source (1 - slatestarcodex, 2 - astralcodexten)
+
 /help - Help`
 )
 
-func getUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesChannel, error) {
+const (
+	SourceSlate  Source = "1"
+	SourceAstral Source = "2"
+)
+
+var userSource = map[int]Source{}
+
+type Source string
+
+func (s Source) String() string {
+	switch s {
+	case SourceSlate:
+		return "https://slatestarcodex.com"
+	case SourceAstral:
+		return "https://astralcodexten.substack.com"
+	default:
+		return "https://slatestarcodex.com"
+	}
+}
+
+func GetUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesChannel, error) {
 	if settings.Webhook {
 		webhook := tgbotapi.NewWebhook(settings.WebhookHost + "/" + bot.Token)
 
@@ -69,7 +91,7 @@ func getUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesCh
 	return updates, nil
 }
 
-func messageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
+func MessageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 	var err error
 
 	if update.Message == nil {
@@ -90,22 +112,35 @@ func messageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbo
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = commandTop()
+		msg.Text, err = CommandTop(userSource[update.Message.From.ID])
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		msg.Text, err = commandRandom(mdConverter)
+		msg.Text, err = CommandRandom(userSource[update.Message.From.ID], mdConverter)
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
-			msg.Text = "Radnom post not found"
+			msg.Text = "Random post not found"
 		}
+	case "source":
+		source := Source(update.Message.CommandArguments())
+
+		if source != SourceSlate && source != SourceAstral {
+			source = SourceSlate
+		}
+
+		userSource[update.Message.From.ID] = source
+
+		msg.Text = "Changed source to " + source.String()
 	default:
 		msg.Text = "I don't know that command"
 	}
 
 	if _, err := bot.Send(msg); err != nil {
+		msg.Text = "Oops, something went wrong!"
+		_, _ = bot.Send(msg)
+
 		return fmt.Errorf("send message failed: %w", err)
 	}
 

@@ -1,8 +1,8 @@
 # lesswrong-bot
 
-[Telegram bot](https://t.me/lesswrong_bot) for [Scott Alexander's new blog](https://astralcodexten.substack.com).
+[Telegram bot](https://t.me/lesswrong_bot) for Scott Alexander's blogs, [old](https://slatestarcodex.com) and [new](https://astralcodexten.substack.com).
 
-Maybe in future I'll add [his old blog](https://slatestarcodex.com) and [Lesswrong](https://lesswrong.com).
+Maybe in the future I'll add [Lesswrong](https://lesswrong.com) and [Lesswrong.ru](https://lesswrong.ru).
 
 ## Setup
 
