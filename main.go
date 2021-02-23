@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -77,8 +78,15 @@ func main() {
 
 		updates = bot.ListenForWebhook("/" + bot.Token)
 
+		port, err := strconv.Atoi(os.Getenv("PORT"))
+		if err != nil {
+			port = 9999
+		}
+
+		addr := fmt.Sprintf(":%v", port)
+
 		go func() {
-			if err := http.ListenAndServe(":80", nil); err != nil {
+			if err := http.ListenAndServe(addr, nil); err != nil {
 				log.Println("[ERROR] Listen and serve failed: ", err)
 			}
 		}()
