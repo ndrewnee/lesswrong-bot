@@ -96,7 +96,7 @@ func messageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbo
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		msg.Text, err = commandRandom(mdConverter)
+		msg.Text, err = commandRandomSlate(mdConverter)
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
 			msg.Text = "Radnom post not found"

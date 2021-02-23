@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
+	"github.com/gocolly/colly"
 )
 
 const (
@@ -99,4 +100,69 @@ func commandRandom(mdConverter *md.Converter) (string, error) {
 	}
 
 	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.CanonicalURL, markdown), nil
+}
+
+type PostSlate struct {
+	Title    string
+	Link     string
+	BodyHTML string
+}
+
+var slatePosts []PostSlate
+
+func commandRandomSlate(mdConverter *md.Converter) (string, error) {
+	if len(slatePosts) == 0 {
+		archiveCollector := colly.NewCollector()
+
+		archiveCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
+			link := e.Attr("href")
+
+			slatePosts = append(slatePosts, PostSlate{
+				Title: e.Text,
+				Link:  link,
+			})
+		})
+
+		if err := archiveCollector.Visit("https://slatestarcodex.com/archives/"); err != nil {
+			return "", fmt.Errorf("get slatestarcodex archives failed: %w", err)
+		}
+	}
+
+	if len(slatePosts) == 0 {
+		return "", fmt.Errorf("posts not found")
+	}
+
+	i := rand.Intn(len(slatePosts))
+	post := slatePosts[i]
+
+	postCollector := colly.NewCollector()
+
+	postCollector.OnHTML(".post", func(e *colly.HTMLElement) {
+		post.BodyHTML, _ = e.DOM.Html()
+	})
+
+	if err := postCollector.Visit(post.Link); err != nil {
+		return "", fmt.Errorf("get slatestarcodex post failed: %w", err)
+	}
+
+	markdown, err := mdConverter.ConvertString(post.BodyHTML)
+	if err != nil {
+		return "", fmt.Errorf("convert html to markdown failed: %w", err)
+	}
+
+	// Cut post for preview mode.
+	if len(markdown) > PostMaxLength {
+		// Convert to runes to properly split between unicode symbols.
+		r := []rune(markdown)
+
+		// Truncate after next line end to not break markdown text.
+		n := strings.IndexByte(string(r[PostMaxLength:]), '\n')
+		if n != -1 {
+			markdown = string(r[:PostMaxLength+n+1])
+		} else {
+			markdown = string(r[:PostMaxLength])
+		}
+	}
+
+	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.Link, markdown), nil
 }
