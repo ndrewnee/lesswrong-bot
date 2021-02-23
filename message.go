@@ -90,7 +90,7 @@ func messageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbo
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = commandTop()
+		msg.Text, err = commandTopSlate(mdConverter)
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
