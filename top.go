@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	md "github.com/JohannesKaufmann/html-to-markdown"
 )
 
 // As https://slatestarcodex.com top posts won't change anymore it's much more effecient to return hardcoded list.
-const TopMessageSlate = `🏆 Top posts
+const MessageTopSlate = `🏆 Top posts
 
 1. [Beware The Man Of One Study](https://slatestarcodex.com/2014/12/12/beware-the-man-of-one-study/)
 
@@ -32,7 +30,18 @@ const TopMessageSlate = `🏆 Top posts
 
 10. [Who By Very Slow Decay](https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/)`
 
-func AstralCommandTop() (string, error) {
+func CommandTop(source Source) (string, error) {
+	switch source {
+	case SourceSlate:
+		return MessageTopSlate, nil
+	case SourceAstral:
+		return CommandTopAstral()
+	default:
+		return MessageTopSlate, nil
+	}
+}
+
+func CommandTopAstral() (string, error) {
 	archiveResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
 	if err != nil {
 		return "", fmt.Errorf("get posts archive failed: %w", err)
@@ -59,8 +68,4 @@ func AstralCommandTop() (string, error) {
 	}
 
 	return text.String(), nil
-}
-
-func SlateCommandTop(mdConverter *md.Converter) (string, error) {
-	return TopMessageSlate, nil
 }

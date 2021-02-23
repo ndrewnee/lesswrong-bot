@@ -21,6 +21,27 @@ Commands:
 /help - Help`
 )
 
+const (
+	SourceSlate  Source = "1"
+	SourceAstral Source = "2"
+)
+
+// TODO Cache user sources in some storage.
+var userSource = map[int]Source{}
+
+type Source string
+
+func (s Source) String() string {
+	switch s {
+	case SourceSlate:
+		return "https://slatestarcodex.com"
+	case SourceAstral:
+		return "https://astralcodexten.substack.com"
+	default:
+		return "https://slatestarcodex.com"
+	}
+}
+
 func GetUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesChannel, error) {
 	if settings.Webhook {
 		webhook := tgbotapi.NewWebhook(settings.WebhookHost + "/" + bot.Token)
@@ -90,17 +111,27 @@ func MessageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbo
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = SlateCommandTop(mdConverter)
+		msg.Text, err = CommandTop(userSource[update.Message.From.ID])
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		msg.Text, err = SlateCommandRandom(mdConverter)
+		msg.Text, err = CommandRandom(userSource[update.Message.From.ID], mdConverter)
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
 			msg.Text = "Random post not found"
 		}
+	case "source":
+		source := Source(update.Message.CommandArguments())
+
+		if source != SourceSlate && source != SourceAstral {
+			source = SourceSlate
+		}
+
+		userSource[update.Message.From.ID] = source
+
+		msg.Text = "Changed source to " + source.String()
 	default:
 		msg.Text = "I don't know that command"
 	}
