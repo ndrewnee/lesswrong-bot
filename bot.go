@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
@@ -44,38 +45,65 @@ func (s Source) String() string {
 type (
 	Bot struct {
 		botAPI      *tgbotapi.BotAPI
+		settings    Settings
 		httpClient  HTTPClient
 		mdConverter *md.Converter
 		randomInt   func(n int) int
-		// Used as cache. Possible race. TODO Lock with mutex.
-		userSource  map[int]Source
-		astralPosts []AstralPost
-		slatePosts  []SlatePost
+		cache       Cache
+	}
+
+	BotOptions struct {
+		Settings    Settings
+		HTTPClient  HTTPClient
+		MDConverter *md.Converter
+		RandomInt   func(n int) int
 	}
 
 	HTTPClient interface {
 		Get(uri string) (*http.Response, error)
 	}
+
+	Cache struct {
+		userSource  map[int]Source
+		astralPosts []AstralPost
+		slatePosts  []SlatePost
+	}
 )
 
-func NewBot(
-	botAPI *tgbotapi.BotAPI,
-	httpClient HTTPClient,
-	mdConverter *md.Converter,
-	randomInt func(n int) int,
-) *Bot {
+func NewBot(botAPI *tgbotapi.BotAPI, options ...BotOptions) *Bot {
+	var opts BotOptions
+
+	if len(options) > 0 {
+		opts = options[0]
+	}
+
+	if opts.HTTPClient == nil {
+		opts.HTTPClient = http.DefaultClient
+	}
+
+	if opts.MDConverter == nil {
+		opts.MDConverter = md.NewConverter("", true, nil)
+	}
+
+	if opts.RandomInt == nil {
+		opts.RandomInt = rand.Intn
+	}
+
 	return &Bot{
 		botAPI:      botAPI,
-		httpClient:  httpClient,
-		mdConverter: mdConverter,
-		randomInt:   randomInt,
-		userSource:  make(map[int]Source),
+		settings:    opts.Settings,
+		httpClient:  opts.HTTPClient,
+		mdConverter: opts.MDConverter,
+		randomInt:   opts.RandomInt,
+		cache: Cache{
+			userSource: make(map[int]Source),
+		},
 	}
 }
 
-func (b *Bot) GetUpdatesChan(settings Settings) (tgbotapi.UpdatesChannel, error) {
-	if settings.Webhook {
-		webhook := tgbotapi.NewWebhook(settings.WebhookHost + "/" + b.botAPI.Token)
+func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
+	if b.settings.Webhook {
+		webhook := tgbotapi.NewWebhook(b.settings.WebhookHost + "/" + b.botAPI.Token)
 
 		if _, err := b.botAPI.SetWebhook(webhook); err != nil {
 			return nil, fmt.Errorf("set webhook failed: %w", err)
@@ -93,7 +121,7 @@ func (b *Bot) GetUpdatesChan(settings Settings) (tgbotapi.UpdatesChannel, error)
 		updates := b.botAPI.ListenForWebhook("/" + b.botAPI.Token)
 
 		go func() {
-			if err := http.ListenAndServe(settings.Address, nil); err != nil {
+			if err := http.ListenAndServe(b.settings.Address, nil); err != nil {
 				log.Println("[ERROR] Listen and serve failed: ", err)
 			}
 		}()
@@ -148,13 +176,13 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = b.CommandTop(b.userSource[update.Message.From.ID])
+		msg.Text, err = b.CommandTop(b.cache.userSource[update.Message.From.ID])
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		msg.Text, err = b.CommandRandom(b.userSource[update.Message.From.ID])
+		msg.Text, err = b.CommandRandom(b.cache.userSource[update.Message.From.ID])
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
 			msg.Text = "Random post not found"
@@ -166,7 +194,7 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 			source = SourceSlate
 		}
 
-		b.userSource[update.Message.From.ID] = source
+		b.cache.userSource[update.Message.From.ID] = source
 
 		msg.Text = "Changed source to " + source.String()
 	default:

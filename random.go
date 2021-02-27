@@ -44,11 +44,11 @@ func (b *Bot) CommandRandom(source Source) (string, error) {
 
 func (b *Bot) CommandRandomSlate() (string, error) {
 	// Load posts for the first time.
-	if len(b.slatePosts) == 0 {
+	if len(b.cache.slatePosts) == 0 {
 		archiveCollector := colly.NewCollector()
 
 		archiveCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
-			b.slatePosts = append(b.slatePosts, SlatePost{
+			b.cache.slatePosts = append(b.cache.slatePosts, SlatePost{
 				Title: e.Text,
 				URL:   e.Attr("href"),
 			})
@@ -59,12 +59,12 @@ func (b *Bot) CommandRandomSlate() (string, error) {
 		}
 	}
 
-	if len(b.slatePosts) == 0 {
+	if len(b.cache.slatePosts) == 0 {
 		return "", fmt.Errorf("posts not found")
 	}
 
-	i := b.randomInt(len(b.slatePosts))
-	post := b.slatePosts[i]
+	i := b.randomInt(len(b.cache.slatePosts))
+	post := b.cache.slatePosts[i]
 
 	postCollector := colly.NewCollector()
 
@@ -100,7 +100,7 @@ func (b *Bot) CommandRandomSlate() (string, error) {
 
 func (b *Bot) CommandRandomAstral() (string, error) {
 	// Load posts for the first time.
-	if len(b.astralPosts) == 0 {
+	if len(b.cache.astralPosts) == 0 {
 		// As substack limits list to 12 posts in one request we fetch all posts using offset.
 		for offset := 0; true; offset += DefaultLimit {
 			uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%v&offset=%v",
@@ -127,18 +127,18 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 
 			for _, post := range newPosts {
 				if post.Audience != "only_paid" {
-					b.astralPosts = append(b.astralPosts, post)
+					b.cache.astralPosts = append(b.cache.astralPosts, post)
 				}
 			}
 		}
 	}
 
-	if len(b.astralPosts) == 0 {
+	if len(b.cache.astralPosts) == 0 {
 		return "", fmt.Errorf("posts not found")
 	}
 
-	i := b.randomInt(len(b.astralPosts))
-	post := b.astralPosts[i]
+	i := b.randomInt(len(b.cache.astralPosts))
+	post := b.cache.astralPosts[i]
 
 	postResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
 	if err != nil {

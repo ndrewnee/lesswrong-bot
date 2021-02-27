@@ -3,14 +3,12 @@
 package main
 
 import (
-	"math/rand"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/stretchr/testify/require"
 )
@@ -23,8 +21,6 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 	require.NoError(t, err)
 
 	botAPI.Debug = settings.Debug
-
-	bot := NewBot(botAPI, nil, nil, rand.Intn)
 
 	type args struct {
 		settings Settings
@@ -67,9 +63,13 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bot.GetUpdatesChan(tt.args.settings)
+			bot := NewBot(botAPI, BotOptions{Settings: tt.args.settings})
+
+			got, err := bot.GetUpdatesChan()
 			tt.wantErr(t, err)
 			tt.want(t, got)
+			// To avoid error "Too Many Requests: retry after 1"
+			time.Sleep(time.Second)
 		})
 	}
 }
@@ -89,7 +89,7 @@ func TestBot_MessageHandler(t *testing.T) {
 
 	botAPI.Debug = settings.Debug
 
-	bot := NewBot(botAPI, http.DefaultClient, md.NewConverter("", true, nil), rand.Intn)
+	bot := NewBot(botAPI)
 
 	type args struct {
 		update tgbotapi.Update

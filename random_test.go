@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/ndrewnee/lesswrong-bot/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -54,7 +53,7 @@ func TestCommandRandom(t *testing.T) {
 
 	randomInt := func(n int) int { return 0 }
 
-	bot := NewBot(nil, httpClient, md.NewConverter("", true, nil), randomInt)
+	bot := NewBot(nil, BotOptions{HTTPClient: httpClient, RandomInt: randomInt})
 
 	type args struct {
 		source Source
