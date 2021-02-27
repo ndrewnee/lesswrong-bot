@@ -24,7 +24,7 @@ func main() {
 
 	log.Printf("Authorized on account %s", botAPI.Self.UserName)
 
-	bot := NewBot(botAPI, http.DefaultClient, md.NewConverter("", true, nil))
+	bot := NewBot(botAPI, http.DefaultClient, md.NewConverter("", true, nil), rand.Intn)
 
 	updates, err := bot.GetUpdatesChan(settings)
 	if err != nil {

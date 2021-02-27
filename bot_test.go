@@ -3,6 +3,7 @@
 package main
 
 import (
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -23,7 +24,7 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 
 	botAPI.Debug = settings.Debug
 
-	bot := NewBot(botAPI, nil, nil)
+	bot := NewBot(botAPI, nil, nil, rand.Intn)
 
 	type args struct {
 		settings Settings
@@ -88,7 +89,7 @@ func TestBot_MessageHandler(t *testing.T) {
 
 	botAPI.Debug = settings.Debug
 
-	bot := NewBot(botAPI, http.DefaultClient, md.NewConverter("", true, nil))
+	bot := NewBot(botAPI, http.DefaultClient, md.NewConverter("", true, nil), rand.Intn)
 
 	type args struct {
 		update tgbotapi.Update

@@ -46,6 +46,7 @@ type (
 		botAPI      *tgbotapi.BotAPI
 		httpClient  HTTPClient
 		mdConverter *md.Converter
+		randomInt   func(n int) int
 		// Used as cache. Possible race. TODO Lock with mutex.
 		userSource  map[int]Source
 		astralPosts []AstralPost
@@ -61,11 +62,13 @@ func NewBot(
 	botAPI *tgbotapi.BotAPI,
 	httpClient HTTPClient,
 	mdConverter *md.Converter,
+	randomInt func(n int) int,
 ) *Bot {
 	return &Bot{
 		botAPI:      botAPI,
 		httpClient:  httpClient,
 		mdConverter: mdConverter,
+		randomInt:   randomInt,
 		userSource:  make(map[int]Source),
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"testing"
 
@@ -26,7 +27,7 @@ func TestCommandTop(t *testing.T) {
 		nil,
 	)
 
-	bot := NewBot(nil, httpClient, nil)
+	bot := NewBot(nil, httpClient, nil, rand.Intn)
 
 	type args struct {
 		source Source

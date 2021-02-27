@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -64,7 +63,7 @@ func (b *Bot) CommandRandomSlate() (string, error) {
 		return "", fmt.Errorf("posts not found")
 	}
 
-	i := rand.Intn(len(b.slatePosts))
+	i := b.randomInt(len(b.slatePosts))
 	post := b.slatePosts[i]
 
 	postCollector := colly.NewCollector()
@@ -138,7 +137,7 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 		return "", fmt.Errorf("posts not found")
 	}
 
-	i := rand.Intn(len(b.astralPosts))
+	i := b.randomInt(len(b.astralPosts))
 	post := b.astralPosts[i]
 
 	postResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)

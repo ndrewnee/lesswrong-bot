@@ -52,7 +52,9 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	bot := NewBot(nil, httpClient, md.NewConverter("", true, nil))
+	randomInt := func(n int) int { return 0 }
+
+	bot := NewBot(nil, httpClient, md.NewConverter("", true, nil), randomInt)
 
 	type args struct {
 		source Source
@@ -67,8 +69,10 @@ func TestCommandRandom(t *testing.T) {
 		{
 			name: "Should get random post from https://slatestarcodex.com when source is not set",
 			want: func(t *testing.T, got string) {
-				// TODO Think about hot to get content of random post.
-				require.True(t, strings.HasPrefix(got, "📝"))
+				file, err := ioutil.ReadFile("testdata/slate_random_want.md")
+				require.NoError(t, err)
+
+				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
 		},
@@ -78,7 +82,10 @@ func TestCommandRandom(t *testing.T) {
 				source: SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
-				require.True(t, strings.HasPrefix(got, "📝"))
+				file, err := ioutil.ReadFile("testdata/slate_random_want.md")
+				require.NoError(t, err)
+
+				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
 		},
