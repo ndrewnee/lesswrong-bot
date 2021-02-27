@@ -4,6 +4,20 @@
 
 Maybe in the future I'll add [Lesswrong](https://lesswrong.com) and [Lesswrong.ru](https://lesswrong.ru).
 
+## Usage
+
+🤖 I'm a bot for reading posts from https://slatestarcodex.com (default) and https://astralcodexten.substack.com.
+
+Commands:
+ 
+/top - Top posts
+
+/random - Read random post
+
+/source - Change source (1 - slatestarcodex, 2 - astralcodexten)
+
+/help - Help
+
 ## Setup
 
 Register new bot at https://t.me/BotFather or use previously created one.

@@ -1,0 +1,89 @@
+{
+    "id": 32788314,
+    "uuid": "2410f1d8-83cd-4b32-9a11-0a2e651473cc",
+    "publication_id": 89120,
+    "type": "newsletter",
+    "title": "Open Thread 160",
+    "social_title": null,
+    "search_engine_title": null,
+    "search_engine_description": null,
+    "subtitle": "...",
+    "slug": "open-thread-160",
+    "post_date": "2021-02-22T02:30:45.538Z",
+    "podcast_url": "",
+    "podcast_duration": null,
+    "audience": "everyone",
+    "write_comment_permissions": "everyone",
+    "default_comment_sort": null,
+    "canonical_url": "https://astralcodexten.substack.com/p/open-thread-160",
+    "latest_comment_id": 1369592,
+    "comment_count": 457,
+    "reactions": {
+        "❤": 30
+    },
+    "top_exclusions": [],
+    "pins": [],
+    "next_slug": "a-look-down-track-b",
+    "prev_slug": "movie-review-gabriel-over-the-white",
+    "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7699c4b9-1eec-4463-9e1b-5b8333f96258_496x341.png",
+    "description": "...",
+    "body_html": "<p>This is the weekly visible open thread.   Post about whatever you want. Also:</p><p><strong>1: </strong>In my post on the precision of sensory evidence, I cited a finding that depressed people had impaired color vision, ie literally saw the world in shades of gray. An alert reader sends me <a href=\"https://f1000research.com/articles/5-1778/v1\">a paper that discredits </a>one of the main results in that field. I’m not going to completely retract the claim, because there are <a href=\"https://www.sciencedirect.com/science/article/abs/pii/S0006322310001290\">other non-discredited papers</a> showing the same thing, and the discredited one just showed people a sad movie rather than using real depressed people. But I appreciate the reminder that this is still controversial and needs further research.</p><p><strong>2: </strong>ACX’s unofficial fan bulletin board, Data Secrets Lox, announced the results of their recent Best Post competition. First place was Evan on <a href=\"https://www.datasecretslox.com/index.php/topic,2346.msg66205.html#msg66205\">Tax prep volunteering as a window into society</a>. Second was <a href=\"https://www.datasecretslox.com/index.php/topic,2409.msg68515.html#msg68515\">Bean on whaling and fishing vessels</a>. Third was <a href=\"https://www.datasecretslox.com/index.php/topic,2496.msg71580.html#msg71580\">David W on chemical plant design</a>. Check them out!</p><p>3: Somebody sent me some Javascript that could fix problems with the comments, and then I lost it. If that’s you, you can send it again and I’ll mention it on the next Open Thread, sorry.</p>",
+    "publishedBylines": [
+        {
+            "id": 12009663,
+            "name": "Scott Alexander",
+            "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+            "bio": null
+        }
+    ],
+    "reaction": null,
+    "comments": [
+        {
+            "id": 1327923,
+            "user_id": 13638695,
+            "publication_id": 89120,
+            "post_id": 32788314,
+            "ancestor_path": "",
+            "body": "Just wanted to say I'm really happy to see you back online and blogging. Take good care and good luck with your other work!",
+            "date": "2021-02-22T02:35:18.603Z",
+            "deleted": false,
+            "name": "Dumky",
+            "photo_url": null,
+            "reactions": {
+                "❤": 28
+            },
+            "is_author": false,
+            "reactor_names": [],
+            "reaction": null,
+            "children": [],
+            "bans": [],
+            "user_banned": false,
+            "user_banned_for_comment": false,
+            "score": 0.2460779482590142
+        },
+        {
+            "id": 1327927,
+            "user_id": 25591893,
+            "publication_id": 89120,
+            "post_id": 32788314,
+            "ancestor_path": "",
+            "body": "Am I the only one who misses the \"Links\" posts? The ones not specific about coronavirus. Is there any chance they'll come back, Scott?",
+            "date": "2021-02-22T02:35:40.246Z",
+            "deleted": false,
+            "name": "Sohqueque",
+            "photo_url": null,
+            "reactions": {
+                "❤": 58
+            },
+            "is_author": false,
+            "reactor_names": [],
+            "reaction": null,
+            "children": [],
+            "bans": [],
+            "user_banned": false,
+            "user_banned_for_comment": false,
+            "score": 0.5006668840466104,
+            "childrenSummary": "6 replies by Scott Alexander and others"
+        }
+    ]
+}

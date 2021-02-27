@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"math/rand"
+	"net/http"
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
@@ -13,24 +14,25 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	settings := ParseSettings()
-	mdConverter := md.NewConverter("", true, nil)
 
-	bot, err := tgbotapi.NewBotAPI(settings.Token)
+	botAPI, err := tgbotapi.NewBotAPI(settings.Token)
 	if err != nil {
 		log.Fatal("Init telegram bot api failed: ", err)
 	}
 
-	bot.Debug = settings.Debug
+	botAPI.Debug = settings.Debug
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	log.Printf("Authorized on account %s", botAPI.Self.UserName)
 
-	updates, err := GetUpdatesChan(bot, settings)
+	bot := NewLesswrongBot(http.DefaultClient, md.NewConverter("", true, nil))
+
+	updates, err := bot.GetUpdatesChan(botAPI, settings)
 	if err != nil {
 		log.Fatal("Get updates chan failed: ", err)
 	}
 
 	for update := range updates {
-		if err := MessageHandler(mdConverter, bot, update); err != nil {
+		if err := bot.MessageHandler(botAPI, update); err != nil {
 			log.Println("[ERROR] Message not sent: ", err)
 		}
 	}

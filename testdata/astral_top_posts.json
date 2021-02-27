@@ -1,0 +1,494 @@
+[
+    {
+        "id": 32523333,
+        "uuid": "deb9aee6-71a6-48d6-9ab6-2a5c9f487de7",
+        "publication_id": 89120,
+        "title": "Statement on New York Times Article",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "statement-on-new-york-times-article",
+        "post_date": "2021-02-14T01:13:23.464Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/statement-on-new-york-times-article",
+        "latest_comment_id": 1363088,
+        "comment_count": 1457,
+        "reactions": {
+            "❤": 790
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 1,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/f79365ba-cfb1-4887-ba59-d167e4cf62f1_480x393.jpeg",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 31751211,
+        "uuid": "127b0146-1bdf-4c89-b7b7-9282ae5a157e",
+        "publication_id": 89120,
+        "title": "Still Alive",
+        "social_title": "Still Alive",
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "still-alive",
+        "post_date": "2021-01-21T20:18:29.560Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/still-alive",
+        "latest_comment_id": 1327955,
+        "comment_count": 513,
+        "reactions": {
+            "❤": 1035
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 2,
+        "subtitle": "You just keep on trying till you run out of cake",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/c6711968-876b-4c79-ba53-5a6f9c60e338_920x720.jpeg",
+        "podcast_url": "",
+        "description": "You just keep on trying till you run out of cake",
+        "truncated_description": "You just keep on trying till you run out of cake",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32657034,
+        "uuid": "a2e86e34-b182-4a53-be7c-f09be0ce41ac",
+        "publication_id": 89120,
+        "title": "Book Review: The Cult Of Smart",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "book-review-the-cult-of-smart",
+        "post_date": "2021-02-18T00:52:39.326Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/book-review-the-cult-of-smart",
+        "latest_comment_id": 1366436,
+        "comment_count": 1125,
+        "reactions": {
+            "❤": 273
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 3,
+        "subtitle": "Summary and commentary on The Cult Of Smart by Fredrik DeBoer",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/db037b76-eccd-41b0-a4a6-83e83dbe51a4_408x443.png",
+        "podcast_url": "",
+        "description": "Summary and commentary on The Cult Of Smart by Fredrik DeBoer",
+        "truncated_description": "Summary and commentary on The Cult Of Smart by Fredrik DeBoer",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 31945065,
+        "uuid": "b98f1239-6ae7-4b99-a8f8-4bb2411026a5",
+        "publication_id": 89120,
+        "title": "Hidden Open Thread 157.5",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "hidden-open-thread-1575",
+        "post_date": "2021-01-27T22:50:07.184Z",
+        "audience": "only_paid",
+        "podcast_duration": null,
+        "write_comment_permissions": "only_paid",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/hidden-open-thread-1575",
+        "latest_comment_id": 1342459,
+        "comment_count": 520,
+        "reactions": {
+            "❤": 328
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 4,
+        "subtitle": "Subscriber-only open thread",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/14d99962-7296-42f9-ba7e-cdaa1a4c7faa_612x583.jpeg",
+        "podcast_url": "",
+        "description": "Subscriber-only open thread",
+        "truncated_description": "Subscriber-only open thread",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32933298,
+        "uuid": "00f2a43b-b13e-486b-b647-a93738d63708",
+        "publication_id": 89120,
+        "title": "A Modest Proposal For Republicans: Use The Word \"Class\"",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "a-modest-proposal-for-republicans",
+        "post_date": "2021-02-25T21:42:10.109Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/a-modest-proposal-for-republicans",
+        "latest_comment_id": 1370605,
+        "comment_count": 1392,
+        "reactions": {
+            "❤": 298
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 5,
+        "subtitle": "Pivot from mindless populist rage to a thoughtful campaign to fight classism.",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/99d33403-9263-4e80-8a91-ce59b4ac7f0f_1600x1200.png",
+        "podcast_url": "",
+        "description": "Pivot from mindless populist rage to a thoughtful campaign to fight classism.",
+        "truncated_description": "Pivot from mindless populist rage to a thoughtful campaign to fight classism.",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32242316,
+        "uuid": "86882198-1efb-4354-94b7-3fb7a81a75dc",
+        "publication_id": 89120,
+        "title": "WebMD, And The Tragedy Of Legible Expertise",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "webmd-and-the-tragedy-of-legible",
+        "post_date": "2021-02-05T21:54:48.936Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/webmd-and-the-tragedy-of-legible",
+        "latest_comment_id": 1291933,
+        "comment_count": 478,
+        "reactions": {
+            "❤": 255
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 6,
+        "subtitle": "What does running a medical database teach you about why everything sucks?",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/c164b79f-835d-4010-a364-91591a857eaf_417x436.png",
+        "podcast_url": "",
+        "description": "What does running a medical database teach you about why everything sucks?",
+        "truncated_description": "What does running a medical database teach you about why everything sucks?",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 919248,
+        "uuid": "f217bda6-817b-4d90-88ef-2849b0b79dd1",
+        "publication_id": 89120,
+        "title": "You're Probably Wondering Why I've Called You Here Today",
+        "social_title": "You're Probably Wondering Why I've Called You Here Today",
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "youre-probably-wondering-why-ive",
+        "post_date": "2020-08-30T21:01:57.050Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/youre-probably-wondering-why-ive",
+        "latest_comment_id": 1280320,
+        "comment_count": 256,
+        "reactions": {
+            "❤": 460
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 7,
+        "subtitle": "",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/da986253-0d68-4e5b-a347-46bfde17a3d8_500x438.png",
+        "podcast_url": "",
+        "description": "Welcome to Astral Codex Ten!",
+        "truncated_description": "",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32614906,
+        "uuid": "763777f1-ce89-4721-90fd-2334661e3b02",
+        "publication_id": 89120,
+        "title": "COVID/Vitamin D: Much More Than You Wanted To Know",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "covidvitamin-d-much-more-than-you",
+        "post_date": "2021-02-16T21:59:54.154Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/covidvitamin-d-much-more-than-you",
+        "latest_comment_id": 1351256,
+        "comment_count": 276,
+        "reactions": {
+            "❤": 150
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 8,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/944b5064-3f42-4eec-b854-6a77256f0156_474x291.jpeg",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32586554,
+        "uuid": "731b88ce-218b-4ea9-8102-649518b105c9",
+        "publication_id": 89120,
+        "title": "Coronavirus: Links, Discussion, Open Thread",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "coronavirus-links-discussion-open",
+        "post_date": "2021-02-16T04:06:07.126Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/coronavirus-links-discussion-open",
+        "latest_comment_id": 1349167,
+        "comment_count": 664,
+        "reactions": {
+            "❤": 148
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 9,
+        "subtitle": "Will things get worse before they get better?",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/fc0ae947-f404-489f-b1b5-2e0285d34177_919x792.jpeg",
+        "podcast_url": "",
+        "description": "Will things get worse before they get better?",
+        "truncated_description": "Will things get worse before they get better?",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 31976808,
+        "uuid": "114a2bd7-741f-4e49-9f22-55a3a29296fc",
+        "publication_id": 89120,
+        "title": "Contra Weyl On Technocracy",
+        "social_title": "Contra Weyl On Technocracy",
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "contra-weyl-on-technocracy",
+        "post_date": "2021-01-29T04:15:56.690Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/contra-weyl-on-technocracy",
+        "latest_comment_id": 1286279,
+        "comment_count": 367,
+        "reactions": {
+            "❤": 206
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 10,
+        "subtitle": "Beyond Brasilia",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/e9fd16b9-48ca-4b94-b003-17700c180eb6_2836x768.png",
+        "podcast_url": "",
+        "description": "Beyond Brasilia",
+        "truncated_description": "Beyond Brasilia",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 31949589,
+        "uuid": "5ffcf167-5045-4e76-aa1a-bb3174ea501c",
+        "publication_id": 89120,
+        "title": "Ontology Of Psychiatric Conditions: Taxometrics",
+        "social_title": "Ontology Of Psychiatric Conditions: Taxometrics",
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "ontology-of-psychiatric-conditions",
+        "post_date": "2021-01-28T04:52:23.569Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/ontology-of-psychiatric-conditions",
+        "latest_comment_id": 1314543,
+        "comment_count": 250,
+        "reactions": {
+            "❤": 221
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 11,
+        "subtitle": "Is mental illness a thing? What kind of thing is it?",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/5162a0ab-9ad1-44d6-975a-5c430daff7ef_467x294.png",
+        "podcast_url": "",
+        "description": "Is mental illness a thing? What kind of thing is it?",
+        "truncated_description": "Is mental illness a thing? What kind of thing is it?",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32922208,
+        "uuid": "c2c020c3-368d-4fc1-a4ba-67f15afcb923",
+        "publication_id": 89120,
+        "title": "Hidden Open Thread 160.5",
+        "social_title": "Hidden Open Thread 160.5",
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "hidden-open-thread-1605",
+        "post_date": "2021-02-25T00:38:42.041Z",
+        "audience": "only_paid",
+        "podcast_duration": null,
+        "write_comment_permissions": "only_paid",
+        "default_comment_sort": "most_recent_first",
+        "canonical_url": "https://astralcodexten.substack.com/p/hidden-open-thread-1605",
+        "latest_comment_id": 1370214,
+        "comment_count": 328,
+        "reactions": {
+            "❤": 200
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 12,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/a392057a-8d95-4176-b249-73f8669ef165_612x583.jpeg",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    }
+]

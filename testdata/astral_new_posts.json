@@ -1,0 +1,576 @@
+[
+    {
+        "id": 32933298,
+        "uuid": "00f2a43b-b13e-486b-b647-a93738d63708",
+        "publication_id": 89120,
+        "title": "A Modest Proposal For Republicans: Use The Word \"Class\"",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "a-modest-proposal-for-republicans",
+        "post_date": "2021-02-25T21:42:10.109Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/a-modest-proposal-for-republicans",
+        "latest_comment_id": 1370873,
+        "comment_count": 1422,
+        "reactions": {
+            "❤": 301
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 1,
+        "subtitle": "Pivot from mindless populist rage to a thoughtful campaign to fight classism.",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/99d33403-9263-4e80-8a91-ce59b4ac7f0f_1600x1200.png",
+        "podcast_url": "",
+        "description": "Pivot from mindless populist rage to a thoughtful campaign to fight classism.",
+        "truncated_description": "Pivot from mindless populist rage to a thoughtful campaign to fight classism.",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32963867,
+        "uuid": "72cfe330-800d-4bb8-80a0-750af0672213",
+        "publication_id": 89120,
+        "title": "Bay Area Plant-Based Meat Reviews",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "bay-area-plant-based-meat-reviews",
+        "post_date": "2021-02-26T19:19:51.710Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/bay-area-plant-based-meat-reviews",
+        "latest_comment_id": 1370755,
+        "comment_count": 165,
+        "reactions": {
+            "❤": 37
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 2,
+        "subtitle": "Eight vegan/vegetarian restaurant options.",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/9e3d1e68-5a67-4750-af29-191df493f31d_1000x750.jpeg",
+        "podcast_url": "",
+        "description": "Eight vegan/vegetarian restaurant options.",
+        "truncated_description": "Eight vegan/vegetarian restaurant options.",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32863465,
+        "uuid": "1e24292f-57c9-47be-9af1-c99783f77cd0",
+        "publication_id": 89120,
+        "title": "Book Review: Fussell On Class",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "book-review-fussell-on-class",
+        "post_date": "2021-02-24T19:15:59.094Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/book-review-fussell-on-class",
+        "latest_comment_id": 1370543,
+        "comment_count": 785,
+        "reactions": {
+            "❤": 144
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 3,
+        "subtitle": "Summary and commentary on Paul Fussell's \"Class: A Guide Through The American Status System\"",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/2f5f63a8-fd0b-4c99-be08-416ccb534a06_770x515.jpeg",
+        "podcast_url": "",
+        "description": "Summary and commentary on Paul Fussell's \"Class: A Guide Through The American Status System\"",
+        "truncated_description": "Summary and commentary on Paul Fussell's \"Class: A Guide Through The American Status System\"",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32489185,
+        "uuid": "688dce79-4aed-40bd-875b-6050089cc001",
+        "publication_id": 89120,
+        "title": "Ezra Klein On Vetocracy",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "ezra-klein-on-vetocracy",
+        "post_date": "2021-02-20T02:12:02.450Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/ezra-klein-on-vetocracy",
+        "latest_comment_id": 1370405,
+        "comment_count": 395,
+        "reactions": {
+            "❤": 77
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 4,
+        "subtitle": "What's the government's E/I balance? What should it be?",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/b12f4a19-908f-4652-ba99-fa1c980da2f6_928x483.jpeg",
+        "podcast_url": "",
+        "description": "What's the government's E/I balance? What should it be?",
+        "truncated_description": "What's the government's E/I balance? What should it be?",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32922208,
+        "uuid": "c2c020c3-368d-4fc1-a4ba-67f15afcb923",
+        "publication_id": 89120,
+        "title": "Hidden Open Thread 160.5",
+        "social_title": "Hidden Open Thread 160.5",
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "hidden-open-thread-1605",
+        "post_date": "2021-02-25T00:38:42.041Z",
+        "audience": "only_paid",
+        "podcast_duration": null,
+        "write_comment_permissions": "only_paid",
+        "default_comment_sort": "most_recent_first",
+        "canonical_url": "https://astralcodexten.substack.com/p/hidden-open-thread-1605",
+        "latest_comment_id": 1370214,
+        "comment_count": 328,
+        "reactions": {
+            "❤": 200
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 5,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/a392057a-8d95-4176-b249-73f8669ef165_612x583.jpeg",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32755222,
+        "uuid": "2c12c392-aed9-4dbf-b832-e089b8ef8dba",
+        "publication_id": 89120,
+        "title": "Movie Review: Gabriel Over The White House",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "movie-review-gabriel-over-the-white",
+        "post_date": "2021-02-20T21:23:32.584Z",
+        "audience": "only_paid",
+        "podcast_duration": null,
+        "write_comment_permissions": "only_paid",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/movie-review-gabriel-over-the-white",
+        "latest_comment_id": 1369737,
+        "comment_count": 119,
+        "reactions": {
+            "❤": 102
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 6,
+        "subtitle": "What if FDR had been an archangel, but the archangel was Mussolini?",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/b2b3a35b-730d-4f6b-8f57-53822df9a641_220x169.jpeg",
+        "podcast_url": "",
+        "description": "What if FDR had been an archangel, but the archangel was Mussolini?",
+        "truncated_description": "What if FDR had been an archangel, but the archangel was Mussolini?",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32788314,
+        "uuid": "2410f1d8-83cd-4b32-9a11-0a2e651473cc",
+        "publication_id": 89120,
+        "title": "Open Thread 160",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "open-thread-160",
+        "post_date": "2021-02-22T02:30:45.538Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/open-thread-160",
+        "latest_comment_id": 1369592,
+        "comment_count": 457,
+        "reactions": {
+            "❤": 30
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 7,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7699c4b9-1eec-4463-9e1b-5b8333f96258_496x341.png",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32761479,
+        "uuid": "1979fe85-cc0b-47f0-a99c-842dedea2826",
+        "publication_id": 89120,
+        "title": "Mantic Monday: Judging April COVID Predictions",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "mantic-monday-judging-april-covid",
+        "post_date": "2021-02-23T08:06:31.623Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/mantic-monday-judging-april-covid",
+        "latest_comment_id": 1369315,
+        "comment_count": 172,
+        "reactions": {
+            "❤": 51
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 8,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/05b85ab4-30b6-4187-9150-6d2bff8473ac_981x721.png",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 31783158,
+        "uuid": "fcdfaf73-1da8-4977-97e5-76444c41bd9b",
+        "publication_id": 89120,
+        "title": "Logistics",
+        "social_title": "Logistics",
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "logistics",
+        "post_date": "2021-01-22T19:45:07.463Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/logistics",
+        "latest_comment_id": 1368968,
+        "comment_count": 269,
+        "reactions": {
+            "❤": 201
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 9,
+        "subtitle": "Don't worry, there will be real posts next week.",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/f85785af-a63c-4fa3-99c3-9ce59949584d_427x287.png",
+        "podcast_url": "",
+        "description": "Don't worry, there will be real posts next week.",
+        "truncated_description": "Don't worry, there will be real posts next week.",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32657034,
+        "uuid": "a2e86e34-b182-4a53-be7c-f09be0ce41ac",
+        "publication_id": 89120,
+        "title": "Book Review: The Cult Of Smart",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "book-review-the-cult-of-smart",
+        "post_date": "2021-02-18T00:52:39.326Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/book-review-the-cult-of-smart",
+        "latest_comment_id": 1366436,
+        "comment_count": 1125,
+        "reactions": {
+            "❤": 273
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 10,
+        "subtitle": "Summary and commentary on The Cult Of Smart by Fredrik DeBoer",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/db037b76-eccd-41b0-a4a6-83e83dbe51a4_408x443.png",
+        "podcast_url": "",
+        "description": "Summary and commentary on The Cult Of Smart by Fredrik DeBoer",
+        "truncated_description": "Summary and commentary on The Cult Of Smart by Fredrik DeBoer",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32207983,
+        "uuid": "91c3309e-6fe0-42dc-a25f-d93f31606770",
+        "publication_id": 89120,
+        "title": "Book Review Contest Final Rules",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "book-review-contest-final-rules",
+        "post_date": "2021-02-04T23:20:07.869Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/book-review-contest-final-rules",
+        "latest_comment_id": 1365632,
+        "comment_count": 34,
+        "reactions": {
+            "❤": 35
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 11,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/430241cb-ade5-4316-b1c9-6e3fe6e63e5e_256x256.png",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32523333,
+        "uuid": "deb9aee6-71a6-48d6-9ab6-2a5c9f487de7",
+        "publication_id": 89120,
+        "title": "Statement on New York Times Article",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "statement-on-new-york-times-article",
+        "post_date": "2021-02-14T01:13:23.464Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/statement-on-new-york-times-article",
+        "latest_comment_id": 1363088,
+        "comment_count": 1457,
+        "reactions": {
+            "❤": 790
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 12,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/f79365ba-cfb1-4887-ba59-d167e4cf62f1_480x393.jpeg",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32688685,
+        "uuid": "4e288737-e1db-40cf-9fa9-95333908609b",
+        "publication_id": 89120,
+        "title": "Highlights From The Comments On Cult Of Smart",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "highlights-from-the-comments-on-cult",
+        "post_date": "2021-02-18T20:51:42.149Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/highlights-from-the-comments-on-cult",
+        "latest_comment_id": 1362223,
+        "comment_count": 482,
+        "reactions": {
+            "❤": 67
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 13,
+        "subtitle": "...",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/e28698a8-ebb7-40fe-987e-859212c8065d_433x259.png",
+        "podcast_url": "",
+        "description": "...",
+        "truncated_description": "...",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    },
+    {
+        "id": 32783193,
+        "uuid": "66510b0b-c31a-4991-bff4-35dc657123db",
+        "publication_id": 89120,
+        "title": "A Look Down Track B",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "a-look-down-track-b",
+        "post_date": "2021-02-22T04:51:41.006Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/a-look-down-track-b",
+        "latest_comment_id": 1362019,
+        "comment_count": 64,
+        "reactions": {
+            "❤": 43
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 14,
+        "subtitle": "Do antidepressants bind to TrkB receptors directly?",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/3b96ca59-4b3c-4690-806d-ba7014128ba1_1761x1065.jpeg",
+        "podcast_url": "",
+        "description": "Do antidepressants bind to TrkB receptors directly?",
+        "truncated_description": "Do antidepressants bind to TrkB receptors directly?",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
+    }
+]

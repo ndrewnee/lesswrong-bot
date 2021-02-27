@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -43,7 +42,7 @@ func (s Source) String() string {
 	}
 }
 
-func GetUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesChannel, error) {
+func (b *LesswrongBot) GetUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesChannel, error) {
 	if settings.Webhook {
 		webhook := tgbotapi.NewWebhook(settings.WebhookHost + "/" + bot.Token)
 
@@ -91,7 +90,7 @@ func GetUpdatesChan(bot *tgbotapi.BotAPI, settings Settings) (tgbotapi.UpdatesCh
 	return updates, nil
 }
 
-func MessageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
+func (b *LesswrongBot) MessageHandler(bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
 	var err error
 
 	if update.Message == nil {
@@ -112,13 +111,13 @@ func MessageHandler(mdConverter *md.Converter, bot *tgbotapi.BotAPI, update tgbo
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = CommandTop(userSource[update.Message.From.ID])
+		msg.Text, err = b.CommandTop(userSource[update.Message.From.ID])
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		msg.Text, err = CommandRandom(userSource[update.Message.From.ID], mdConverter)
+		msg.Text, err = b.CommandRandom(userSource[update.Message.From.ID])
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
 			msg.Text = "Random post not found"

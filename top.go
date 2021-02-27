@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 )
 
 // As https://slatestarcodex.com top posts won't change anymore it's much more effecient to return hardcoded list.
@@ -30,19 +29,19 @@ const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 10. [Who By Very Slow Decay](https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/)`
 
-func CommandTop(source Source) (string, error) {
+func (b *LesswrongBot) CommandTop(source Source) (string, error) {
 	switch source {
 	case SourceSlate:
 		return MessageTopSlate, nil
 	case SourceAstral:
-		return CommandTopAstral()
+		return b.CommandTopAstral()
 	default:
 		return MessageTopSlate, nil
 	}
 }
 
-func CommandTopAstral() (string, error) {
-	archiveResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
+func (b *LesswrongBot) CommandTopAstral() (string, error) {
+	archiveResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
 	if err != nil {
 		return "", fmt.Errorf("get posts archive failed: %w", err)
 	}

@@ -5,21 +5,14 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"net/http"
 	"strings"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/gocolly/colly"
 )
 
 const (
 	DefaultLimit  = 12
 	PostMaxLength = 1500
-)
-
-var (
-	astralPosts []AstralPost
-	slatePosts  []SlatePost
 )
 
 type (
@@ -39,24 +32,24 @@ type (
 	}
 )
 
-func CommandRandom(source Source, mdConverter *md.Converter) (string, error) {
+func (b *LesswrongBot) CommandRandom(source Source) (string, error) {
 	switch source {
 	case SourceSlate:
-		return CommandRandomSlate(mdConverter)
+		return b.CommandRandomSlate()
 	case SourceAstral:
-		return CommandRandomAstral(mdConverter)
+		return b.CommandRandomAstral()
 	default:
-		return CommandRandomSlate(mdConverter)
+		return b.CommandRandomSlate()
 	}
 }
 
-func CommandRandomSlate(mdConverter *md.Converter) (string, error) {
+func (b *LesswrongBot) CommandRandomSlate() (string, error) {
 	// Load posts for the first time.
-	if len(slatePosts) == 0 {
+	if len(b.slatePosts) == 0 {
 		archiveCollector := colly.NewCollector()
 
 		archiveCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
-			slatePosts = append(slatePosts, SlatePost{
+			b.slatePosts = append(b.slatePosts, SlatePost{
 				Title: e.Text,
 				URL:   e.Attr("href"),
 			})
@@ -67,12 +60,12 @@ func CommandRandomSlate(mdConverter *md.Converter) (string, error) {
 		}
 	}
 
-	if len(slatePosts) == 0 {
+	if len(b.slatePosts) == 0 {
 		return "", fmt.Errorf("posts not found")
 	}
 
-	i := rand.Intn(len(slatePosts))
-	post := slatePosts[i]
+	i := rand.Intn(len(b.slatePosts))
+	post := b.slatePosts[i]
 
 	postCollector := colly.NewCollector()
 
@@ -84,7 +77,7 @@ func CommandRandomSlate(mdConverter *md.Converter) (string, error) {
 		return "", fmt.Errorf("get slatestarcodex post failed: %w", err)
 	}
 
-	markdown, err := mdConverter.ConvertString(post.BodyHTML)
+	markdown, err := b.mdConverter.ConvertString(post.BodyHTML)
 	if err != nil {
 		return "", fmt.Errorf("convert html to markdown failed: %w", err)
 	}
@@ -106,9 +99,9 @@ func CommandRandomSlate(mdConverter *md.Converter) (string, error) {
 	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.URL, markdown), nil
 }
 
-func CommandRandomAstral(mdConverter *md.Converter) (string, error) {
+func (b *LesswrongBot) CommandRandomAstral() (string, error) {
 	// Load posts for the first time.
-	if len(astralPosts) == 0 {
+	if len(b.astralPosts) == 0 {
 		// As substack limits list to 12 posts in one request we fetch all posts using offset.
 		for offset := 0; true; offset += DefaultLimit {
 			uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%v&offset=%v",
@@ -116,7 +109,7 @@ func CommandRandomAstral(mdConverter *md.Converter) (string, error) {
 				offset,
 			)
 
-			archiveResponse, err := http.Get(uri)
+			archiveResponse, err := b.httpClient.Get(uri)
 			if err != nil {
 				log.Println("[ERROR] Get posts archive failed: ", err)
 				break
@@ -135,20 +128,20 @@ func CommandRandomAstral(mdConverter *md.Converter) (string, error) {
 
 			for _, post := range newPosts {
 				if post.Audience != "only_paid" {
-					astralPosts = append(astralPosts, post)
+					b.astralPosts = append(b.astralPosts, post)
 				}
 			}
 		}
 	}
 
-	if len(astralPosts) == 0 {
+	if len(b.astralPosts) == 0 {
 		return "", fmt.Errorf("posts not found")
 	}
 
-	i := rand.Intn(len(astralPosts))
-	post := astralPosts[i]
+	i := rand.Intn(len(b.astralPosts))
+	post := b.astralPosts[i]
 
-	postResponse, err := http.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
+	postResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
 	if err != nil {
 		return "", fmt.Errorf("get post from server failed: %w", err)
 	}
@@ -157,7 +150,7 @@ func CommandRandomAstral(mdConverter *md.Converter) (string, error) {
 		return "", fmt.Errorf("unmarshal post failed: %w", err)
 	}
 
-	markdown, err := mdConverter.ConvertString(post.BodyHTML)
+	markdown, err := b.mdConverter.ConvertString(post.BodyHTML)
 	if err != nil {
 		return "", fmt.Errorf("convert html to markdown failed: %w", err)
 	}
