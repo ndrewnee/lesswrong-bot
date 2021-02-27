@@ -26,7 +26,7 @@ func TestCommandTop(t *testing.T) {
 		nil,
 	)
 
-	bot := NewLesswrongBot(httpClient, nil)
+	bot := NewBot(nil, httpClient, nil)
 
 	type args struct {
 		source Source
@@ -39,14 +39,14 @@ func TestCommandTop(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "Should get top posts from slatestarcodex when source is not set",
+			name: "Should get top posts from https://slatestarcodex.com when source is not set",
 			want: func(t *testing.T, got string) {
 				require.Equal(t, MessageTopSlate, got)
 			},
 			wantErr: require.NoError,
 		},
 		{
-			name: "Should get top posts from slatestarcodex",
+			name: "Should get top posts from https://slatestarcodex.com",
 			args: args{
 				source: SourceSlate,
 			},
@@ -56,7 +56,7 @@ func TestCommandTop(t *testing.T) {
 			wantErr: require.NoError,
 		},
 		{
-			name: "Should get top posts from astralcodexten",
+			name: "Should get top posts from https://astralcodexten.substack.com",
 			args: args{
 				source: SourceAstral,
 			},

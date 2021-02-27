@@ -52,7 +52,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	bot := NewLesswrongBot(httpClient, md.NewConverter("", true, nil))
+	bot := NewBot(nil, httpClient, md.NewConverter("", true, nil))
 
 	type args struct {
 		source Source
@@ -65,14 +65,15 @@ func TestCommandRandom(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "Should get random post from slatestarcodex when source is not set",
+			name: "Should get random post from https://slatestarcodex.com when source is not set",
 			want: func(t *testing.T, got string) {
+				// TODO Think about hot to get content of random post.
 				require.True(t, strings.HasPrefix(got, "📝"))
 			},
 			wantErr: require.NoError,
 		},
 		{
-			name: "Should get random post from slatestarcodex",
+			name: "Should get random post from https://slatestarcodex.com",
 			args: args{
 				source: SourceSlate,
 			},
@@ -82,7 +83,7 @@ func TestCommandRandom(t *testing.T) {
 			wantErr: require.NoError,
 		},
 		{
-			name: "Should get random post from astralcodexten",
+			name: "Should get random post from https://astralcodexten.substack.com",
 			args: args{
 				source: SourceAstral,
 			},

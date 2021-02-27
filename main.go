@@ -24,15 +24,15 @@ func main() {
 
 	log.Printf("Authorized on account %s", botAPI.Self.UserName)
 
-	bot := NewLesswrongBot(http.DefaultClient, md.NewConverter("", true, nil))
+	bot := NewBot(botAPI, http.DefaultClient, md.NewConverter("", true, nil))
 
-	updates, err := bot.GetUpdatesChan(botAPI, settings)
+	updates, err := bot.GetUpdatesChan(settings)
 	if err != nil {
 		log.Fatal("Get updates chan failed: ", err)
 	}
 
 	for update := range updates {
-		if err := bot.MessageHandler(botAPI, update); err != nil {
+		if _, err := bot.MessageHandler(update); err != nil {
 			log.Println("[ERROR] Message not sent: ", err)
 		}
 	}

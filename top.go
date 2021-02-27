@@ -29,7 +29,7 @@ const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 10. [Who By Very Slow Decay](https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/)`
 
-func (b *LesswrongBot) CommandTop(source Source) (string, error) {
+func (b *Bot) CommandTop(source Source) (string, error) {
 	switch source {
 	case SourceSlate:
 		return MessageTopSlate, nil
@@ -40,7 +40,7 @@ func (b *LesswrongBot) CommandTop(source Source) (string, error) {
 	}
 }
 
-func (b *LesswrongBot) CommandTopAstral() (string, error) {
+func (b *Bot) CommandTopAstral() (string, error) {
 	archiveResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
 	if err != nil {
 		return "", fmt.Errorf("get posts archive failed: %w", err)

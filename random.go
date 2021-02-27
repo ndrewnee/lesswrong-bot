@@ -32,7 +32,7 @@ type (
 	}
 )
 
-func (b *LesswrongBot) CommandRandom(source Source) (string, error) {
+func (b *Bot) CommandRandom(source Source) (string, error) {
 	switch source {
 	case SourceSlate:
 		return b.CommandRandomSlate()
@@ -43,7 +43,7 @@ func (b *LesswrongBot) CommandRandom(source Source) (string, error) {
 	}
 }
 
-func (b *LesswrongBot) CommandRandomSlate() (string, error) {
+func (b *Bot) CommandRandomSlate() (string, error) {
 	// Load posts for the first time.
 	if len(b.slatePosts) == 0 {
 		archiveCollector := colly.NewCollector()
@@ -99,7 +99,7 @@ func (b *LesswrongBot) CommandRandomSlate() (string, error) {
 	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.URL, markdown), nil
 }
 
-func (b *LesswrongBot) CommandRandomAstral() (string, error) {
+func (b *Bot) CommandRandomAstral() (string, error) {
 	// Load posts for the first time.
 	if len(b.astralPosts) == 0 {
 		// As substack limits list to 12 posts in one request we fetch all posts using offset.
