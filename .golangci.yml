@@ -1,0 +1,6 @@
+run:
+  build-tags:
+    - integration
+  skip-dirs:
+    - mocks
+    - testdata
