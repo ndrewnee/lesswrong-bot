@@ -77,7 +77,6 @@ func TestCommandRandom(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post.md")
 				require.NoError(t, err)
-
 				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
@@ -90,7 +89,6 @@ func TestCommandRandom(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post.md")
 				require.NoError(t, err)
-
 				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
@@ -104,7 +102,6 @@ func TestCommandRandom(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post_invalid_cut.md")
 				require.NoError(t, err)
-
 				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
@@ -118,7 +115,6 @@ func TestCommandRandom(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_random_post.md")
 				require.NoError(t, err)
-
 				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
@@ -132,7 +128,19 @@ func TestCommandRandom(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.md")
 				require.NoError(t, err)
-
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should get random post from https://lesswrong.ru",
+			args: args{
+				randomPost: 0,
+				source:     SourceLesswrongRu,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post.md")
+				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
