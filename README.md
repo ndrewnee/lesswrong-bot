@@ -1,12 +1,12 @@
-# lesswrong-bot
+# 🤖 lesswrong-bot
 
 [![Go](https://github.com/ndrewnee/lesswrong-bot/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/ndrewnee/lesswrong-bot/actions/workflows/go.yml)
 
-[Telegram bot](https://t.me/lesswrong_bot) for Scott Alexander's blogs, [old](https://slatestarcodex.com) and [new](https://astralcodexten.substack.com).
+[Telegram bot](https://t.me/lesswrong_bot) for reading posts from [Lesswrong.ru](https://lesswrong.ru) and Scott Alexander's blog, [the old](https://slatestarcodex.com) and [new one](https://astralcodexten.substack.com).
 
-Maybe in the future I'll add [Lesswrong](https://lesswrong.com).
+Maybe in the future I'll add [Lesswrong.com](https://lesswrong.com).
 
-## Usage
+## 😎 Usage
 
 🤖 I'm a bot for reading posts from https://slatestarcodex.com, https://astralcodexten.substack.com and https://lesswrong.ru.
 
@@ -20,7 +20,7 @@ Commands:
 
 /help - Help
 
-## Run
+## 🧑‍💻 Run locally
 
 Register new bot at https://t.me/BotFather or use previously created one.
 
@@ -36,7 +36,7 @@ Run application locally:
 make run
 ```
 
-## Testing
+## 🧪 Testing
 
 Run unit tests
 
@@ -50,7 +50,7 @@ Run integration tests
 make test_integration
 ```
 
-## Lint
+## 🖍 Lint
 
 Run linters
 
@@ -58,15 +58,13 @@ Run linters
 make lint
 ```
 
-## Deploy
+## 🛥 Deployment
 
-If application is already setup just run:
+Automatic CI/CD pipelines are building and testing the bot on each PR.
 
-```sh
-make deploy
-```
+Demo bot is deployed to production on Heroku on merge to master.
 
-To deploy app on Heroku read [documentation](https://devcenter.heroku.com/articles/getting-started-with-go?singlepage=true).
+To deploy your app on Heroku read [documentation](https://devcenter.heroku.com/articles/getting-started-with-go?singlepage=true).
 
 ```sh
 brew install heroku/brew/heroku
@@ -79,7 +77,13 @@ heroku config:set TOKEN=<token>
 git push heroku main
 ```
 
-## Environment variables
+If application is already setup just run:
+
+```sh
+make deploy
+```
+
+## 🛠 Environment variables
 
 | Env var      | Type    | Description                   | Default                             |
 | ------------ | ------- | ----------------------------- | ----------------------------------- |
