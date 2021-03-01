@@ -572,5 +572,46 @@
             }
         ],
         "reaction": null
+    },
+    {
+        "id": 32586554,
+        "uuid": "731b88ce-218b-4ea9-8102-649518b105c9",
+        "publication_id": 89120,
+        "title": "Coronavirus: Links, Discussion, Open Thread",
+        "social_title": null,
+        "search_engine_title": null,
+        "search_engine_description": null,
+        "type": "newsletter",
+        "slug": "coronavirus-links-discussion-open",
+        "post_date": "2021-02-16T04:06:07.126Z",
+        "audience": "everyone",
+        "podcast_duration": null,
+        "write_comment_permissions": "everyone",
+        "default_comment_sort": null,
+        "canonical_url": "https://astralcodexten.substack.com/p/coronavirus-links-discussion-open",
+        "latest_comment_id": 1349167,
+        "comment_count": 664,
+        "reactions": {
+            "❤": 148
+        },
+        "top_exclusions": [],
+        "pins": [],
+        "position": 9,
+        "subtitle": "Will things get worse before they get better?",
+        "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/fc0ae947-f404-489f-b1b5-2e0285d34177_919x792.jpeg",
+        "podcast_url": "",
+        "description": "Will things get worse before they get better?",
+        "truncated_description": "Will things get worse before they get better?",
+        "body_html": null,
+        "truncated_body_html": null,
+        "publishedBylines": [
+            {
+                "id": 12009663,
+                "name": "Scott Alexander",
+                "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+                "bio": null
+            }
+        ],
+        "reaction": null
     }
 ]

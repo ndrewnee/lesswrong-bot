@@ -162,6 +162,9 @@ func cutMarkdown(markdown string) string {
 		}
 	}
 
-	// Stupid hotfix for some invalid markdowns.
-	return strings.ReplaceAll(markdown, "* * *", "")
+	// Stupid hotfixes for some invalid markdowns.
+	markdown = strings.ReplaceAll(markdown, "* * *", "")
+	markdown = strings.ReplaceAll(markdown, "```", "")
+
+	return markdown
 }

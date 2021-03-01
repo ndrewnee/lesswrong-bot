@@ -5,11 +5,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/ndrewnee/lesswrong-bot/mocks"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -37,9 +35,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	httpClient.On("Get", mock.MatchedBy(func(uri string) bool {
-		return strings.HasPrefix(uri, "https://astralcodexten.substack.com/api/v1/posts/")
-	})).Return(
+	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/posts/open-thread-160").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_random_post.json")
@@ -51,8 +47,22 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
+	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/posts/coronavirus-links-discussion-open").Return(
+		&http.Response{
+			Body: func() io.ReadCloser {
+				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.json")
+				require.NoError(t, err)
+
+				return ioutil.NopCloser(bytes.NewBuffer(file))
+			}(),
+		},
+		nil,
+	)
+
+	bot := NewBot(nil, BotOptions{HTTPClient: httpClient})
+
 	type args struct {
-		postNumber int
+		randomPost int
 		source     Source
 	}
 
@@ -88,7 +98,7 @@ func TestCommandRandom(t *testing.T) {
 		{
 			name: "Should get random post from https://slatestarcodex.com (invalid markdown cut)",
 			args: args{
-				postNumber: 563,
+				randomPost: 563,
 				source:     SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
@@ -102,10 +112,25 @@ func TestCommandRandom(t *testing.T) {
 		{
 			name: "Should get random post from https://astralcodexten.substack.com",
 			args: args{
-				source: SourceAstral,
+				randomPost: 4,
+				source:     SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_random_post.md")
+				require.NoError(t, err)
+
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should get random post from https://astralcodexten.substack.com (invalid markdown cut)",
+			args: args{
+				randomPost: 12,
+				source:     SourceAstral,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.md")
 				require.NoError(t, err)
 
 				require.Equal(t, string(file), got)
@@ -116,12 +141,9 @@ func TestCommandRandom(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bot := NewBot(nil, BotOptions{
-				HTTPClient: httpClient,
-				RandomInt: func(n int) int {
-					return tt.args.postNumber
-				},
-			})
+			bot.randomInt = func(n int) int {
+				return tt.args.randomPost
+			}
 
 			got, err := bot.CommandRandom(tt.args.source)
 			tt.wantErr(t, err)
