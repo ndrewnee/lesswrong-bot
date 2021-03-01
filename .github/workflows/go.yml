@@ -2,53 +2,52 @@ name: Go
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
     name: Test
-    strategy:
-      matrix:
-        go-version:
-          - 1.15.x
     runs-on: ubuntu-20.04
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go-version }}
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
 
-    - name: Run tests
-      run: make test
-  
-    - name: Install
-      run: make install
+      - name: Run tests
+        run: make test
+
+      - name: Run integration tests
+        run: make test_integration
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          USER_ID: ${{ secrets.USER_ID }}
+
+      - name: Install
+        run: make install
 
   golangci-lint:
     name: Lint
-    strategy:
-      matrix:
-        go-version:
-          - 1.15.x
     runs-on: ubuntu-20.04
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go-version }}
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
 
-    - name: Lint
-      uses: golangci/golangci-lint-action@v2
-      with:
-        version: v1.37
-        skip-go-installation: true
+      - name: Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.37
+          skip-go-installation: true
