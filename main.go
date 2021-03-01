@@ -22,7 +22,7 @@ func main() {
 
 	log.Printf("Authorized on account %s", botAPI.Self.UserName)
 
-	bot := NewBot(botAPI)
+	bot := NewBot(botAPI, BotOptions{Settings: settings})
 
 	updates, err := bot.GetUpdatesChan()
 	if err != nil {

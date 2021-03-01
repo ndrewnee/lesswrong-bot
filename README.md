@@ -20,7 +20,7 @@ Commands:
 
 /help - Help
 
-## Setup
+## Run
 
 Register new bot at https://t.me/BotFather or use previously created one.
 
@@ -30,12 +30,32 @@ Take bot access token and export it in terminal:
 export TOKEN=<token>
 ```
 
-## Run
-
-To run application locally simply run:
+Run application locally:
 
 ```sh
 make run
+```
+
+## Testing
+
+Run unit tests
+
+```bash
+make test
+```
+
+Run integration tests
+
+```bash
+make test_integration
+```
+
+## Lint
+
+Run linters
+
+```bash
+make lint
 ```
 
 ## Deploy
