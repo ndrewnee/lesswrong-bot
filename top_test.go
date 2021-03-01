@@ -29,7 +29,8 @@ func TestCommandTop(t *testing.T) {
 	bot := NewBot(nil, BotOptions{HTTPClient: httpClient})
 
 	type args struct {
-		source Source
+		randomPost int
+		source     Source
 	}
 
 	tests := []struct {
@@ -63,7 +64,19 @@ func TestCommandTop(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_top_posts.md")
 				require.NoError(t, err)
-
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should get top posts from https://lesswrong.ru",
+			args: args{
+				randomPost: 0,
+				source:     SourceLesswrongRu,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/lesswrong_ru_top_posts.md")
+				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
@@ -72,6 +85,10 @@ func TestCommandTop(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			bot.randomInt = func(n int) int {
+				return tt.args.randomPost
+			}
+
 			got, err := bot.CommandTop(tt.args.source)
 			tt.wantErr(t, err)
 			tt.want(t, got)

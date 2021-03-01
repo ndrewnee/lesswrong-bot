@@ -4,19 +4,19 @@
 
 [Telegram bot](https://t.me/lesswrong_bot) for Scott Alexander's blogs, [old](https://slatestarcodex.com) and [new](https://astralcodexten.substack.com).
 
-Maybe in the future I'll add [Lesswrong](https://lesswrong.com) and [Lesswrong.ru](https://lesswrong.ru).
+Maybe in the future I'll add [Lesswrong](https://lesswrong.com).
 
 ## Usage
 
-🤖 I'm a bot for reading posts from https://slatestarcodex.com (default) and https://astralcodexten.substack.com.
+🤖 I'm a bot for reading posts from https://slatestarcodex.com, https://astralcodexten.substack.com and https://lesswrong.ru.
 
 Commands:
- 
+
 /top - Top posts
 
 /random - Read random post
 
-/source - Change source (1 - slatestarcodex, 2 - astralcodexten)
+/source - Change source (1 - slatestarcodex, 2 - astralcodexten, 3 - lesswrong.ru)
 
 /help - Help
 

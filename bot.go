@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	MessageHelp = `🤖 I'm a bot for reading posts from https://slatestarcodex.com (default) and https://astralcodexten.substack.com.
+	MessageHelp = `🤖 I'm a bot for reading posts from https://slatestarcodex.com, https://astralcodexten.substack.com and https://lesswrong.ru.
 
 Commands:
 
@@ -19,14 +19,15 @@ Commands:
 
 /random - Read random post
 
-/source - Change source (1 - slatestarcodex, 2 - astralcodexten)
+/source - Change source (1 - slatestarcodex, 2 - astralcodexten, 3 - lesswrong.ru)
 
 /help - Help`
 )
 
 const (
-	SourceSlate  Source = "1"
-	SourceAstral Source = "2"
+	SourceSlate       Source = "1"
+	SourceAstral      Source = "2"
+	SourceLesswrongRu Source = "3"
 )
 
 type Source string
@@ -37,9 +38,15 @@ func (s Source) String() string {
 		return "https://slatestarcodex.com"
 	case SourceAstral:
 		return "https://astralcodexten.substack.com"
+	case SourceLesswrongRu:
+		return "https://lesswrong.ru"
 	default:
 		return "https://slatestarcodex.com"
 	}
+}
+
+func (s Source) IsValid() bool {
+	return s == SourceSlate || s == SourceAstral || s == SourceLesswrongRu
 }
 
 type (
@@ -64,9 +71,10 @@ type (
 	}
 
 	Cache struct {
-		userSource  map[int]Source
-		astralPosts []AstralPost
-		slatePosts  []SlatePost
+		userSource       map[int]Source
+		astralPosts      []AstralPost
+		slatePosts       []Post
+		lesswrongRuPosts []Post
 	}
 )
 
@@ -189,8 +197,7 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 		}
 	case "source":
 		source := Source(update.Message.CommandArguments())
-
-		if source != SourceSlate && source != SourceAstral {
+		if !source.IsValid() {
 			source = SourceSlate
 		}
 

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
+	"github.com/gocolly/colly"
 )
 
 // As https://slatestarcodex.com top posts won't change anymore it's much more effecient to return hardcoded list.
@@ -35,6 +37,8 @@ func (b *Bot) CommandTop(source Source) (string, error) {
 		return MessageTopSlate, nil
 	case SourceAstral:
 		return b.CommandTopAstral()
+	case SourceLesswrongRu:
+		return b.CommandTopLesswrongRu()
 	default:
 		return MessageTopSlate, nil
 	}
@@ -43,13 +47,13 @@ func (b *Bot) CommandTop(source Source) (string, error) {
 func (b *Bot) CommandTopAstral() (string, error) {
 	archiveResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
 	if err != nil {
-		return "", fmt.Errorf("get posts archive failed: %s", err)
+		return "", fmt.Errorf("get astralcodexten posts failed: %s", err)
 	}
 
 	var topPosts []AstralPost
 
 	if err := json.NewDecoder(archiveResponse.Body).Decode(&topPosts); err != nil {
-		return "", fmt.Errorf("unmarshal top posts archive failed: %s", err)
+		return "", fmt.Errorf("unmarshal astralcodexten top posts failed: %s", err)
 	}
 
 	text := bytes.NewBufferString("🏆 Top posts from https://astralcodexten.substack.com\n\n")
@@ -59,11 +63,45 @@ func (b *Bot) CommandTopAstral() (string, error) {
 			continue
 		}
 
-		text.WriteString(fmt.Sprintf("%v. [%s](%s)\n\n", i+1, post.Title, post.CanonicalURL))
+		text.WriteString(fmt.Sprintf("%d. [%s](%s)\n\n", i+1, post.Title, post.CanonicalURL))
 
 		if post.Subtitle != "" && post.Subtitle != "..." {
 			text.WriteString(fmt.Sprintf("    %s\n\n", post.Subtitle))
 		}
+	}
+
+	return text.String(), nil
+}
+
+func (b *Bot) CommandTopLesswrongRu() (string, error) {
+	// Load posts for the first time.
+	if len(b.cache.lesswrongRuPosts) == 0 {
+		postsCollector := colly.NewCollector()
+
+		postsCollector.OnHTML("ul > li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
+			b.cache.lesswrongRuPosts = append(b.cache.lesswrongRuPosts, Post{
+				Title: e.Text,
+				URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),
+			})
+		})
+
+		if err := postsCollector.Visit("https://lesswrong.ru/w"); err != nil {
+			return "", fmt.Errorf("get lesswrong.ru posts failed: %s", err)
+		}
+	}
+
+	if len(b.cache.lesswrongRuPosts) == 0 {
+		return "", fmt.Errorf("lesswrong.ru posts not found")
+	}
+
+	text := bytes.NewBufferString("🏆 Random posts from https://lesswrong.ru\n\n")
+
+	// As lesswrong.ru doesn't have page with top posts return random posts instead.
+	for i := 0; i < DefaultLimit; i++ {
+		n := b.randomInt(len(b.cache.lesswrongRuPosts))
+		post := b.cache.lesswrongRuPosts[n]
+
+		text.WriteString(fmt.Sprintf("%d. [%s](%s)\n\n", i+1, post.Title, post.URL))
 	}
 
 	return text.String(), nil
