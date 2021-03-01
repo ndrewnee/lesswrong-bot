@@ -43,13 +43,13 @@ func (b *Bot) CommandTop(source Source) (string, error) {
 func (b *Bot) CommandTopAstral() (string, error) {
 	archiveResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
 	if err != nil {
-		return "", fmt.Errorf("get posts archive failed: %s", err)
+		return "", fmt.Errorf("get astralcodexten posts failed: %s", err)
 	}
 
 	var topPosts []AstralPost
 
 	if err := json.NewDecoder(archiveResponse.Body).Decode(&topPosts); err != nil {
-		return "", fmt.Errorf("unmarshal top posts archive failed: %s", err)
+		return "", fmt.Errorf("unmarshal astralcodexten top posts failed: %s", err)
 	}
 
 	text := bytes.NewBufferString("🏆 Top posts from https://astralcodexten.substack.com\n\n")
