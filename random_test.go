@@ -51,12 +51,9 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	randomInt := func(n int) int { return 0 }
-
-	bot := NewBot(nil, BotOptions{HTTPClient: httpClient, RandomInt: randomInt})
-
 	type args struct {
-		source Source
+		postNumber int
+		source     Source
 	}
 
 	tests := []struct {
@@ -68,7 +65,7 @@ func TestCommandRandom(t *testing.T) {
 		{
 			name: "Should get random post from https://slatestarcodex.com when source is not set",
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/slate_random_want.md")
+				file, err := ioutil.ReadFile("testdata/slate_random_post.md")
 				require.NoError(t, err)
 
 				require.Equal(t, string(file), got)
@@ -81,7 +78,21 @@ func TestCommandRandom(t *testing.T) {
 				source: SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/slate_random_want.md")
+				file, err := ioutil.ReadFile("testdata/slate_random_post.md")
+				require.NoError(t, err)
+
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should get random post from https://slatestarcodex.com (invalid markdown cut)",
+			args: args{
+				postNumber: 563,
+				source:     SourceSlate,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/slate_random_post_invalid_cut.md")
 				require.NoError(t, err)
 
 				require.Equal(t, string(file), got)
@@ -94,7 +105,7 @@ func TestCommandRandom(t *testing.T) {
 				source: SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/astral_random_want.md")
+				file, err := ioutil.ReadFile("testdata/astral_random_post.md")
 				require.NoError(t, err)
 
 				require.Equal(t, string(file), got)
@@ -105,6 +116,13 @@ func TestCommandRandom(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			bot := NewBot(nil, BotOptions{
+				HTTPClient: httpClient,
+				RandomInt: func(n int) int {
+					return tt.args.postNumber
+				},
+			})
+
 			got, err := bot.CommandRandom(tt.args.source)
 			tt.wantErr(t, err)
 			tt.want(t, got)

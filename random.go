@@ -55,7 +55,7 @@ func (b *Bot) CommandRandomSlate() (string, error) {
 		})
 
 		if err := archiveCollector.Visit("https://slatestarcodex.com/archives/"); err != nil {
-			return "", fmt.Errorf("get slatestarcodex archives failed: %w", err)
+			return "", fmt.Errorf("get slatestarcodex archives failed: %s", err)
 		}
 	}
 
@@ -73,27 +73,15 @@ func (b *Bot) CommandRandomSlate() (string, error) {
 	})
 
 	if err := postCollector.Visit(post.URL); err != nil {
-		return "", fmt.Errorf("get slatestarcodex post failed: %w", err)
+		return "", fmt.Errorf("get slatestarcodex post failed: %s", err)
 	}
 
 	markdown, err := b.mdConverter.ConvertString(post.BodyHTML)
 	if err != nil {
-		return "", fmt.Errorf("convert html to markdown failed: %w", err)
+		return "", fmt.Errorf("convert html to markdown failed: %s", err)
 	}
 
-	// Cut post for preview mode.
-	if len(markdown) > PostMaxLength {
-		// Convert to runes to properly split between unicode symbols.
-		r := []rune(markdown)
-
-		// Truncate after next line end to not break markdown text.
-		n := strings.IndexByte(string(r[PostMaxLength:]), '\n')
-		if n != -1 {
-			markdown = string(r[:PostMaxLength+n])
-		} else {
-			markdown = string(r[:PostMaxLength])
-		}
-	}
+	markdown = cutMarkdown(markdown)
 
 	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.URL, markdown), nil
 }
@@ -142,18 +130,24 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 
 	postResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
 	if err != nil {
-		return "", fmt.Errorf("get post from server failed: %w", err)
+		return "", fmt.Errorf("get post from server failed: %s", err)
 	}
 
 	if err := json.NewDecoder(postResponse.Body).Decode(&post); err != nil {
-		return "", fmt.Errorf("unmarshal post failed: %w", err)
+		return "", fmt.Errorf("unmarshal post failed: %s", err)
 	}
 
 	markdown, err := b.mdConverter.ConvertString(post.BodyHTML)
 	if err != nil {
-		return "", fmt.Errorf("convert html to markdown failed: %w", err)
+		return "", fmt.Errorf("convert html to markdown failed: %s", err)
 	}
 
+	markdown = cutMarkdown(markdown)
+
+	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.CanonicalURL, markdown), nil
+}
+
+func cutMarkdown(markdown string) string {
 	// Cut post for preview mode.
 	if len(markdown) > PostMaxLength {
 		// Convert to runes to properly split between unicode symbols.
@@ -168,5 +162,6 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 		}
 	}
 
-	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.CanonicalURL, markdown), nil
+	// Stupid hotfix for some invalid markdowns.
+	return strings.ReplaceAll(markdown, "* * *", "")
 }

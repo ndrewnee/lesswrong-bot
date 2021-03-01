@@ -106,12 +106,12 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 		webhook := tgbotapi.NewWebhook(b.settings.WebhookHost + "/" + b.botAPI.Token)
 
 		if _, err := b.botAPI.SetWebhook(webhook); err != nil {
-			return nil, fmt.Errorf("set webhook failed: %w", err)
+			return nil, fmt.Errorf("set webhook failed: %s", err)
 		}
 
 		info, err := b.botAPI.GetWebhookInfo()
 		if err != nil {
-			return nil, fmt.Errorf("get webhook info failed: %w", err)
+			return nil, fmt.Errorf("get webhook info failed: %s", err)
 		}
 
 		if info.LastErrorDate != 0 {
@@ -131,7 +131,7 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 
 	response, err := b.botAPI.RemoveWebhook()
 	if err != nil {
-		return nil, fmt.Errorf("removed webhook failed: %w", err)
+		return nil, fmt.Errorf("removed webhook failed: %s", err)
 	}
 
 	if !response.Ok {
@@ -143,7 +143,7 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 
 	updates, err := b.botAPI.GetUpdatesChan(u)
 	if err != nil {
-		return nil, fmt.Errorf("get updates chan failed: %w", err)
+		return nil, fmt.Errorf("get updates chan failed: %s", err)
 	}
 
 	return updates, nil
@@ -203,10 +203,11 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 
 	sent, err := b.botAPI.Send(msg)
 	if err != nil {
-		msg.Text = "Oops, something went wrong!"
-		_, _ = b.botAPI.Send(msg)
+		errMsg := msg
+		errMsg.Text = "Oops, something went wrong!"
+		_, _ = b.botAPI.Send(errMsg)
 
-		return tgbotapi.Message{}, fmt.Errorf("send message failed: %w", err)
+		return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
 	}
 
 	return sent, nil
