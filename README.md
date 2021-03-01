@@ -1,5 +1,7 @@
 # lesswrong-bot
 
+[![Go](https://github.com/ndrewnee/lesswrong-bot/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/ndrewnee/lesswrong-bot/actions/workflows/go.yml)
+
 [Telegram bot](https://t.me/lesswrong_bot) for Scott Alexander's blogs, [old](https://slatestarcodex.com) and [new](https://astralcodexten.substack.com).
 
 Maybe in the future I'll add [Lesswrong](https://lesswrong.com) and [Lesswrong.ru](https://lesswrong.ru).
