@@ -61,7 +61,7 @@ func TestCommandTop(t *testing.T) {
 				source: SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/astral_top_want.md")
+				file, err := ioutil.ReadFile("testdata/astral_top_posts.md")
 				require.NoError(t, err)
 
 				require.Equal(t, string(file), got)
