@@ -107,6 +107,19 @@ func TestCommandRandom(t *testing.T) {
 			wantErr: require.NoError,
 		},
 		{
+			name: "Should get random post from https://slatestarcodex.com (image fix)",
+			args: args{
+				randomPost: 191,
+				source:     SourceSlate,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/slate_random_post_image_fix.md")
+				require.NoError(t, err)
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
+		{
 			name: "Should get random post from https://astralcodexten.substack.com",
 			args: args{
 				randomPost: 4,

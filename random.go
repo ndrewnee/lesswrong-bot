@@ -211,6 +211,7 @@ func cutMarkdown(markdown string) string {
 	// Stupid hotfixes for some invalid markdowns.
 	markdown = strings.ReplaceAll(markdown, "* * *", "")
 	markdown = strings.ReplaceAll(markdown, "```", "")
+	markdown = strings.ReplaceAll(markdown, "![]", "[Image]")
 
 	return markdown
 }
