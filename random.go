@@ -93,7 +93,7 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 	if len(b.cache.astralPosts) == 0 {
 		// As substack limits list to 12 posts in one request we fetch all posts using offset.
 		for offset := 0; true; offset += DefaultLimit {
-			uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%v&offset=%v",
+			uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%d&offset=%d",
 				DefaultLimit,
 				offset,
 			)
@@ -150,17 +150,20 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 }
 
 func (b *Bot) CommandRandomLesswrongRu() (string, error) {
-	postsCollector := colly.NewCollector()
+	// Load posts for the first time.
+	if len(b.cache.lesswrongRuPosts) == 0 {
+		postsCollector := colly.NewCollector()
 
-	postsCollector.OnHTML("ul > li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
-		b.cache.lesswrongRuPosts = append(b.cache.lesswrongRuPosts, Post{
-			Title: e.Text,
-			URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),
+		postsCollector.OnHTML("ul > li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
+			b.cache.lesswrongRuPosts = append(b.cache.lesswrongRuPosts, Post{
+				Title: e.Text,
+				URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),
+			})
 		})
-	})
 
-	if err := postsCollector.Visit("https://lesswrong.ru/w"); err != nil {
-		return "", fmt.Errorf("get lesswrong.ru posts failed: %s", err)
+		if err := postsCollector.Visit("https://lesswrong.ru/w"); err != nil {
+			return "", fmt.Errorf("get lesswrong.ru posts failed: %s", err)
+		}
 	}
 
 	if len(b.cache.lesswrongRuPosts) == 0 {
@@ -172,7 +175,6 @@ func (b *Bot) CommandRandomLesswrongRu() (string, error) {
 
 	randomPostCollector := colly.NewCollector()
 
-	// #node-430 > div > div.field.field-name-body.field-type-text-with-summary.field-label-hidden > div > div > div.tex2jax
 	randomPostCollector.OnHTML("div.tex2jax", func(e *colly.HTMLElement) {
 		post.BodyHTML, _ = e.DOM.Html()
 	})
