@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,8 +11,9 @@ import (
 )
 
 const (
-	DefaultLimit  = 12
-	PostMaxLength = 1500
+	DefaultLimit           = 12
+	PostMaxLength          = 1500
+	LesswrongPostsMaxCount = 25000
 )
 
 type (
@@ -32,17 +34,26 @@ type (
 	}
 
 	LesswrongResponse struct {
-		Data struct {
-			Posts struct {
-				Results []struct {
-					Title   string `json:"title"`
-					PageURL string `json:"pageUrl"`
-					User    struct {
-						DisplayName string `json:"displayName"`
-					} `json:"user"`
-				} `json:"results"`
-			} `json:"posts"`
-		} `json:"data"`
+		Data LesswrongData `json:"data"`
+	}
+
+	LesswrongData struct {
+		Posts LesswrongPost `json:"posts"`
+	}
+
+	LesswrongPost struct {
+		Results []LesswrongResult `json:"results"`
+	}
+
+	LesswrongResult struct {
+		Title    string        `json:"title"`
+		PageURL  string        `json:"pageUrl"`
+		HTMLBody string        `json:"htmlBody"`
+		User     LesswrongUser `json:"user"`
+	}
+
+	LesswrongUser struct {
+		DisplayName string `json:"displayName"`
 	}
 )
 
@@ -55,6 +66,14 @@ func (ap AstralPost) AsPost() Post {
 	}
 }
 
+func (lr LesswrongResult) AsPost() Post {
+	return Post{
+		Title: lr.Title,
+		URL:   lr.PageURL,
+		HTML:  lr.HTMLBody,
+	}
+}
+
 func (b *Bot) CommandRandom(source Source) (string, error) {
 	switch source {
 	case SourceSlate:
@@ -63,6 +82,8 @@ func (b *Bot) CommandRandom(source Source) (string, error) {
 		return b.CommandRandomAstral()
 	case SourceLesswrongRu:
 		return b.CommandRandomLesswrongRu()
+	case SourceLesswrong:
+		return b.CommandRandomLesswrong()
 	default:
 		return b.CommandRandomSlate()
 	}
@@ -201,6 +222,46 @@ func (b *Bot) CommandRandomLesswrongRu() (string, error) {
 	}
 
 	return b.postToMarkdown(post)
+}
+
+func (b *Bot) CommandRandomLesswrong() (string, error) {
+	offset := b.randomInt(LesswrongPostsMaxCount)
+
+	query := fmt.Sprintf(`{
+		posts(input: {terms: {view: "new", limit: 1, offset: %d}}) {
+			results {
+				title
+				pageUrl
+				htmlBody
+			}
+		}
+	}`, offset)
+
+	request, err := json.Marshal(map[string]string{"query": query})
+	if err != nil {
+		return "", fmt.Errorf("marshal request for lesswrong.com random post failed: %s", err)
+	}
+
+	httpResponse, err := b.httpClient.Post("https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request))
+	if err != nil {
+		return "", fmt.Errorf("get lesswrong.com random post failed: %s", err)
+	}
+
+	defer httpResponse.Body.Close()
+
+	var response LesswrongResponse
+
+	if err := json.NewDecoder(httpResponse.Body).Decode(&response); err != nil {
+		return "", fmt.Errorf("unmarshal lesswrong.com random post failed: %s", err)
+	}
+
+	if len(response.Data.Posts.Results) == 0 {
+		return "", fmt.Errorf("lesswrong.com random post not found")
+	}
+
+	lesswrongPost := response.Data.Posts.Results[0]
+
+	return b.postToMarkdown(lesswrongPost.AsPost())
 }
 
 func (b *Bot) postToMarkdown(post Post) (string, error) {

@@ -134,7 +134,7 @@ func (b *Bot) CommandTopLesswrong() (string, error) {
 
 	httpResponse, err := b.httpClient.Post("https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request))
 	if err != nil {
-		return "", fmt.Errorf("get lesswrong.com posts failed: %s", err)
+		return "", fmt.Errorf("get lesswrong.com top posts failed: %s", err)
 	}
 
 	defer httpResponse.Body.Close()
