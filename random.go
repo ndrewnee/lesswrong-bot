@@ -15,6 +15,13 @@ const (
 )
 
 type (
+	Post struct {
+		Title string
+		URL   string
+		HTML  string
+		Slug  string
+	}
+
 	AstralPost struct {
 		Slug         string `json:"slug"`
 		Title        string `json:"title"`
@@ -24,11 +31,18 @@ type (
 		Audience     string `json:"audience"`
 	}
 
-	Post struct {
-		Title string
-		URL   string
-		HTML  string
-		Slug  string
+	LesswrongResponse struct {
+		Data struct {
+			Posts struct {
+				Results []struct {
+					Title   string `json:"title"`
+					PageURL string `json:"pageUrl"`
+					User    struct {
+						DisplayName string `json:"displayName"`
+					} `json:"user"`
+				} `json:"results"`
+			} `json:"posts"`
+		} `json:"data"`
 	}
 )
 
@@ -57,16 +71,16 @@ func (b *Bot) CommandRandom(source Source) (string, error) {
 func (b *Bot) CommandRandomSlate() (string, error) {
 	// Load posts for the first time.
 	if len(b.cache.slatePosts) == 0 {
-		archiveCollector := colly.NewCollector()
+		archivesCollector := colly.NewCollector()
 
-		archiveCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
+		archivesCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
 			b.cache.slatePosts = append(b.cache.slatePosts, Post{
 				Title: e.Text,
 				URL:   e.Attr("href"),
 			})
 		})
 
-		if err := archiveCollector.Visit("https://slatestarcodex.com/archives/"); err != nil {
+		if err := archivesCollector.Visit("https://slatestarcodex.com/archives/"); err != nil {
 			return "", fmt.Errorf("get slatestarcodex posts failed: %s", err)
 		}
 	}
@@ -101,7 +115,7 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 				offset,
 			)
 
-			archiveResponse, err := b.httpClient.Get(uri)
+			httpResponse, err := b.httpClient.Get(uri)
 			if err != nil {
 				log.Println("[ERROR] Get astralcodexten posts failed: ", err)
 				break
@@ -109,10 +123,13 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 
 			var newPosts []AstralPost
 
-			if err := json.NewDecoder(archiveResponse.Body).Decode(&newPosts); err != nil {
+			if err := json.NewDecoder(httpResponse.Body).Decode(&newPosts); err != nil {
 				log.Println("[ERROR] Unmarshal astralcodexten new posts failed: ", err)
+				httpResponse.Body.Close()
 				break
 			}
+
+			httpResponse.Body.Close()
 
 			if len(newPosts) == 0 {
 				break
@@ -133,14 +150,16 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 	i := b.randomInt(len(b.cache.astralPosts))
 	post := b.cache.astralPosts[i]
 
-	postResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
+	httpResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
 	if err != nil {
 		return "", fmt.Errorf("get astralcodexten random post failed: %s", err)
 	}
 
+	defer httpResponse.Body.Close()
+
 	var astralPost AstralPost
 
-	if err := json.NewDecoder(postResponse.Body).Decode(&astralPost); err != nil {
+	if err := json.NewDecoder(httpResponse.Body).Decode(&astralPost); err != nil {
 		return "", fmt.Errorf("unmarshal astralcodexten post failed: %s", err)
 	}
 
@@ -171,13 +190,13 @@ func (b *Bot) CommandRandomLesswrongRu() (string, error) {
 	i := b.randomInt(len(b.cache.lesswrongRuPosts))
 	post := b.cache.lesswrongRuPosts[i]
 
-	randomPostCollector := colly.NewCollector()
+	postCollector := colly.NewCollector()
 
-	randomPostCollector.OnHTML("div.tex2jax", func(e *colly.HTMLElement) {
+	postCollector.OnHTML("div.tex2jax", func(e *colly.HTMLElement) {
 		post.HTML, _ = e.DOM.Html()
 	})
 
-	if err := randomPostCollector.Visit(post.URL); err != nil {
+	if err := postCollector.Visit(post.URL); err != nil {
 		return "", fmt.Errorf("get lesswrong.ru random post failed: %s", err)
 	}
 

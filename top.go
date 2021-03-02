@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -39,20 +40,24 @@ func (b *Bot) CommandTop(source Source) (string, error) {
 		return b.CommandTopAstral()
 	case SourceLesswrongRu:
 		return b.CommandTopLesswrongRu()
+	case SourceLesswrong:
+		return b.CommandTopLesswrong()
 	default:
 		return MessageTopSlate, nil
 	}
 }
 
 func (b *Bot) CommandTopAstral() (string, error) {
-	archiveResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
+	httpResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
 	if err != nil {
 		return "", fmt.Errorf("get astralcodexten posts failed: %s", err)
 	}
 
+	defer httpResponse.Body.Close()
+
 	var topPosts []AstralPost
 
-	if err := json.NewDecoder(archiveResponse.Body).Decode(&topPosts); err != nil {
+	if err := json.NewDecoder(httpResponse.Body).Decode(&topPosts); err != nil {
 		return "", fmt.Errorf("unmarshal astralcodexten top posts failed: %s", err)
 	}
 
@@ -102,6 +107,48 @@ func (b *Bot) CommandTopLesswrongRu() (string, error) {
 		post := b.cache.lesswrongRuPosts[n]
 
 		text.WriteString(fmt.Sprintf("%d. [%s](%s)\n\n", i+1, post.Title, post.URL))
+	}
+
+	return text.String(), nil
+}
+
+func (b *Bot) CommandTopLesswrong() (string, error) {
+	weekAgo := time.Now().AddDate(0, 0, -7)
+
+	query := fmt.Sprintf(`{
+		posts(input: {terms: {view: "top", limit: 12, after: "%s"}}) {
+			results {
+				title
+				pageUrl
+				user {
+					displayName
+				}
+			}
+		}
+	}`, weekAgo.Format("2006-01-02"))
+
+	request, err := json.Marshal(map[string]string{"query": query})
+	if err != nil {
+		return "", fmt.Errorf("marshal request for lesswrong.com top posts failed: %s", err)
+	}
+
+	httpResponse, err := b.httpClient.Post("https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request))
+	if err != nil {
+		return "", fmt.Errorf("get lesswrong.com posts failed: %s", err)
+	}
+
+	defer httpResponse.Body.Close()
+
+	var response LesswrongResponse
+
+	if err := json.NewDecoder(httpResponse.Body).Decode(&response); err != nil {
+		return "", fmt.Errorf("unmarshal lesswrong.com top posts failed: %s", err)
+	}
+
+	text := bytes.NewBufferString("🏆 Top posts this week from https://lesswrong.com:\n\n")
+
+	for i, post := range response.Data.Posts.Results {
+		text.WriteString(fmt.Sprintf("%d. [%s](%s) (%s)\n\n", i+1, post.Title, post.PageURL, post.User.DisplayName))
 	}
 
 	return text.String(), nil

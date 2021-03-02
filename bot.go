@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -28,6 +29,7 @@ const (
 	SourceSlate       Source = "1"
 	SourceAstral      Source = "2"
 	SourceLesswrongRu Source = "3"
+	SourceLesswrong   Source = "4"
 )
 
 type Source string
@@ -40,13 +42,15 @@ func (s Source) String() string {
 		return "https://astralcodexten.substack.com"
 	case SourceLesswrongRu:
 		return "https://lesswrong.ru"
+	case SourceLesswrong:
+		return "https://lesswrong.com"
 	default:
 		return "https://slatestarcodex.com"
 	}
 }
 
 func (s Source) IsValid() bool {
-	return s == SourceSlate || s == SourceAstral || s == SourceLesswrongRu
+	return s == SourceSlate || s == SourceAstral || s == SourceLesswrongRu || s == SourceLesswrong
 }
 
 type (
@@ -68,6 +72,7 @@ type (
 
 	HTTPClient interface {
 		Get(uri string) (*http.Response, error)
+		Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
 	}
 
 	Cache struct {
