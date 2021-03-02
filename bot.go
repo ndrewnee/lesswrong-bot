@@ -68,7 +68,7 @@ type (
 		cache       Cache
 	}
 
-	BotOptions struct {
+	Options struct {
 		Settings    Settings
 		BotAPI      *tgbotapi.BotAPI
 		HTTPClient  HTTPClient
@@ -89,8 +89,8 @@ type (
 	}
 )
 
-func NewBot(options ...BotOptions) (*Bot, error) {
-	var opts BotOptions
+func NewBot(options ...Options) (*Bot, error) {
+	var opts Options
 
 	if len(options) > 0 {
 		opts = options[0]

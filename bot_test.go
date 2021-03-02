@@ -190,7 +190,7 @@ Commands:
 			wantErr: require.NoError,
 		},
 		{
-			name: "Should change source to https://lesswrong.ru",
+			name: "Should change source to https://slatestarcodex.com",
 			args: args{
 				update: tgbotapi.Update{
 					Message: &tgbotapi.Message{

@@ -56,7 +56,7 @@ func TestCommandTop(t *testing.T) {
 		nil,
 	)
 
-	bot, err := NewBot(BotOptions{HTTPClient: httpClient})
+	bot, err := NewBot(Options{HTTPClient: httpClient})
 	require.NoError(t, err)
 
 	type args struct {
