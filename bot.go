@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 const (
-	MessageHelp = `🤖 I'm a bot for reading posts from https://slatestarcodex.com, https://astralcodexten.substack.com and https://lesswrong.ru.
+	MessageHelp = `🤖 I'm a bot for reading posts:
 
 Commands:
 
@@ -19,48 +20,57 @@ Commands:
 
 /random - Read random post
 
-/source - Change source (1 - slatestarcodex, 2 - astralcodexten, 3 - lesswrong.ru)
+/source - Change source:
+
+  1. [Lesswrong.ru](https://lesswrong.ru) (default)
+  2. [Slate Star Codex](https://slatestarcodex.com)
+  3. [Astral Codex Ten](https://astralcodexten.substack.com)
+  4. [Lesswrong.com](https://lesswrong.com)
 
 /help - Help`
 )
 
 const (
-	SourceSlate       Source = "1"
-	SourceAstral      Source = "2"
-	SourceLesswrongRu Source = "3"
+	SourceLesswrongRu Source = "1"
+	SourceSlate       Source = "2"
+	SourceAstral      Source = "3"
+	SourceLesswrong   Source = "4"
 )
 
 type Source string
 
 func (s Source) String() string {
 	switch s {
+	case SourceLesswrongRu:
+		return "https://lesswrong.ru"
 	case SourceSlate:
 		return "https://slatestarcodex.com"
 	case SourceAstral:
 		return "https://astralcodexten.substack.com"
-	case SourceLesswrongRu:
-		return "https://lesswrong.ru"
+	case SourceLesswrong:
+		return "https://lesswrong.com"
 	default:
-		return "https://slatestarcodex.com"
+		return ""
 	}
 }
 
 func (s Source) IsValid() bool {
-	return s == SourceSlate || s == SourceAstral || s == SourceLesswrongRu
+	return s.String() != ""
 }
 
 type (
 	Bot struct {
-		botAPI      *tgbotapi.BotAPI
 		settings    Settings
+		botAPI      *tgbotapi.BotAPI
 		httpClient  HTTPClient
 		mdConverter *md.Converter
 		randomInt   func(n int) int
 		cache       Cache
 	}
 
-	BotOptions struct {
+	Options struct {
 		Settings    Settings
+		BotAPI      *tgbotapi.BotAPI
 		HTTPClient  HTTPClient
 		MDConverter *md.Converter
 		RandomInt   func(n int) int
@@ -68,22 +78,39 @@ type (
 
 	HTTPClient interface {
 		Get(uri string) (*http.Response, error)
+		Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
 	}
 
 	Cache struct {
 		userSource       map[int]Source
-		astralPosts      []AstralPost
+		astralPosts      []Post
 		slatePosts       []Post
 		lesswrongRuPosts []Post
 	}
 )
 
-func NewBot(botAPI *tgbotapi.BotAPI, options ...BotOptions) *Bot {
-	var opts BotOptions
+func NewBot(options ...Options) (*Bot, error) {
+	var opts Options
 
 	if len(options) > 0 {
 		opts = options[0]
 	}
+
+	if opts.Settings == (Settings{}) {
+		opts.Settings = ParseSettings()
+	}
+
+	if opts.BotAPI == nil {
+		botAPI, err := tgbotapi.NewBotAPI(opts.Settings.Token)
+		if err != nil {
+			return nil, err
+		}
+
+		botAPI.Debug = opts.Settings.Debug
+		opts.BotAPI = botAPI
+	}
+
+	log.Printf("Authorized on account %s", opts.BotAPI.Self.UserName)
 
 	if opts.HTTPClient == nil {
 		opts.HTTPClient = http.DefaultClient
@@ -98,7 +125,7 @@ func NewBot(botAPI *tgbotapi.BotAPI, options ...BotOptions) *Bot {
 	}
 
 	return &Bot{
-		botAPI:      botAPI,
+		botAPI:      opts.BotAPI,
 		settings:    opts.Settings,
 		httpClient:  opts.HTTPClient,
 		mdConverter: opts.MDConverter,
@@ -106,7 +133,7 @@ func NewBot(botAPI *tgbotapi.BotAPI, options ...BotOptions) *Bot {
 		cache: Cache{
 			userSource: make(map[int]Source),
 		},
-	}
+	}, nil
 }
 
 func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
@@ -168,10 +195,6 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 	}
 
-	if !update.Message.IsCommand() {
-		return tgbotapi.Message{}, nil
-	}
-
 	if update.Message.Chat == nil {
 		return tgbotapi.Message{}, nil
 	}
@@ -198,7 +221,7 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 	case "source":
 		source := Source(update.Message.CommandArguments())
 		if !source.IsValid() {
-			source = SourceSlate
+			source = SourceLesswrongRu
 		}
 
 		b.cache.userSource[update.Message.From.ID] = source

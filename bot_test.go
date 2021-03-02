@@ -14,14 +14,6 @@ import (
 )
 
 func TestBot_GetUpdatesChan(t *testing.T) {
-	settings := ParseSettings()
-	require.NotEmpty(t, settings.Token, "Env var TOKEN should be set")
-
-	botAPI, err := tgbotapi.NewBotAPI(settings.Token)
-	require.NoError(t, err)
-
-	botAPI.Debug = settings.Debug
-
 	type args struct {
 		settings Settings
 	}
@@ -48,7 +40,7 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 			args: args{
 				settings: Settings{
 					Webhook:     true,
-					WebhookHost: settings.WebhookHost,
+					WebhookHost: "https://lesswrong-bot.herokuapp.com",
 				},
 			},
 			want:    require.NotNil,
@@ -63,7 +55,10 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bot := NewBot(botAPI, BotOptions{Settings: tt.args.settings})
+			bot, err := NewBot()
+			require.NoError(t, err)
+
+			bot.settings = tt.args.settings
 
 			got, err := bot.GetUpdatesChan()
 			tt.wantErr(t, err)
@@ -81,15 +76,8 @@ func TestBot_MessageHandler(t *testing.T) {
 	userID, err := strconv.Atoi(os.Getenv("USER_ID"))
 	require.NoError(t, err, "Env var USER_ID should be set")
 
-	settings := ParseSettings()
-	require.NotEmpty(t, settings.Token, "Env var TOKEN should be set")
-
-	botAPI, err := tgbotapi.NewBotAPI(settings.Token)
+	bot, err := NewBot()
 	require.NoError(t, err)
-
-	botAPI.Debug = settings.Debug
-
-	bot := NewBot(botAPI)
 
 	type args struct {
 		update tgbotapi.Update
@@ -106,15 +94,6 @@ func TestBot_MessageHandler(t *testing.T) {
 			wantErr: require.NoError,
 		},
 		{
-			name: "Should handle non-command message",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{},
-				},
-			},
-			wantErr: require.NoError,
-		},
-		{
 			name: "Should handle command with nil chat",
 			args: args{
 				update: tgbotapi.Update{
@@ -127,6 +106,22 @@ func TestBot_MessageHandler(t *testing.T) {
 						},
 					},
 				},
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should handle non-command message",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.Equal(t, "I don't know that command", got.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -174,7 +169,50 @@ func TestBot_MessageHandler(t *testing.T) {
 				},
 			},
 			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, MessageHelp, got.Text)
+				want := `🤖 I'm a bot for reading posts:
+
+Commands:
+
+/top - Top posts
+
+/random - Read random post
+
+/source - Change source:
+
+  1. Lesswrong.ru (default)
+  2. Slate Star Codex
+  3. Astral Codex Ten
+  4. Lesswrong.com
+
+/help - Help`
+				require.Equal(t, want, got.Text)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should change source to https://slatestarcodex.com",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						From: &tgbotapi.User{
+							ID: userID,
+						},
+						Entities: &[]tgbotapi.MessageEntity{
+							{
+								Offset: 0,
+								Type:   "bot_command",
+								Length: 7,
+							},
+						},
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+						Text: "/source 2",
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.Equal(t, "Changed source to https://slatestarcodex.com", got.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -271,7 +309,7 @@ func TestBot_MessageHandler(t *testing.T) {
 						Chat: &tgbotapi.Chat{
 							ID: chatID,
 						},
-						Text: "/source 2",
+						Text: "/source 3",
 					},
 				},
 			},
@@ -352,7 +390,7 @@ func TestBot_MessageHandler(t *testing.T) {
 						Chat: &tgbotapi.Chat{
 							ID: chatID,
 						},
-						Text: "/source 3",
+						Text: "/source 1",
 					},
 				},
 			},
@@ -390,6 +428,87 @@ func TestBot_MessageHandler(t *testing.T) {
 		},
 		{
 			name: "Should get random post from https://lesswrong.ru",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						From: &tgbotapi.User{
+							ID: userID,
+						},
+						Entities: &[]tgbotapi.MessageEntity{
+							{
+								Offset: 0,
+								Type:   "bot_command",
+								Length: 7,
+							},
+						},
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+						Text: "/random",
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.True(t, strings.HasPrefix(got.Text, "📝"))
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should change source to https://lesswrong.com",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						From: &tgbotapi.User{
+							ID: userID,
+						},
+						Entities: &[]tgbotapi.MessageEntity{
+							{
+								Offset: 0,
+								Type:   "bot_command",
+								Length: 7,
+							},
+						},
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+						Text: "/source 4",
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.Equal(t, "Changed source to https://lesswrong.com", got.Text)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should get top posts from https://lesswrong.com",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						From: &tgbotapi.User{
+							ID: userID,
+						},
+						Entities: &[]tgbotapi.MessageEntity{
+							{
+								Offset: 0,
+								Type:   "bot_command",
+								Length: 4,
+							},
+						},
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+						Text: "/top",
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.True(t, strings.HasPrefix(got.Text, "🏆 Top posts this week from https://lesswrong.com"))
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should get random post from https://lesswrong.com",
 			args: args{
 				update: tgbotapi.Update{
 					Message: &tgbotapi.Message{
