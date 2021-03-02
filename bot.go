@@ -22,18 +22,18 @@ Commands:
 
 /source - Change source:
 
-  1. [Lesswrong.ru](https://lesswrong.ru)
+  1. [Lesswrong.ru](https://lesswrong.ru) (default)
   2. [Slate Star Codex](https://slatestarcodex.com)
-  3. [Astral Codex Ten](https://astralcodexten.substack.com).
+  3. [Astral Codex Ten](https://astralcodexten.substack.com)
   4. [Lesswrong.com](https://lesswrong.com)
 
 /help - Help`
 )
 
 const (
-	SourceSlate       Source = "1"
-	SourceAstral      Source = "2"
-	SourceLesswrongRu Source = "3"
+	SourceLesswrongRu Source = "1"
+	SourceSlate       Source = "2"
+	SourceAstral      Source = "3"
 	SourceLesswrong   Source = "4"
 )
 
@@ -41,21 +41,21 @@ type Source string
 
 func (s Source) String() string {
 	switch s {
+	case SourceLesswrongRu:
+		return "https://lesswrong.ru"
 	case SourceSlate:
 		return "https://slatestarcodex.com"
 	case SourceAstral:
 		return "https://astralcodexten.substack.com"
-	case SourceLesswrongRu:
-		return "https://lesswrong.ru"
 	case SourceLesswrong:
 		return "https://lesswrong.com"
 	default:
-		return "https://slatestarcodex.com"
+		return ""
 	}
 }
 
 func (s Source) IsValid() bool {
-	return s == SourceSlate || s == SourceAstral || s == SourceLesswrongRu || s == SourceLesswrong
+	return s.String() != ""
 }
 
 type (
@@ -204,7 +204,7 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 	case "source":
 		source := Source(update.Message.CommandArguments())
 		if !source.IsValid() {
-			source = SourceSlate
+			source = SourceLesswrongRu
 		}
 
 		b.cache.userSource[update.Message.From.ID] = source

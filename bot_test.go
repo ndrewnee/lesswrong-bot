@@ -181,7 +181,50 @@ func TestBot_MessageHandler(t *testing.T) {
 				},
 			},
 			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, MessageHelp, got.Text)
+				want := `🤖 I'm a bot for reading posts:
+
+Commands:
+
+/top - Top posts
+
+/random - Read random post
+
+/source - Change source:
+
+  1. Lesswrong.ru (default)
+  2. Slate Star Codex
+  3. Astral Codex Ten
+  4. Lesswrong.com
+
+/help - Help`
+				require.Equal(t, want, got.Text)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should change source to https://lesswrong.ru",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						From: &tgbotapi.User{
+							ID: userID,
+						},
+						Entities: &[]tgbotapi.MessageEntity{
+							{
+								Offset: 0,
+								Type:   "bot_command",
+								Length: 7,
+							},
+						},
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+						Text: "/source 2",
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.Equal(t, "Changed source to https://slatestarcodex.com", got.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -278,7 +321,7 @@ func TestBot_MessageHandler(t *testing.T) {
 						Chat: &tgbotapi.Chat{
 							ID: chatID,
 						},
-						Text: "/source 2",
+						Text: "/source 3",
 					},
 				},
 			},
@@ -359,7 +402,7 @@ func TestBot_MessageHandler(t *testing.T) {
 						Chat: &tgbotapi.Chat{
 							ID: chatID,
 						},
-						Text: "/source 3",
+						Text: "/source 1",
 					},
 				},
 			},

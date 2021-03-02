@@ -34,16 +34,16 @@ const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 func (b *Bot) CommandTop(source Source) (string, error) {
 	switch source {
+	case SourceLesswrongRu:
+		return b.CommandTopLesswrongRu()
 	case SourceSlate:
 		return MessageTopSlate, nil
 	case SourceAstral:
 		return b.CommandTopAstral()
-	case SourceLesswrongRu:
-		return b.CommandTopLesswrongRu()
 	case SourceLesswrong:
 		return b.CommandTopLesswrong()
 	default:
-		return MessageTopSlate, nil
+		return b.CommandTopLesswrongRu()
 	}
 }
 

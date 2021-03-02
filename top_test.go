@@ -70,9 +70,14 @@ func TestCommandTop(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "Should get top posts from https://slatestarcodex.com when source is not set",
+			name: "Should get top posts from https://lesswrong.ru when source is not set",
+			args: args{
+				randomPost: 0,
+			},
 			want: func(t *testing.T, got string) {
-				require.Equal(t, MessageTopSlate, got)
+				file, err := ioutil.ReadFile("testdata/lesswrong_ru_top_posts.md")
+				require.NoError(t, err)
+				require.Equal(t, string(file), got)
 			},
 			wantErr: require.NoError,
 		},

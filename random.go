@@ -76,16 +76,16 @@ func (lr LesswrongResult) AsPost() Post {
 
 func (b *Bot) CommandRandom(source Source) (string, error) {
 	switch source {
+	case SourceLesswrongRu:
+		return b.CommandRandomLesswrongRu()
 	case SourceSlate:
 		return b.CommandRandomSlate()
 	case SourceAstral:
 		return b.CommandRandomAstral()
-	case SourceLesswrongRu:
-		return b.CommandRandomLesswrongRu()
 	case SourceLesswrong:
 		return b.CommandRandomLesswrong()
 	default:
-		return b.CommandRandomSlate()
+		return b.CommandRandomLesswrongRu()
 	}
 }
 

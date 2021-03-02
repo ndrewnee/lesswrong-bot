@@ -4,9 +4,9 @@
 
 [Telegram bot](https://t.me/lesswrong_bot) for reading posts from:
 
-- [Lesswrong.ru](https://lesswrong.ru)
+- [Lesswrong.ru](https://lesswrong.ru) (default)
 - [Slate Star Codex](https://slatestarcodex.com)
-- [Astral Codex Ten](https://astralcodexten.substack.com).
+- [Astral Codex Ten](https://astralcodexten.substack.com)
 - [Lesswrong.com](https://lesswrong.com)
 
 ## 😎 Usage
@@ -19,7 +19,7 @@ Commands:
 
 /source - Change source:
 
-  1. [Lesswrong.ru](https://lesswrong.ru)
+  1. [Lesswrong.ru](https://lesswrong.ru) (default)
   2. [Slate Star Codex](https://slatestarcodex.com)
   3. [Astral Codex Ten](https://astralcodexten.substack.com).
   4. [Lesswrong.com](https://lesswrong.com)
@@ -40,6 +40,14 @@ Run application locally:
 
 ```sh
 make run
+```
+
+## 👷 Build
+
+Build binary
+
+```bash
+make build
 ```
 
 ## 🧪 Testing

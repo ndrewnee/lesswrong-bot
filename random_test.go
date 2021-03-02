@@ -99,9 +99,12 @@ func TestCommandRandom(t *testing.T) {
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name: "Should get random post from https://slatestarcodex.com when source is not set",
+			name: "Should get random post from https://lesswrong.ru when source is not set",
+			args: args{
+				randomPost: 0,
+			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/slate_random_post.md")
+				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
