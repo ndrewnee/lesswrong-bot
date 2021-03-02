@@ -2,13 +2,14 @@
 
 [![Go](https://github.com/ndrewnee/lesswrong-bot/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/ndrewnee/lesswrong-bot/actions/workflows/go.yml)
 
-[Telegram bot](https://t.me/lesswrong_bot) for reading posts from [Lesswrong.ru](https://lesswrong.ru) and Scott Alexander's blog, [the old](https://slatestarcodex.com) and [new one](https://astralcodexten.substack.com).
+[Telegram bot](https://t.me/lesswrong_bot) for reading posts from:
 
-Maybe in the future I'll add [Lesswrong.com](https://lesswrong.com).
+- [Lesswrong.ru](https://lesswrong.ru)
+- [Slate Star Codex](https://slatestarcodex.com)
+- [Astral Codex Ten](https://astralcodexten.substack.com).
+- [Lesswrong.com](https://lesswrong.com)
 
 ## 😎 Usage
-
-🤖 I'm a bot for reading posts from https://slatestarcodex.com, https://astralcodexten.substack.com and https://lesswrong.ru.
 
 Commands:
 
@@ -16,7 +17,12 @@ Commands:
 
 /random - Read random post
 
-/source - Change source (1 - slatestarcodex, 2 - astralcodexten, 3 - lesswrong.ru)
+/source - Change source:
+
+  1. [Lesswrong.ru](https://lesswrong.ru)
+  2. [Slate Star Codex](https://slatestarcodex.com)
+  3. [Astral Codex Ten](https://astralcodexten.substack.com).
+  4. [Lesswrong.com](https://lesswrong.com)
 
 /help - Help
 

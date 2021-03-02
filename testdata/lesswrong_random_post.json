@@ -1,0 +1,33 @@
+{
+    "data": {
+        "posts": {
+            "results": [
+                {
+                    "title": "Tap Water and Filtration",
+                    "pageUrl": "https://www.lesswrong.com/posts/tYqgzyFurJqdbkWcJ/tap-water-and-filtration",
+                    "htmlBody": "<p>I've been wondering about the safety and quality of the tap water in my city. I've always been assured that it's clean right out the tap. But I spent this past year living rurally with a groundwater well on-site, and when I visited the city I was struck by how bad the tap water tasted to me.</p>\n<p>Given its frequency of use in all our lives, I am generally surprised by the lack of discussion around water quality in my circles. It seems like nobody talks about it, and almost everyone I know drinks (and cooks with etc) what I now consider bad-tasting tap water. Does anyone have good leads or resources on this topic? I'd like to learn more and am unsure where to look first.</p>\n<p>Some questions under consideration:</p>\n<ul>\n<li>What is 'safe' to drink?</li>\n<li>What makes water quality good vs bad?</li>\n<li>Are taste and safety/quality correlated?</li>\n<li>Any recommended water quality tests?</li>\n<li>To filter or not to filter?</li>\n<li>Which filtering methods actually work?</li>\n<li>What questions would you be asking?</li>\n</ul>\n"
+                }
+            ]
+        }
+    },
+    "extensions": {
+        "cacheControl": {
+            "version": 1,
+            "hints": [
+                {
+                    "path": [
+                        "posts"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results"
+                    ],
+                    "maxAge": 0
+                }
+            ]
+        }
+    }
+}

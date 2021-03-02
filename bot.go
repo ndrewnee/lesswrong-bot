@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	MessageHelp = `🤖 I'm a bot for reading posts from https://slatestarcodex.com, https://astralcodexten.substack.com and https://lesswrong.ru.
+	MessageHelp = `🤖 I'm a bot for reading posts:
 
 Commands:
 
@@ -20,7 +20,12 @@ Commands:
 
 /random - Read random post
 
-/source - Change source (1 - slatestarcodex, 2 - astralcodexten, 3 - lesswrong.ru)
+/source - Change source:
+
+  1. [Lesswrong.ru](https://lesswrong.ru)
+  2. [Slate Star Codex](https://slatestarcodex.com)
+  3. [Astral Codex Ten](https://astralcodexten.substack.com).
+  4. [Lesswrong.com](https://lesswrong.com)
 
 /help - Help`
 )

@@ -113,10 +113,8 @@ func (b *Bot) CommandTopLesswrongRu() (string, error) {
 }
 
 func (b *Bot) CommandTopLesswrong() (string, error) {
-	weekAgo := time.Now().AddDate(0, 0, -7)
-
 	query := fmt.Sprintf(`{
-		posts(input: {terms: {view: "top", limit: 12, after: "%s"}}) {
+		posts(input: {terms: {view: "top", limit: 12, meta: null, after: "%s"}}) {
 			results {
 				title
 				pageUrl
@@ -125,7 +123,7 @@ func (b *Bot) CommandTopLesswrong() (string, error) {
 				}
 			}
 		}
-	}`, weekAgo.Format("2006-01-02"))
+	}`, time.Now().AddDate(0, 0, -7).Format("2006-01-02"))
 
 	request, err := json.Marshal(map[string]string{"query": query})
 	if err != nil {

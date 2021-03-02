@@ -225,17 +225,15 @@ func (b *Bot) CommandRandomLesswrongRu() (string, error) {
 }
 
 func (b *Bot) CommandRandomLesswrong() (string, error) {
-	offset := b.randomInt(LesswrongPostsMaxCount)
-
 	query := fmt.Sprintf(`{
-		posts(input: {terms: {view: "new", limit: 1, offset: %d}}) {
+		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: %d}}) {
 			results {
 				title
 				pageUrl
 				htmlBody
 			}
 		}
-	}`, offset)
+	}`, b.randomInt(LesswrongPostsMaxCount))
 
 	request, err := json.Marshal(map[string]string{"query": query})
 	if err != nil {

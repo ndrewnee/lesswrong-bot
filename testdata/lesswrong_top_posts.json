@@ -1,0 +1,220 @@
+{
+    "data": {
+        "posts": {
+            "results": [
+                {
+                    "title": "RadVac Commercial Antibody Test Results",
+                    "pageUrl": "https://www.lesswrong.com/posts/Mqy4GFqJoMSfs8raA/radvac-commercial-antibody-test-results",
+                    "user": {
+                        "displayName": "johnswentworth"
+                    }
+                },
+                {
+                    "title": "Takeaways from one year of lockdown",
+                    "pageUrl": "https://www.lesswrong.com/posts/uM6mENiJi2pNPpdnC/takeaways-from-one-year-of-lockdown",
+                    "user": {
+                        "displayName": "mingyuan"
+                    }
+                },
+                {
+                    "title": "Mentorship, Management, and Mysterious Old Wizards",
+                    "pageUrl": "https://www.lesswrong.com/posts/Wj5CCL7ay39on9ZuK/mentorship-management-and-mysterious-old-wizards",
+                    "user": {
+                        "displayName": "Raemon"
+                    }
+                },
+                {
+                    "title": "Full-time AGI Safety!",
+                    "pageUrl": "https://www.lesswrong.com/posts/tnEQMnpyBFK5QBRz3/full-time-agi-safety",
+                    "user": {
+                        "displayName": "steve2152"
+                    }
+                },
+                {
+                    "title": "Covid 2/25: Holding Pattern",
+                    "pageUrl": "https://www.lesswrong.com/posts/EYk8Hz3imnZK2eCXx/covid-2-25-holding-pattern",
+                    "user": {
+                        "displayName": "Zvi"
+                    }
+                },
+                {
+                    "title": "A No-Nonsense Guide to Early Retirement",
+                    "pageUrl": "https://www.lesswrong.com/posts/ttXGrquvXgouawHEq/a-no-nonsense-guide-to-early-retirement",
+                    "user": {
+                        "displayName": "tryactions"
+                    }
+                },
+                {
+                    "title": "\"If You're Not a Holy Madman, You're Not Trying\"",
+                    "pageUrl": "https://www.lesswrong.com/posts/s3rAKTkdSHb6Hwwoz/if-you-re-not-a-holy-madman-you-re-not-trying",
+                    "user": {
+                        "displayName": "abramdemski"
+                    }
+                },
+                {
+                    "title": "Fun with +12 OOMs of Compute",
+                    "pageUrl": "https://www.lesswrong.com/posts/rzqACeBGycZtqCfaX/fun-with-12-ooms-of-compute",
+                    "user": {
+                        "displayName": "Daniel Kokotajlo"
+                    }
+                },
+                {
+                    "title": "Judging Our April 2020 Covid-19 Predictions",
+                    "pageUrl": "https://www.lesswrong.com/posts/dRuTeLm7oEfxxBFRF/judging-our-april-2020-covid-19-predictions",
+                    "user": {
+                        "displayName": "Zvi"
+                    }
+                },
+                {
+                    "title": "Avoid Contentious Terms",
+                    "pageUrl": "https://www.lesswrong.com/posts/6W8Jdcc2Dq4uyE7Hi/avoid-contentious-terms",
+                    "user": {
+                        "displayName": "jefftk"
+                    }
+                },
+                {
+                    "title": "Why aren't we all using Taffix?",
+                    "pageUrl": "https://www.lesswrong.com/posts/Bg9ozak6GJfghmpRz/why-aren-t-we-all-using-taffix",
+                    "user": {
+                        "displayName": "ChristianKl"
+                    }
+                },
+                {
+                    "title": "Anna and Oliver discuss Children and X-Risk",
+                    "pageUrl": "https://www.lesswrong.com/events/KGvQs9tTpgnKugdv2/anna-and-oliver-discuss-children-and-x-risk",
+                    "user": {
+                        "displayName": "Raemon"
+                    }
+                }
+            ]
+        }
+    },
+    "extensions": {
+        "cacheControl": {
+            "version": 1,
+            "hints": [
+                {
+                    "path": [
+                        "posts"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        0,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        1,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        2,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        3,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        4,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        5,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        6,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        7,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        8,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        9,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        10,
+                        "user"
+                    ],
+                    "maxAge": 0
+                },
+                {
+                    "path": [
+                        "posts",
+                        "results",
+                        11,
+                        "user"
+                    ],
+                    "maxAge": 0
+                }
+            ]
+        }
+    }
+}
