@@ -4,25 +4,15 @@ import (
 	"log"
 	"math/rand"
 	"time"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	settings := ParseSettings()
-
-	botAPI, err := tgbotapi.NewBotAPI(settings.Token)
+	bot, err := NewBot()
 	if err != nil {
-		log.Fatal("Init telegram bot api failed: ", err)
+		log.Fatal("Init telegram bot failed: ", err)
 	}
-
-	botAPI.Debug = settings.Debug
-
-	log.Printf("Authorized on account %s", botAPI.Self.UserName)
-
-	bot := NewBot(botAPI, BotOptions{Settings: settings})
 
 	updates, err := bot.GetUpdatesChan()
 	if err != nil {

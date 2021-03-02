@@ -60,8 +60,8 @@ func (s Source) IsValid() bool {
 
 type (
 	Bot struct {
-		botAPI      *tgbotapi.BotAPI
 		settings    Settings
+		botAPI      *tgbotapi.BotAPI
 		httpClient  HTTPClient
 		mdConverter *md.Converter
 		randomInt   func(n int) int
@@ -70,6 +70,7 @@ type (
 
 	BotOptions struct {
 		Settings    Settings
+		BotAPI      *tgbotapi.BotAPI
 		HTTPClient  HTTPClient
 		MDConverter *md.Converter
 		RandomInt   func(n int) int
@@ -88,12 +89,28 @@ type (
 	}
 )
 
-func NewBot(botAPI *tgbotapi.BotAPI, options ...BotOptions) *Bot {
+func NewBot(options ...BotOptions) (*Bot, error) {
 	var opts BotOptions
 
 	if len(options) > 0 {
 		opts = options[0]
 	}
+
+	if opts.Settings == (Settings{}) {
+		opts.Settings = ParseSettings()
+	}
+
+	if opts.BotAPI == nil {
+		botAPI, err := tgbotapi.NewBotAPI(opts.Settings.Token)
+		if err != nil {
+			return nil, err
+		}
+
+		botAPI.Debug = opts.Settings.Debug
+		opts.BotAPI = botAPI
+	}
+
+	log.Printf("Authorized on account %s", opts.BotAPI.Self.UserName)
 
 	if opts.HTTPClient == nil {
 		opts.HTTPClient = http.DefaultClient
@@ -108,7 +125,7 @@ func NewBot(botAPI *tgbotapi.BotAPI, options ...BotOptions) *Bot {
 	}
 
 	return &Bot{
-		botAPI:      botAPI,
+		botAPI:      opts.BotAPI,
 		settings:    opts.Settings,
 		httpClient:  opts.HTTPClient,
 		mdConverter: opts.MDConverter,
@@ -116,7 +133,7 @@ func NewBot(botAPI *tgbotapi.BotAPI, options ...BotOptions) *Bot {
 		cache: Cache{
 			userSource: make(map[int]Source),
 		},
-	}
+	}, nil
 }
 
 func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {

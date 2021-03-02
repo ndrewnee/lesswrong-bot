@@ -85,7 +85,8 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	bot := NewBot(nil, BotOptions{HTTPClient: httpClient})
+	bot, err := NewBot(BotOptions{HTTPClient: httpClient})
+	require.NoError(t, err)
 
 	type args struct {
 		randomPost int

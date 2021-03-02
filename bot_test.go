@@ -14,14 +14,6 @@ import (
 )
 
 func TestBot_GetUpdatesChan(t *testing.T) {
-	settings := ParseSettings()
-	require.NotEmpty(t, settings.Token, "Env var TOKEN should be set")
-
-	botAPI, err := tgbotapi.NewBotAPI(settings.Token)
-	require.NoError(t, err)
-
-	botAPI.Debug = settings.Debug
-
 	type args struct {
 		settings Settings
 	}
@@ -48,7 +40,7 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 			args: args{
 				settings: Settings{
 					Webhook:     true,
-					WebhookHost: settings.WebhookHost,
+					WebhookHost: "https://lesswrong-bot.herokuapp.com",
 				},
 			},
 			want:    require.NotNil,
@@ -63,7 +55,10 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bot := NewBot(botAPI, BotOptions{Settings: tt.args.settings})
+			bot, err := NewBot()
+			require.NoError(t, err)
+
+			bot.settings = tt.args.settings
 
 			got, err := bot.GetUpdatesChan()
 			tt.wantErr(t, err)
@@ -81,15 +76,8 @@ func TestBot_MessageHandler(t *testing.T) {
 	userID, err := strconv.Atoi(os.Getenv("USER_ID"))
 	require.NoError(t, err, "Env var USER_ID should be set")
 
-	settings := ParseSettings()
-	require.NotEmpty(t, settings.Token, "Env var TOKEN should be set")
-
-	botAPI, err := tgbotapi.NewBotAPI(settings.Token)
+	bot, err := NewBot()
 	require.NoError(t, err)
-
-	botAPI.Debug = settings.Debug
-
-	bot := NewBot(botAPI)
 
 	type args struct {
 		update tgbotapi.Update
