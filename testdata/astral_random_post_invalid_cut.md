@@ -8,3 +8,5 @@ A fourth wave may hit in March, when the more contagious B117 strain from the UK
 
 
 Prediction: 75% chance that there will be a new wave peaking in March or April, with a peak at least half again as high as the preceding trough.
+
+[Coronavirus: Links, Discussion, Open Thread](https://astralcodexten.substack.com/p/coronavirus-links-discussion-open)

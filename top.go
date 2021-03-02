@@ -83,7 +83,7 @@ func (b *Bot) CommandTopLesswrongRu() (string, error) {
 	if len(b.cache.lesswrongRuPosts) == 0 {
 		postsCollector := colly.NewCollector()
 
-		postsCollector.OnHTML("ul > li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
+		postsCollector.OnHTML("li.leaf.menu-depth-3,li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
 			b.cache.lesswrongRuPosts = append(b.cache.lesswrongRuPosts, Post{
 				Title: e.Text,
 				URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),

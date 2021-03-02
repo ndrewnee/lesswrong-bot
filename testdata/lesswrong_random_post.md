@@ -13,3 +13,5 @@ Some questions under consideration:
 - To filter or not to filter?
 - Which filtering methods actually work?
 - What questions would you be asking?
+
+[Tap Water and Filtration](https://www.lesswrong.com/posts/tYqgzyFurJqdbkWcJ/tap-water-and-filtration)

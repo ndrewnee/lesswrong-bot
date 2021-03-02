@@ -73,7 +73,7 @@ func TestCommandTop(t *testing.T) {
 		{
 			name: "Should get top posts from https://lesswrong.ru when source is not set",
 			args: args{
-				randomPost: 0,
+				randomPost: 2,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_ru_top_posts.md")
@@ -107,7 +107,7 @@ func TestCommandTop(t *testing.T) {
 		{
 			name: "Should get top posts from https://lesswrong.ru",
 			args: args{
-				randomPost: 0,
+				randomPost: 2,
 				source:     SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
