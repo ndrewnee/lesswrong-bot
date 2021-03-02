@@ -106,15 +106,6 @@ func TestBot_MessageHandler(t *testing.T) {
 			wantErr: require.NoError,
 		},
 		{
-			name: "Should handle non-command message",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{},
-				},
-			},
-			wantErr: require.NoError,
-		},
-		{
 			name: "Should handle command with nil chat",
 			args: args{
 				update: tgbotapi.Update{
@@ -127,6 +118,22 @@ func TestBot_MessageHandler(t *testing.T) {
 						},
 					},
 				},
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should handle non-command message",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.Equal(t, "I don't know that command", got.Text)
 			},
 			wantErr: require.NoError,
 		},

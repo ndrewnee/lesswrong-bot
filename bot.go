@@ -72,7 +72,7 @@ type (
 
 	Cache struct {
 		userSource       map[int]Source
-		astralPosts      []AstralPost
+		astralPosts      []Post
 		slatePosts       []Post
 		lesswrongRuPosts []Post
 	}
@@ -166,10 +166,6 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 
 	if update.Message.From != nil {
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-	}
-
-	if !update.Message.IsCommand() {
-		return tgbotapi.Message{}, nil
 	}
 
 	if update.Message.Chat == nil {

@@ -25,11 +25,21 @@ type (
 	}
 
 	Post struct {
-		Title    string
-		URL      string
-		BodyHTML string
+		Title string
+		URL   string
+		HTML  string
+		Slug  string
 	}
 )
+
+func (ap AstralPost) AsPost() Post {
+	return Post{
+		Title: ap.Title,
+		URL:   ap.CanonicalURL,
+		HTML:  ap.BodyHTML,
+		Slug:  ap.Slug,
+	}
+}
 
 func (b *Bot) CommandRandom(source Source) (string, error) {
 	switch source {
@@ -71,21 +81,14 @@ func (b *Bot) CommandRandomSlate() (string, error) {
 	postCollector := colly.NewCollector()
 
 	postCollector.OnHTML("div .entry-content", func(e *colly.HTMLElement) {
-		post.BodyHTML, _ = e.DOM.Html()
+		post.HTML, _ = e.DOM.Html()
 	})
 
 	if err := postCollector.Visit(post.URL); err != nil {
 		return "", fmt.Errorf("get slatestarcodex random post failed: %s", err)
 	}
 
-	markdown, err := b.mdConverter.ConvertString(post.BodyHTML)
-	if err != nil {
-		return "", fmt.Errorf("convert slatestarcodex html to markdown failed: %s", err)
-	}
-
-	markdown = cutMarkdown(markdown)
-
-	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.URL, markdown), nil
+	return b.postToMarkdown(post)
 }
 
 func (b *Bot) CommandRandomAstral() (string, error) {
@@ -115,9 +118,9 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 				break
 			}
 
-			for _, post := range newPosts {
-				if post.Audience != "only_paid" {
-					b.cache.astralPosts = append(b.cache.astralPosts, post)
+			for _, astralPost := range newPosts {
+				if astralPost.Audience != "only_paid" {
+					b.cache.astralPosts = append(b.cache.astralPosts, astralPost.AsPost())
 				}
 			}
 		}
@@ -135,18 +138,13 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 		return "", fmt.Errorf("get astralcodexten random post failed: %s", err)
 	}
 
-	if err := json.NewDecoder(postResponse.Body).Decode(&post); err != nil {
+	var astralPost AstralPost
+
+	if err := json.NewDecoder(postResponse.Body).Decode(&astralPost); err != nil {
 		return "", fmt.Errorf("unmarshal astralcodexten post failed: %s", err)
 	}
 
-	markdown, err := b.mdConverter.ConvertString(post.BodyHTML)
-	if err != nil {
-		return "", fmt.Errorf("convert astralcodexten html to markdown failed: %s", err)
-	}
-
-	markdown = cutMarkdown(markdown)
-
-	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.CanonicalURL, markdown), nil
+	return b.postToMarkdown(astralPost.AsPost())
 }
 
 func (b *Bot) CommandRandomLesswrongRu() (string, error) {
@@ -176,24 +174,22 @@ func (b *Bot) CommandRandomLesswrongRu() (string, error) {
 	randomPostCollector := colly.NewCollector()
 
 	randomPostCollector.OnHTML("div.tex2jax", func(e *colly.HTMLElement) {
-		post.BodyHTML, _ = e.DOM.Html()
+		post.HTML, _ = e.DOM.Html()
 	})
 
 	if err := randomPostCollector.Visit(post.URL); err != nil {
 		return "", fmt.Errorf("get lesswrong.ru random post failed: %s", err)
 	}
 
-	markdown, err := b.mdConverter.ConvertString(post.BodyHTML)
+	return b.postToMarkdown(post)
+}
+
+func (b *Bot) postToMarkdown(post Post) (string, error) {
+	markdown, err := b.mdConverter.ConvertString(post.HTML)
 	if err != nil {
 		return "", fmt.Errorf("convert lesswrong.ru html to markdown failed: %s", err)
 	}
 
-	markdown = cutMarkdown(markdown)
-
-	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.URL, markdown), nil
-}
-
-func cutMarkdown(markdown string) string {
 	// Cut post for preview mode.
 	if len(markdown) > PostMaxLength {
 		// Convert to runes to properly split between unicode symbols.
@@ -213,5 +209,5 @@ func cutMarkdown(markdown string) string {
 	markdown = strings.ReplaceAll(markdown, "```", "")
 	markdown = strings.ReplaceAll(markdown, "![]", "[Image]")
 
-	return markdown
+	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.URL, markdown), nil
 }
