@@ -7,3 +7,5 @@ This is the weekly visible open thread. Post about whatever you want. Also:
 **2:** ACX’s unofficial fan bulletin board, Data Secrets Lox, announced the results of their recent Best Post competition. First place was Evan on [Tax prep volunteering as a window into society](https://www.datasecretslox.com/index.php/topic,2346.msg66205.html#msg66205). Second was [Bean on whaling and fishing vessels](https://www.datasecretslox.com/index.php/topic,2409.msg68515.html#msg68515). Third was [David W on chemical plant design](https://www.datasecretslox.com/index.php/topic,2496.msg71580.html#msg71580). Check them out!
 
 3: Somebody sent me some Javascript that could fix problems with the comments, and then I lost it. If that’s you, you can send it again and I’ll mention it on the next Open Thread, sorry.
+
+[Open Thread 160](https://astralcodexten.substack.com/p/open-thread-160)

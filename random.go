@@ -192,7 +192,7 @@ func (b *Bot) CommandRandomLesswrongRu() (string, error) {
 	if len(b.cache.lesswrongRuPosts) == 0 {
 		postsCollector := colly.NewCollector()
 
-		postsCollector.OnHTML("ul > li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
+		postsCollector.OnHTML("li.leaf.menu-depth-3,li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
 			b.cache.lesswrongRuPosts = append(b.cache.lesswrongRuPosts, Post{
 				Title: e.Text,
 				URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),
@@ -271,21 +271,21 @@ func (b *Bot) postToMarkdown(post Post) (string, error) {
 	// Cut post for preview mode.
 	if len(markdown) > PostMaxLength {
 		// Convert to runes to properly split between unicode symbols.
-		r := []rune(markdown)
-
+		runes := []rune(markdown)
+		markdown = string(runes[:PostMaxLength])
 		// Truncate after next line end to not break markdown text.
-		n := strings.IndexByte(string(r[PostMaxLength:]), '\n')
-		if n != -1 {
-			markdown = string(r[:PostMaxLength+n])
-		} else {
-			markdown = string(r[:PostMaxLength])
+		rest := string(runes[PostMaxLength:])
+		if n := strings.IndexByte(rest, '\n'); n != -1 {
+			markdown += rest[:n]
 		}
+
+		// Stupid hotfixes for some invalid markdowns.
+		markdown = strings.ReplaceAll(markdown, "* * *", "")
+		markdown = strings.ReplaceAll(markdown, "```", "")
+		markdown = strings.ReplaceAll(markdown, "![]", "[Image]")
 	}
 
-	// Stupid hotfixes for some invalid markdowns.
-	markdown = strings.ReplaceAll(markdown, "* * *", "")
-	markdown = strings.ReplaceAll(markdown, "```", "")
-	markdown = strings.ReplaceAll(markdown, "![]", "[Image]")
+	link := fmt.Sprintf("[%s](%s)", post.Title, post.URL)
 
-	return fmt.Sprintf("📝 [%s](%s)\n\n%s", post.Title, post.URL, markdown), nil
+	return fmt.Sprintf("📝 %s\n\n%s\n\n%s", link, markdown, link), nil
 }
