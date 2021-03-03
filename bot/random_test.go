@@ -63,7 +63,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	query := `{
+	query1 := `{
 		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: 0}}) {
 			results {
 				title
@@ -73,13 +73,38 @@ func TestCommandRandom(t *testing.T) {
 		}
 	}`
 
-	request, err := json.Marshal(map[string]string{"query": query})
+	request1, err := json.Marshal(map[string]string{"query": query1})
 	require.NoError(t, err)
 
-	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
+	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request1)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.json")
+				require.NoError(t, err)
+
+				return ioutil.NopCloser(bytes.NewBuffer(file))
+			}(),
+		},
+		nil,
+	)
+
+	query2 := `{
+		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: 1}}) {
+			results {
+				title
+				pageUrl
+				htmlBody
+			}
+		}
+	}`
+
+	request2, err := json.Marshal(map[string]string{"query": query2})
+	require.NoError(t, err)
+
+	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request2)).Return(
+		&http.Response{
+			Body: func() io.ReadCloser {
+				file, err := ioutil.ReadFile("testdata/lesswrong_random_post_invalid_domain.json")
 				require.NoError(t, err)
 
 				return ioutil.NopCloser(bytes.NewBuffer(file))
@@ -212,6 +237,19 @@ func TestCommandRandom(t *testing.T) {
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.md")
+				require.NoError(t, err)
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should get random post from https://lesswrong.com (invalid domain)",
+			args: args{
+				randomPost: 1,
+				source:     models.SourceLesswrong,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/lesswrong_random_post_invalid_domain.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
