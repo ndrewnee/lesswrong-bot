@@ -66,7 +66,7 @@ func (s Source) IsValid() bool {
 
 type (
 	Bot struct {
-		settings    Settings
+		config      Config
 		botAPI      *tgbotapi.BotAPI
 		httpClient  HTTPClient
 		storage     Storage
@@ -76,7 +76,7 @@ type (
 	}
 
 	Options struct {
-		Settings    Settings
+		Config      Config
 		BotAPI      *tgbotapi.BotAPI
 		HTTPClient  HTTPClient
 		Storage     Storage
@@ -108,17 +108,17 @@ func NewBot(options ...Options) (*Bot, error) {
 		opts = options[0]
 	}
 
-	if opts.Settings == (Settings{}) {
-		opts.Settings = ParseSettings()
+	if opts.Config == (Config{}) {
+		opts.Config = ParseConfig()
 	}
 
 	if opts.BotAPI == nil {
-		botAPI, err := tgbotapi.NewBotAPI(opts.Settings.Token)
+		botAPI, err := tgbotapi.NewBotAPI(opts.Config.Token)
 		if err != nil {
 			return nil, err
 		}
 
-		botAPI.Debug = opts.Settings.Debug
+		botAPI.Debug = opts.Config.Debug
 		opts.BotAPI = botAPI
 	}
 
@@ -142,7 +142,7 @@ func NewBot(options ...Options) (*Bot, error) {
 
 	return &Bot{
 		botAPI:      opts.BotAPI,
-		settings:    opts.Settings,
+		config:      opts.Config,
 		httpClient:  opts.HTTPClient,
 		storage:     opts.Storage,
 		mdConverter: opts.MDConverter,
@@ -151,8 +151,8 @@ func NewBot(options ...Options) (*Bot, error) {
 }
 
 func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
-	if b.settings.Webhook {
-		webhook := tgbotapi.NewWebhook(b.settings.WebhookHost + "/" + b.botAPI.Token)
+	if b.config.Webhook {
+		webhook := tgbotapi.NewWebhook(b.config.WebhookHost + "/" + b.botAPI.Token)
 
 		if _, err := b.botAPI.SetWebhook(webhook); err != nil {
 			return nil, fmt.Errorf("set webhook failed: %s", err)
@@ -170,7 +170,7 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 		updates := b.botAPI.ListenForWebhook("/" + b.botAPI.Token)
 
 		go func() {
-			if err := http.ListenAndServe(b.settings.Address, nil); err != nil {
+			if err := http.ListenAndServe(b.config.Address, nil); err != nil {
 				log.Println("[ERROR] Listen and serve failed: ", err)
 			}
 		}()

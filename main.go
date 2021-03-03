@@ -13,20 +13,20 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	settings := ParseSettings()
+	config := ParseConfig()
 
 	var (
 		storage Storage
 		err     error
 	)
 
-	storage, err = redis.NewStorage(settings.RedisURL)
+	storage, err = redis.NewStorage(config.RedisURL)
 	if err != nil {
 		log.Printf("Connect to redis failed, using memory storage instead: %s", err)
 		storage = memory.NewStorage()
 	}
 
-	bot, err := NewBot(Options{Settings: settings, Storage: storage})
+	bot, err := NewBot(Options{Config: config, Storage: storage})
 	if err != nil {
 		log.Fatal("Init telegram bot failed: ", err)
 	}
@@ -37,7 +37,7 @@ func main() {
 	}
 
 	for update := range updates {
-		ctx, cancel := context.WithTimeout(context.Background(), settings.Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
 
 		if _, err := bot.MessageHandler(ctx, update); err != nil {
 			log.Println("[ERROR] Message not sent: ", err)

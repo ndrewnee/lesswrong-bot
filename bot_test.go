@@ -16,7 +16,7 @@ import (
 
 func TestBot_GetUpdatesChan(t *testing.T) {
 	type args struct {
-		settings Settings
+		config Config
 	}
 
 	tests := []struct {
@@ -28,7 +28,7 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 		{
 			name: "Shouldn't get webhook chan because webhook host is empty",
 			args: args{
-				settings: Settings{
+				config: Config{
 					Webhook:     true,
 					WebhookHost: "",
 				},
@@ -39,7 +39,7 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 		{
 			name: "Should get webhook chan",
 			args: args{
-				settings: Settings{
+				config: Config{
 					Webhook:     true,
 					WebhookHost: "https://lesswrong-bot.herokuapp.com",
 				},
@@ -59,7 +59,7 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 			bot, err := NewBot()
 			require.NoError(t, err)
 
-			bot.settings = tt.args.settings
+			bot.config = tt.args.config
 
 			got, err := bot.GetUpdatesChan()
 			tt.wantErr(t, err)

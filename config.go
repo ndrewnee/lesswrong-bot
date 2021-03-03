@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Settings struct {
+type Config struct {
 	RedisURL    string
 	Address     string
 	Token       string
@@ -16,7 +16,7 @@ type Settings struct {
 	Timeout     time.Duration
 }
 
-func ParseSettings() Settings {
+func ParseConfig() Config {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		port = 9999
@@ -37,7 +37,7 @@ func ParseSettings() Settings {
 		redisURL = "redis://localhost:6379/1"
 	}
 
-	return Settings{
+	return Config{
 		RedisURL:    redisURL,
 		Address:     ":" + strconv.Itoa(port),
 		WebhookHost: webhookHost,
