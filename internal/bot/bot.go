@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"context"
@@ -66,7 +66,7 @@ type (
 	}
 )
 
-func NewBot(options ...Options) (*Bot, error) {
+func New(options ...Options) (*Bot, error) {
 	var opts Options
 
 	if len(options) > 0 {

@@ -1,6 +1,6 @@
 // +build integration
 
-package main
+package bot
 
 import (
 	"context"
@@ -58,12 +58,12 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bot, err := NewBot()
+			tgbot, err := New()
 			require.NoError(t, err)
 
-			bot.config = tt.args.config
+			tgbot.config = tt.args.config
 
-			got, err := bot.GetUpdatesChan()
+			got, err := tgbot.GetUpdatesChan()
 			tt.wantErr(t, err)
 			tt.want(t, got)
 			// To avoid error "Too Many Requests: retry after 1"
@@ -79,7 +79,7 @@ func TestBot_MessageHandler(t *testing.T) {
 	userID, err := strconv.Atoi(os.Getenv("USER_ID"))
 	require.NoError(t, err, "Env var USER_ID should be set")
 
-	bot, err := NewBot()
+	tgbot, err := New()
 	require.NoError(t, err)
 
 	type args struct {
@@ -541,7 +541,7 @@ Commands:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bot.MessageHandler(context.TODO(), tt.args.update)
+			got, err := tgbot.MessageHandler(context.TODO(), tt.args.update)
 			tt.wantErr(t, err)
 
 			if tt.check != nil {

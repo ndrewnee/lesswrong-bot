@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"bytes"
@@ -9,9 +9,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ndrewnee/lesswrong-bot/internal/models"
-	"github.com/ndrewnee/lesswrong-bot/mocks"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ndrewnee/lesswrong-bot/internal/bot/mocks"
+	"github.com/ndrewnee/lesswrong-bot/internal/models"
 )
 
 func TestCommandRandom(t *testing.T) {
@@ -87,7 +88,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	bot, err := NewBot(Options{HTTPClient: httpClient})
+	tgbot, err := New(Options{HTTPClient: httpClient})
 	require.NoError(t, err)
 
 	type args struct {
@@ -220,11 +221,11 @@ func TestCommandRandom(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bot.randomInt = func(n int) int {
+			tgbot.randomInt = func(n int) int {
 				return tt.args.randomPost
 			}
 
-			got, err := bot.CommandRandom(context.TODO(), tt.args.source)
+			got, err := tgbot.CommandRandom(context.TODO(), tt.args.source)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

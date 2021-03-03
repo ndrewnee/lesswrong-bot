@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/ndrewnee/lesswrong-bot/internal/bot"
 	"github.com/ndrewnee/lesswrong-bot/internal/config"
 	"github.com/ndrewnee/lesswrong-bot/internal/storage/memory"
 	"github.com/ndrewnee/lesswrong-bot/internal/storage/redis"
@@ -17,7 +18,7 @@ func main() {
 	config := config.ParseConfig()
 
 	var (
-		storage Storage
+		storage bot.Storage
 		err     error
 	)
 
@@ -27,12 +28,12 @@ func main() {
 		storage = memory.NewStorage()
 	}
 
-	bot, err := NewBot(Options{Config: config, Storage: storage})
+	tgbot, err := bot.New(bot.Options{Config: config, Storage: storage})
 	if err != nil {
 		log.Fatal("Init telegram bot failed: ", err)
 	}
 
-	updates, err := bot.GetUpdatesChan()
+	updates, err := tgbot.GetUpdatesChan()
 	if err != nil {
 		log.Fatal("Get updates chan failed: ", err)
 	}
@@ -40,7 +41,7 @@ func main() {
 	for update := range updates {
 		ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
 
-		if _, err := bot.MessageHandler(ctx, update); err != nil {
+		if _, err := tgbot.MessageHandler(ctx, update); err != nil {
 			log.Println("[ERROR] Message not sent: ", err)
 		}
 

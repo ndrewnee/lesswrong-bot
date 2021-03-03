@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gocolly/colly"
+
 	"github.com/ndrewnee/lesswrong-bot/internal/models"
 )
 
