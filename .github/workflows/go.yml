@@ -11,6 +11,22 @@ jobs:
     name: Test
     runs-on: ubuntu-20.04
 
+    # Service containers to run with `test`
+    services:
+      # Label used to access the service container
+      redis:
+        # Docker Hub image
+        image: redis
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps port 6379 on service container to the host
+          - 6379:6379
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -24,8 +40,9 @@ jobs:
         run: make test_integration
         env:
           TOKEN: ${{ secrets.TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-          USER_ID: ${{ secrets.USER_ID }}
+          TEST_CHAT_ID: ${{ secrets.TEST_CHAT_ID }}
+          TEST_USER_ID: ${{ secrets.TEST_USER_ID }}
+          TEST_USE_REDIS: ${{ secrets.TEST_USE_REDIS }}
 
   golangci-lint:
     name: Lint

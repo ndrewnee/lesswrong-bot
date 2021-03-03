@@ -1,7 +1,8 @@
-package main
+package bot
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,14 +11,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ndrewnee/lesswrong-bot/mocks"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ndrewnee/lesswrong-bot/bot/mocks"
+	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
 func TestCommandTop(t *testing.T) {
 	httpClient := &mocks.HTTPClient{}
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_top_posts.json")
@@ -44,7 +47,7 @@ func TestCommandTop(t *testing.T) {
 	request, err := json.Marshal(map[string]string{"query": query})
 	require.NoError(t, err)
 
-	httpClient.On("Post", "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
+	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/lesswrong_top_posts.json")
@@ -56,12 +59,12 @@ func TestCommandTop(t *testing.T) {
 		nil,
 	)
 
-	bot, err := NewBot(Options{HTTPClient: httpClient})
+	tgbot, err := New(Options{HTTPClient: httpClient})
 	require.NoError(t, err)
 
 	type args struct {
 		randomPost int
-		source     Source
+		source     models.Source
 	}
 
 	tests := []struct {
@@ -85,7 +88,7 @@ func TestCommandTop(t *testing.T) {
 		{
 			name: "Should get top posts from https://slatestarcodex.com",
 			args: args{
-				source: SourceSlate,
+				source: models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				require.Equal(t, MessageTopSlate, got)
@@ -95,7 +98,7 @@ func TestCommandTop(t *testing.T) {
 		{
 			name: "Should get top posts from https://astralcodexten.substack.com",
 			args: args{
-				source: SourceAstral,
+				source: models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_top_posts.md")
@@ -108,7 +111,7 @@ func TestCommandTop(t *testing.T) {
 			name: "Should get top posts from https://lesswrong.ru",
 			args: args{
 				randomPost: 2,
-				source:     SourceLesswrongRu,
+				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_ru_top_posts.md")
@@ -120,7 +123,7 @@ func TestCommandTop(t *testing.T) {
 		{
 			name: "Should get top posts from https://lesswrong.com",
 			args: args{
-				source: SourceLesswrong,
+				source: models.SourceLesswrong,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_top_posts.md")
@@ -133,11 +136,11 @@ func TestCommandTop(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bot.randomInt = func(n int) int {
+			tgbot.randomInt = func(n int) int {
 				return tt.args.randomPost
 			}
 
-			got, err := bot.CommandTop(tt.args.source)
+			got, err := tgbot.CommandTop(context.TODO(), tt.args.source)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

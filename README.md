@@ -30,10 +30,13 @@ Commands:
 
 Register new bot at https://t.me/BotFather or use previously created one.
 
-Take bot access token and export it in terminal:
+Take bot access token.
+
+Before running copy example file and replace env vars with your credentials
 
 ```sh
-export TOKEN=<token>
+cp .env.dev.example.sh .env.dev.sh
+source .env.dev.sh
 ```
 
 Run application locally:
@@ -42,11 +45,13 @@ Run application locally:
 make run
 ```
 
+Redis is used as cache. If redis isn't available fallbacks to memory cache.
+
 ## 👷 Build
 
 Build binary
 
-```bash
+```sh
 make build
 ```
 
@@ -54,13 +59,22 @@ make build
 
 Run unit tests
 
-```bash
+```sh
 make test
 ```
 
-Run integration tests
+To run integration tests you need working redis server.
 
-```bash
+Before running tests copy example env file and replace env vars with your credentials
+
+```sh
+cp .env.test.example.sh .env.test.sh
+source .env.test.sh
+```
+
+and then run integration tests
+
+```sh
 make test_integration
 ```
 
@@ -68,7 +82,7 @@ make test_integration
 
 Run linters
 
-```bash
+```sh
 make lint
 ```
 
@@ -101,8 +115,11 @@ make deploy
 
 | Env var      | Type    | Description                   | Default                             |
 | ------------ | ------- | ----------------------------- | ----------------------------------- |
+| REDIS_URL    | String  | Redis connection string       | redis://localhost:6379/1            |
 | TOKEN        | String  | Telegram bot access token     |                                     |
 | DEBUG        | Boolean | Enable debug mode             | false                               |
 | WEBHOOK      | Boolean | Enable webhook mode           | false                               |
 | PORT         | String  | Port for webhook              | 9999                                |
 | WEBHOOK_HOST | String  | Webhook host for telegram bot | https://lesswrong-bot.herokuapp.com |
+| TIMEOUT      | Integer | Request timeout in seconds    | 15                                  |
+| CACHE_EXPIRE | Integer | Posts cache expire in hours   | 24                                  |

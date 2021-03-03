@@ -1,14 +1,20 @@
-package main
+package bot
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"net/http"
+	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/models"
+	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 )
 
 const (
@@ -30,90 +36,65 @@ Commands:
 /help - Help`
 )
 
-const (
-	SourceLesswrongRu Source = "1"
-	SourceSlate       Source = "2"
-	SourceAstral      Source = "3"
-	SourceLesswrong   Source = "4"
-)
-
-type Source string
-
-func (s Source) String() string {
-	switch s {
-	case SourceLesswrongRu:
-		return "https://lesswrong.ru"
-	case SourceSlate:
-		return "https://slatestarcodex.com"
-	case SourceAstral:
-		return "https://astralcodexten.substack.com"
-	case SourceLesswrong:
-		return "https://lesswrong.com"
-	default:
-		return ""
-	}
-}
-
-func (s Source) IsValid() bool {
-	return s.String() != ""
-}
-
 type (
 	Bot struct {
-		settings    Settings
+		config      config.Config
 		botAPI      *tgbotapi.BotAPI
 		httpClient  HTTPClient
+		storage     Storage
 		mdConverter *md.Converter
 		randomInt   func(n int) int
-		cache       Cache
 	}
 
 	Options struct {
-		Settings    Settings
+		Config      config.Config
 		BotAPI      *tgbotapi.BotAPI
 		HTTPClient  HTTPClient
+		Storage     Storage
 		MDConverter *md.Converter
 		RandomInt   func(n int) int
 	}
 
 	HTTPClient interface {
-		Get(uri string) (*http.Response, error)
-		Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
+		Get(ctx context.Context, uri string) (*http.Response, error)
+		Post(ctx context.Context, url, contentType string, body io.Reader) (*http.Response, error)
 	}
 
-	Cache struct {
-		userSource       map[int]Source
-		astralPosts      []Post
-		slatePosts       []Post
-		lesswrongRuPosts []Post
+	Storage interface {
+		Get(ctx context.Context, key string) (string, error)
+		Set(ctx context.Context, key, value string, expire time.Duration) error
 	}
 )
 
-func NewBot(options ...Options) (*Bot, error) {
+func New(options ...Options) (*Bot, error) {
 	var opts Options
 
 	if len(options) > 0 {
 		opts = options[0]
 	}
 
-	if opts.Settings == (Settings{}) {
-		opts.Settings = ParseSettings()
+	if opts.Config == (config.Config{}) {
+		opts.Config = config.ParseConfig()
 	}
 
 	if opts.BotAPI == nil {
-		botAPI, err := tgbotapi.NewBotAPI(opts.Settings.Token)
+		botAPI, err := tgbotapi.NewBotAPI(opts.Config.Token)
 		if err != nil {
 			return nil, err
 		}
 
-		botAPI.Debug = opts.Settings.Debug
+		botAPI.Debug = opts.Config.Debug
 		opts.BotAPI = botAPI
 	}
 
 	log.Printf("Authorized on account %s", opts.BotAPI.Self.UserName)
 
 	if opts.HTTPClient == nil {
-		opts.HTTPClient = http.DefaultClient
+		opts.HTTPClient = NewHTTPClient()
+	}
+
+	if opts.Storage == nil {
+		opts.Storage = memory.NewStorage()
 	}
 
 	if opts.MDConverter == nil {
@@ -126,19 +107,17 @@ func NewBot(options ...Options) (*Bot, error) {
 
 	return &Bot{
 		botAPI:      opts.BotAPI,
-		settings:    opts.Settings,
+		config:      opts.Config,
 		httpClient:  opts.HTTPClient,
+		storage:     opts.Storage,
 		mdConverter: opts.MDConverter,
 		randomInt:   opts.RandomInt,
-		cache: Cache{
-			userSource: make(map[int]Source),
-		},
 	}, nil
 }
 
 func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
-	if b.settings.Webhook {
-		webhook := tgbotapi.NewWebhook(b.settings.WebhookHost + "/" + b.botAPI.Token)
+	if b.config.Webhook {
+		webhook := tgbotapi.NewWebhook(b.config.WebhookHost + "/" + b.botAPI.Token)
 
 		if _, err := b.botAPI.SetWebhook(webhook); err != nil {
 			return nil, fmt.Errorf("set webhook failed: %s", err)
@@ -156,7 +135,7 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 		updates := b.botAPI.ListenForWebhook("/" + b.botAPI.Token)
 
 		go func() {
-			if err := http.ListenAndServe(b.settings.Address, nil); err != nil {
+			if err := http.ListenAndServe(b.config.Address, nil); err != nil {
 				log.Println("[ERROR] Listen and serve failed: ", err)
 			}
 		}()
@@ -184,7 +163,7 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 	return updates, nil
 }
 
-func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
+func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, error) {
 	var err error
 
 	if update.Message == nil {
@@ -207,26 +186,44 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = b.CommandTop(b.cache.userSource[update.Message.From.ID])
+		key := fmt.Sprintf("source:%d", update.Message.From.ID)
+
+		source, err := b.storage.Get(ctx, key)
+		if err != nil {
+			log.Printf("[ERROR] Get source for user failed: %s", err)
+		}
+
+		msg.Text, err = b.CommandTop(ctx, models.Source(source))
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		msg.Text, err = b.CommandRandom(b.cache.userSource[update.Message.From.ID])
+		key := fmt.Sprintf("source:%d", update.Message.From.ID)
+
+		source, err := b.storage.Get(ctx, key)
+		if err != nil {
+			log.Printf("[ERROR] Get source for user failed: %s", err)
+		}
+
+		msg.Text, err = b.CommandRandom(ctx, models.Source(source))
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
 			msg.Text = "Random post not found"
 		}
 	case "source":
-		source := Source(update.Message.CommandArguments())
+		source := models.Source(update.Message.CommandArguments())
 		if !source.IsValid() {
-			source = SourceLesswrongRu
+			source = models.SourceLesswrongRu
 		}
 
-		b.cache.userSource[update.Message.From.ID] = source
-
 		msg.Text = "Changed source to " + source.String()
+		key := fmt.Sprintf("source:%d", update.Message.From.ID)
+
+		if err := b.storage.Set(ctx, key, source.Value(), 0); err != nil {
+			log.Printf("[ERROR] Set source for user failed: %s", err)
+			msg.Text = fmt.Sprintf("Change source to %s failed", source.String())
+		}
 	default:
 		msg.Text = "I don't know that command"
 	}

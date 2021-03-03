@@ -1,21 +1,24 @@
-package main
+package bot
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
-	"github.com/ndrewnee/lesswrong-bot/mocks"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ndrewnee/lesswrong-bot/bot/mocks"
+	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
 func TestCommandRandom(t *testing.T) {
 	httpClient := &mocks.HTTPClient{}
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=0").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=0").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_new_posts.json")
@@ -27,7 +30,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=12").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=12").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				return ioutil.NopCloser(bytes.NewBufferString("[]"))
@@ -36,7 +39,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/posts/open-thread-160").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/open-thread-160").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_random_post.json")
@@ -48,7 +51,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/posts/coronavirus-links-discussion-open").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/coronavirus-links-discussion-open").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.json")
@@ -73,7 +76,7 @@ func TestCommandRandom(t *testing.T) {
 	request, err := json.Marshal(map[string]string{"query": query})
 	require.NoError(t, err)
 
-	httpClient.On("Post", "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
+	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.json")
@@ -85,12 +88,12 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	bot, err := NewBot(Options{HTTPClient: httpClient})
+	tgbot, err := New(Options{HTTPClient: httpClient})
 	require.NoError(t, err)
 
 	type args struct {
 		randomPost int
-		source     Source
+		source     models.Source
 	}
 
 	tests := []struct {
@@ -114,7 +117,7 @@ func TestCommandRandom(t *testing.T) {
 		{
 			name: "Should get random post from https://slatestarcodex.com",
 			args: args{
-				source: SourceSlate,
+				source: models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post.md")
@@ -127,7 +130,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://slatestarcodex.com (invalid markdown cut)",
 			args: args{
 				randomPost: 563,
-				source:     SourceSlate,
+				source:     models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post_invalid_cut.md")
@@ -140,7 +143,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://slatestarcodex.com (image fix)",
 			args: args{
 				randomPost: 191,
-				source:     SourceSlate,
+				source:     models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post_image_fix.md")
@@ -153,7 +156,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://astralcodexten.substack.com",
 			args: args{
 				randomPost: 4,
-				source:     SourceAstral,
+				source:     models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_random_post.md")
@@ -166,7 +169,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://astralcodexten.substack.com (invalid markdown cut)",
 			args: args{
 				randomPost: 12,
-				source:     SourceAstral,
+				source:     models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.md")
@@ -179,7 +182,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://lesswrong.ru",
 			args: args{
 				randomPost: 2,
-				source:     SourceLesswrongRu,
+				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post.md")
@@ -192,7 +195,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://lesswrong.ru (invalid cut)",
 			args: args{
 				randomPost: 279,
-				source:     SourceLesswrongRu,
+				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post_invalid_cut.md")
@@ -205,7 +208,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://lesswrong.com",
 			args: args{
 				randomPost: 0,
-				source:     SourceLesswrong,
+				source:     models.SourceLesswrong,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.md")
@@ -218,11 +221,11 @@ func TestCommandRandom(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bot.randomInt = func(n int) int {
+			tgbot.randomInt = func(n int) int {
 				return tt.args.randomPost
 			}
 
-			got, err := bot.CommandRandom(tt.args.source)
+			got, err := tgbot.CommandRandom(context.TODO(), tt.args.source)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})
