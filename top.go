@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -32,23 +33,23 @@ const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 10. [Who By Very Slow Decay](https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/)`
 
-func (b *Bot) CommandTop(source Source) (string, error) {
+func (b *Bot) CommandTop(ctx context.Context, source Source) (string, error) {
 	switch source {
 	case SourceLesswrongRu:
-		return b.CommandTopLesswrongRu()
+		return b.CommandTopLesswrongRu(ctx)
 	case SourceSlate:
 		return MessageTopSlate, nil
 	case SourceAstral:
-		return b.CommandTopAstral()
+		return b.CommandTopAstral(ctx)
 	case SourceLesswrong:
-		return b.CommandTopLesswrong()
+		return b.CommandTopLesswrong(ctx)
 	default:
-		return b.CommandTopLesswrongRu()
+		return b.CommandTopLesswrongRu(ctx)
 	}
 }
 
-func (b *Bot) CommandTopAstral() (string, error) {
-	httpResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
+func (b *Bot) CommandTopAstral(ctx context.Context) (string, error) {
+	httpResponse, err := b.httpClient.Get(ctx, "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
 	if err != nil {
 		return "", fmt.Errorf("get astralcodexten posts failed: %s", err)
 	}
@@ -78,7 +79,7 @@ func (b *Bot) CommandTopAstral() (string, error) {
 	return text.String(), nil
 }
 
-func (b *Bot) CommandTopLesswrongRu() (string, error) {
+func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
 	// Load posts for the first time.
 	if len(b.cache.lesswrongRuPosts) == 0 {
 		postsCollector := colly.NewCollector()
@@ -112,7 +113,7 @@ func (b *Bot) CommandTopLesswrongRu() (string, error) {
 	return text.String(), nil
 }
 
-func (b *Bot) CommandTopLesswrong() (string, error) {
+func (b *Bot) CommandTopLesswrong(ctx context.Context) (string, error) {
 	query := fmt.Sprintf(`{
 		posts(input: {terms: {view: "top", limit: 12, meta: null, after: "%s"}}) {
 			results {
@@ -125,12 +126,12 @@ func (b *Bot) CommandTopLesswrong() (string, error) {
 		}
 	}`, time.Now().AddDate(0, 0, -7).Format("2006-01-02"))
 
-	request, err := json.Marshal(map[string]string{"query": query})
+	body, err := json.Marshal(map[string]string{"query": query})
 	if err != nil {
 		return "", fmt.Errorf("marshal request for lesswrong.com top posts failed: %s", err)
 	}
 
-	httpResponse, err := b.httpClient.Post("https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request))
+	httpResponse, err := b.httpClient.Post(ctx, "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return "", fmt.Errorf("get lesswrong.com top posts failed: %s", err)
 	}

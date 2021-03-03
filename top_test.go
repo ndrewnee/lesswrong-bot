@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,7 +18,7 @@ import (
 func TestCommandTop(t *testing.T) {
 	httpClient := &mocks.HTTPClient{}
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_top_posts.json")
@@ -44,7 +45,7 @@ func TestCommandTop(t *testing.T) {
 	request, err := json.Marshal(map[string]string{"query": query})
 	require.NoError(t, err)
 
-	httpClient.On("Post", "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
+	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/lesswrong_top_posts.json")
@@ -137,7 +138,7 @@ func TestCommandTop(t *testing.T) {
 				return tt.args.randomPost
 			}
 
-			got, err := bot.CommandTop(tt.args.source)
+			got, err := bot.CommandTop(context.TODO(), tt.args.source)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

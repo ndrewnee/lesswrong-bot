@@ -85,8 +85,8 @@ type (
 	}
 
 	HTTPClient interface {
-		Get(uri string) (*http.Response, error)
-		Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
+		Get(ctx context.Context, uri string) (*http.Response, error)
+		Post(ctx context.Context, url, contentType string, body io.Reader) (*http.Response, error)
 	}
 
 	Cache struct {
@@ -125,7 +125,7 @@ func NewBot(options ...Options) (*Bot, error) {
 	log.Printf("Authorized on account %s", opts.BotAPI.Self.UserName)
 
 	if opts.HTTPClient == nil {
-		opts.HTTPClient = http.DefaultClient
+		opts.HTTPClient = NewHTTPClient()
 	}
 
 	if opts.Storage == nil {
@@ -228,7 +228,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 			log.Printf("[ERROR] Get source for user failed: %s", err)
 		}
 
-		msg.Text, err = b.CommandTop(Source(source))
+		msg.Text, err = b.CommandTop(ctx, Source(source))
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
@@ -241,7 +241,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 			log.Printf("[ERROR] Get source for user failed: %s", err)
 		}
 
-		msg.Text, err = b.CommandRandom(Source(source))
+		msg.Text, err = b.CommandRandom(ctx, Source(source))
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
 			msg.Text = "Random post not found"

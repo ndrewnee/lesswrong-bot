@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -15,7 +16,7 @@ import (
 func TestCommandRandom(t *testing.T) {
 	httpClient := &mocks.HTTPClient{}
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=0").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=0").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_new_posts.json")
@@ -27,7 +28,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=12").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=12").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				return ioutil.NopCloser(bytes.NewBufferString("[]"))
@@ -36,7 +37,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/posts/open-thread-160").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/open-thread-160").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_random_post.json")
@@ -48,7 +49,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	httpClient.On("Get", "https://astralcodexten.substack.com/api/v1/posts/coronavirus-links-discussion-open").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/coronavirus-links-discussion-open").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.json")
@@ -73,7 +74,7 @@ func TestCommandRandom(t *testing.T) {
 	request, err := json.Marshal(map[string]string{"query": query})
 	require.NoError(t, err)
 
-	httpClient.On("Post", "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
+	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.json")
@@ -222,7 +223,7 @@ func TestCommandRandom(t *testing.T) {
 				return tt.args.randomPost
 			}
 
-			got, err := bot.CommandRandom(tt.args.source)
+			got, err := bot.CommandRandom(context.TODO(), tt.args.source)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

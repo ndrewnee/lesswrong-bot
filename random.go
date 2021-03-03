@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -74,22 +75,22 @@ func (lr LesswrongResult) AsPost() Post {
 	}
 }
 
-func (b *Bot) CommandRandom(source Source) (string, error) {
+func (b *Bot) CommandRandom(ctx context.Context, source Source) (string, error) {
 	switch source {
 	case SourceLesswrongRu:
-		return b.CommandRandomLesswrongRu()
+		return b.CommandRandomLesswrongRu(ctx)
 	case SourceSlate:
-		return b.CommandRandomSlate()
+		return b.CommandRandomSlate(ctx)
 	case SourceAstral:
-		return b.CommandRandomAstral()
+		return b.CommandRandomAstral(ctx)
 	case SourceLesswrong:
-		return b.CommandRandomLesswrong()
+		return b.CommandRandomLesswrong(ctx)
 	default:
-		return b.CommandRandomLesswrongRu()
+		return b.CommandRandomLesswrongRu(ctx)
 	}
 }
 
-func (b *Bot) CommandRandomSlate() (string, error) {
+func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
 	// Load posts for the first time.
 	if len(b.cache.slatePosts) == 0 {
 		archivesCollector := colly.NewCollector()
@@ -126,7 +127,7 @@ func (b *Bot) CommandRandomSlate() (string, error) {
 	return b.postToMarkdown(post)
 }
 
-func (b *Bot) CommandRandomAstral() (string, error) {
+func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 	// Load posts for the first time.
 	if len(b.cache.astralPosts) == 0 {
 		// As substack limits list to 12 posts in one request we fetch all posts using offset.
@@ -136,7 +137,7 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 				offset,
 			)
 
-			httpResponse, err := b.httpClient.Get(uri)
+			httpResponse, err := b.httpClient.Get(ctx, uri)
 			if err != nil {
 				log.Println("[ERROR] Get astralcodexten posts failed: ", err)
 				break
@@ -171,7 +172,7 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 	i := b.randomInt(len(b.cache.astralPosts))
 	post := b.cache.astralPosts[i]
 
-	httpResponse, err := b.httpClient.Get("https://astralcodexten.substack.com/api/v1/posts/" + post.Slug)
+	httpResponse, err := b.httpClient.Get(ctx, "https://astralcodexten.substack.com/api/v1/posts/"+post.Slug)
 	if err != nil {
 		return "", fmt.Errorf("get astralcodexten random post failed: %s", err)
 	}
@@ -187,7 +188,7 @@ func (b *Bot) CommandRandomAstral() (string, error) {
 	return b.postToMarkdown(astralPost.AsPost())
 }
 
-func (b *Bot) CommandRandomLesswrongRu() (string, error) {
+func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
 	// Load posts for the first time.
 	if len(b.cache.lesswrongRuPosts) == 0 {
 		postsCollector := colly.NewCollector()
@@ -224,7 +225,7 @@ func (b *Bot) CommandRandomLesswrongRu() (string, error) {
 	return b.postToMarkdown(post)
 }
 
-func (b *Bot) CommandRandomLesswrong() (string, error) {
+func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
 	query := fmt.Sprintf(`{
 		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: %d}}) {
 			results {
@@ -240,7 +241,7 @@ func (b *Bot) CommandRandomLesswrong() (string, error) {
 		return "", fmt.Errorf("marshal request for lesswrong.com random post failed: %s", err)
 	}
 
-	httpResponse, err := b.httpClient.Post("https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request))
+	httpResponse, err := b.httpClient.Post(ctx, "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request))
 	if err != nil {
 		return "", fmt.Errorf("get lesswrong.com random post failed: %s", err)
 	}
