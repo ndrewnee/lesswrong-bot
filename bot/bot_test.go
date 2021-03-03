@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 	"github.com/ndrewnee/lesswrong-bot/storage/redis"
 )
 
@@ -74,16 +75,19 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 }
 
 func TestBot_MessageHandler(t *testing.T) {
-	chatID, err := strconv.ParseInt(os.Getenv("CHAT_ID"), 10, 64)
-	require.NoError(t, err, "Env var CHAT_ID should be set")
+	chatID, err := strconv.ParseInt(os.Getenv("TEST_CHAT_ID"), 10, 64)
+	require.NoError(t, err, "Env var TEST_CHAT_ID should be set")
 
-	userID, err := strconv.Atoi(os.Getenv("USER_ID"))
-	require.NoError(t, err, "Env var USER_ID should be set")
+	userID, err := strconv.Atoi(os.Getenv("TEST_USER_ID"))
+	require.NoError(t, err, "Env var TEST_USER_ID should be set")
 
 	config := config.ParseConfig()
+	var storage Storage = memory.NewStorage()
 
-	storage, err := redis.NewStorage(config.RedisURL)
-	require.NoError(t, err, "Connect to redis failed")
+	if os.Getenv("TEST_USE_REDIS") == "true" {
+		storage, err = redis.NewStorage(config.RedisURL)
+		require.NoError(t, err, "Connect to redis failed")
+	}
 
 	tgbot, err := New(Options{Config: config, Storage: storage})
 	require.NoError(t, err)

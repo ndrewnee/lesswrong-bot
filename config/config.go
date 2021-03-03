@@ -35,7 +35,7 @@ func ParseConfig() Config {
 
 	timeout, err := strconv.Atoi(os.Getenv("TIMEOUT"))
 	if err != nil {
-		timeout = 10
+		timeout = 15
 	}
 
 	expire, err := strconv.Atoi(os.Getenv("CACHE_EXPIRE"))
