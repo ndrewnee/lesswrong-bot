@@ -4,12 +4,28 @@ import (
 	"log"
 	"math/rand"
 	"time"
+
+	"github.com/ndrewnee/lesswrong-bot/internal/storage/memory"
+	"github.com/ndrewnee/lesswrong-bot/internal/storage/redis"
 )
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	bot, err := NewBot()
+	settings := ParseSettings()
+
+	var (
+		storage Storage
+		err     error
+	)
+
+	storage, err = redis.NewStorage(settings.RedisURL)
+	if err != nil {
+		log.Printf("Connect to redis failed, using memory storage instead: %s", err)
+		storage = memory.NewStorage()
+	}
+
+	bot, err := NewBot(Options{Settings: settings, Storage: storage})
 	if err != nil {
 		log.Fatal("Init telegram bot failed: ", err)
 	}

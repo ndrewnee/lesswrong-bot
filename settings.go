@@ -6,6 +6,7 @@ import (
 )
 
 type Settings struct {
+	RedisURL    string
 	Address     string
 	Token       string
 	WebhookHost string
@@ -24,7 +25,13 @@ func ParseSettings() Settings {
 		webhookHost = "https://lesswrong-bot.herokuapp.com"
 	}
 
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://localhost:6379/1"
+	}
+
 	return Settings{
+		RedisURL:    redisURL,
 		Address:     ":" + strconv.Itoa(port),
 		WebhookHost: webhookHost,
 		Token:       os.Getenv("TOKEN"),
