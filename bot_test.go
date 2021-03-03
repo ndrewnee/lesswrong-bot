@@ -12,11 +12,13 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ndrewnee/lesswrong-bot/internal/config"
 )
 
 func TestBot_GetUpdatesChan(t *testing.T) {
 	type args struct {
-		config Config
+		config config.Config
 	}
 
 	tests := []struct {
@@ -28,7 +30,7 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 		{
 			name: "Shouldn't get webhook chan because webhook host is empty",
 			args: args{
-				config: Config{
+				config: config.Config{
 					Webhook:     true,
 					WebhookHost: "",
 				},
@@ -39,7 +41,7 @@ func TestBot_GetUpdatesChan(t *testing.T) {
 		{
 			name: "Should get webhook chan",
 			args: args{
-				config: Config{
+				config: config.Config{
 					Webhook:     true,
 					WebhookHost: "https://lesswrong-bot.herokuapp.com",
 				},

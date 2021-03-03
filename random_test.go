@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/ndrewnee/lesswrong-bot/internal/models"
 	"github.com/ndrewnee/lesswrong-bot/mocks"
 	"github.com/stretchr/testify/require"
 )
@@ -91,7 +92,7 @@ func TestCommandRandom(t *testing.T) {
 
 	type args struct {
 		randomPost int
-		source     Source
+		source     models.Source
 	}
 
 	tests := []struct {
@@ -115,7 +116,7 @@ func TestCommandRandom(t *testing.T) {
 		{
 			name: "Should get random post from https://slatestarcodex.com",
 			args: args{
-				source: SourceSlate,
+				source: models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post.md")
@@ -128,7 +129,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://slatestarcodex.com (invalid markdown cut)",
 			args: args{
 				randomPost: 563,
-				source:     SourceSlate,
+				source:     models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post_invalid_cut.md")
@@ -141,7 +142,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://slatestarcodex.com (image fix)",
 			args: args{
 				randomPost: 191,
-				source:     SourceSlate,
+				source:     models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/slate_random_post_image_fix.md")
@@ -154,7 +155,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://astralcodexten.substack.com",
 			args: args{
 				randomPost: 4,
-				source:     SourceAstral,
+				source:     models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_random_post.md")
@@ -167,7 +168,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://astralcodexten.substack.com (invalid markdown cut)",
 			args: args{
 				randomPost: 12,
-				source:     SourceAstral,
+				source:     models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.md")
@@ -180,7 +181,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://lesswrong.ru",
 			args: args{
 				randomPost: 2,
-				source:     SourceLesswrongRu,
+				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post.md")
@@ -193,7 +194,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://lesswrong.ru (invalid cut)",
 			args: args{
 				randomPost: 279,
-				source:     SourceLesswrongRu,
+				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post_invalid_cut.md")
@@ -206,7 +207,7 @@ func TestCommandRandom(t *testing.T) {
 			name: "Should get random post from https://lesswrong.com",
 			args: args{
 				randomPost: 0,
-				source:     SourceLesswrong,
+				source:     models.SourceLesswrong,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.md")

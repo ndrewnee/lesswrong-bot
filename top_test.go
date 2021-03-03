@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ndrewnee/lesswrong-bot/internal/models"
 	"github.com/ndrewnee/lesswrong-bot/mocks"
 	"github.com/stretchr/testify/require"
 )
@@ -62,7 +63,7 @@ func TestCommandTop(t *testing.T) {
 
 	type args struct {
 		randomPost int
-		source     Source
+		source     models.Source
 	}
 
 	tests := []struct {
@@ -86,7 +87,7 @@ func TestCommandTop(t *testing.T) {
 		{
 			name: "Should get top posts from https://slatestarcodex.com",
 			args: args{
-				source: SourceSlate,
+				source: models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				require.Equal(t, MessageTopSlate, got)
@@ -96,7 +97,7 @@ func TestCommandTop(t *testing.T) {
 		{
 			name: "Should get top posts from https://astralcodexten.substack.com",
 			args: args{
-				source: SourceAstral,
+				source: models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_top_posts.md")
@@ -109,7 +110,7 @@ func TestCommandTop(t *testing.T) {
 			name: "Should get top posts from https://lesswrong.ru",
 			args: args{
 				randomPost: 2,
-				source:     SourceLesswrongRu,
+				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_ru_top_posts.md")
@@ -121,7 +122,7 @@ func TestCommandTop(t *testing.T) {
 		{
 			name: "Should get top posts from https://lesswrong.com",
 			args: args{
-				source: SourceLesswrong,
+				source: models.SourceLesswrong,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/lesswrong_top_posts.md")

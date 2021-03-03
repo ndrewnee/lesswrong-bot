@@ -11,6 +11,9 @@ import (
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"github.com/ndrewnee/lesswrong-bot/internal/config"
+	"github.com/ndrewnee/lesswrong-bot/internal/models"
 	"github.com/ndrewnee/lesswrong-bot/internal/storage/memory"
 )
 
@@ -33,41 +36,9 @@ Commands:
 /help - Help`
 )
 
-const (
-	SourceLesswrongRu Source = "1"
-	SourceSlate       Source = "2"
-	SourceAstral      Source = "3"
-	SourceLesswrong   Source = "4"
-)
-
-type Source string
-
-func (s Source) String() string {
-	switch s {
-	case SourceLesswrongRu:
-		return "https://lesswrong.ru"
-	case SourceSlate:
-		return "https://slatestarcodex.com"
-	case SourceAstral:
-		return "https://astralcodexten.substack.com"
-	case SourceLesswrong:
-		return "https://lesswrong.com"
-	default:
-		return ""
-	}
-}
-
-func (s Source) Value() string {
-	return string(s)
-}
-
-func (s Source) IsValid() bool {
-	return s.String() != ""
-}
-
 type (
 	Bot struct {
-		config      Config
+		config      config.Config
 		botAPI      *tgbotapi.BotAPI
 		httpClient  HTTPClient
 		storage     Storage
@@ -76,7 +47,7 @@ type (
 	}
 
 	Options struct {
-		Config      Config
+		Config      config.Config
 		BotAPI      *tgbotapi.BotAPI
 		HTTPClient  HTTPClient
 		Storage     Storage
@@ -102,8 +73,8 @@ func NewBot(options ...Options) (*Bot, error) {
 		opts = options[0]
 	}
 
-	if opts.Config == (Config{}) {
-		opts.Config = ParseConfig()
+	if opts.Config == (config.Config{}) {
+		opts.Config = config.ParseConfig()
 	}
 
 	if opts.BotAPI == nil {
@@ -222,7 +193,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 			log.Printf("[ERROR] Get source for user failed: %s", err)
 		}
 
-		msg.Text, err = b.CommandTop(ctx, Source(source))
+		msg.Text, err = b.CommandTop(ctx, models.Source(source))
 		if err != nil {
 			log.Println("[ERROR] Command /top failed: ", err)
 			msg.Text = "Top posts not found"
@@ -235,15 +206,15 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 			log.Printf("[ERROR] Get source for user failed: %s", err)
 		}
 
-		msg.Text, err = b.CommandRandom(ctx, Source(source))
+		msg.Text, err = b.CommandRandom(ctx, models.Source(source))
 		if err != nil {
 			log.Println("[ERROR] Command /random failed: ", err)
 			msg.Text = "Random post not found"
 		}
 	case "source":
-		source := Source(update.Message.CommandArguments())
+		source := models.Source(update.Message.CommandArguments())
 		if !source.IsValid() {
-			source = SourceLesswrongRu
+			source = models.SourceLesswrongRu
 		}
 
 		msg.Text = "Changed source to " + source.String()

@@ -9,81 +9,19 @@ import (
 	"strings"
 
 	"github.com/gocolly/colly"
+
+	"github.com/ndrewnee/lesswrong-bot/internal/models"
 )
 
-const (
-	DefaultLimit           = 12
-	PostMaxLength          = 1500
-	LesswrongPostsMaxCount = 25000
-)
-
-type (
-	Post struct {
-		Title string
-		URL   string
-		HTML  string
-		Slug  string
-	}
-
-	AstralPost struct {
-		Slug         string `json:"slug"`
-		Title        string `json:"title"`
-		Subtitle     string `json:"subtitle"`
-		CanonicalURL string `json:"canonical_url"`
-		BodyHTML     string `json:"body_html"`
-		Audience     string `json:"audience"`
-	}
-
-	LesswrongResponse struct {
-		Data LesswrongData `json:"data"`
-	}
-
-	LesswrongData struct {
-		Posts LesswrongPost `json:"posts"`
-	}
-
-	LesswrongPost struct {
-		Results []LesswrongResult `json:"results"`
-	}
-
-	LesswrongResult struct {
-		Title    string        `json:"title"`
-		PageURL  string        `json:"pageUrl"`
-		HTMLBody string        `json:"htmlBody"`
-		User     LesswrongUser `json:"user"`
-	}
-
-	LesswrongUser struct {
-		DisplayName string `json:"displayName"`
-	}
-)
-
-func (ap AstralPost) AsPost() Post {
-	return Post{
-		Title: ap.Title,
-		URL:   ap.CanonicalURL,
-		HTML:  ap.BodyHTML,
-		Slug:  ap.Slug,
-	}
-}
-
-func (lr LesswrongResult) AsPost() Post {
-	return Post{
-		Title: lr.Title,
-		URL:   lr.PageURL,
-		HTML:  lr.HTMLBody,
-	}
-}
-
-func (b *Bot) CommandRandom(ctx context.Context, source Source) (string, error) {
+func (b *Bot) CommandRandom(ctx context.Context, source models.Source) (string, error) {
 	switch source {
-	case SourceLesswrongRu:
+	case models.SourceLesswrongRu:
 		return b.CommandRandomLesswrongRu(ctx)
-	case SourceSlate:
+	case models.SourceSlate:
 		return b.CommandRandomSlate(ctx)
-	case SourceAstral:
+	case models.SourceAstral:
 		return b.CommandRandomAstral(ctx)
-	case SourceLesswrong:
+	case models.SourceLesswrong:
 		return b.CommandRandomLesswrong(ctx)
 	default:
 		return b.CommandRandomLesswrongRu(ctx)
@@ -96,7 +34,7 @@ func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get slatestarcodex cached posts failed: %s", err)
 	}
 
-	var posts []Post
+	var posts []models.Post
 
 	if postsCached != "" {
 		if err := json.Unmarshal([]byte(postsCached), &posts); err != nil {
@@ -109,7 +47,7 @@ func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
 		archivesCollector := colly.NewCollector()
 
 		archivesCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
-			posts = append(posts, Post{
+			posts = append(posts, models.Post{
 				Title: e.Text,
 				URL:   e.Attr("href"),
 			})
@@ -155,7 +93,7 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get astralcodexten cached posts failed: %s", err)
 	}
 
-	var posts []Post
+	var posts []models.Post
 
 	if postsCached != "" {
 		if err := json.Unmarshal([]byte(postsCached), &posts); err != nil {
@@ -166,9 +104,9 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 	// Load posts for the first time.
 	if len(posts) == 0 {
 		// As substack limits list to 12 posts in one request we fetch all posts using offset.
-		for offset := 0; true; offset += DefaultLimit {
+		for offset := 0; true; offset += models.DefaultLimit {
 			uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%d&offset=%d",
-				DefaultLimit,
+				models.DefaultLimit,
 				offset,
 			)
 
@@ -178,7 +116,7 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 				break
 			}
 
-			var newPosts []AstralPost
+			var newPosts []models.AstralPost
 
 			if err := json.NewDecoder(httpResponse.Body).Decode(&newPosts); err != nil {
 				log.Println("[ERROR] Unmarshal astralcodexten new posts failed: ", err)
@@ -223,7 +161,7 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 
 	defer httpResponse.Body.Close()
 
-	var astralPost AstralPost
+	var astralPost models.AstralPost
 
 	if err := json.NewDecoder(httpResponse.Body).Decode(&astralPost); err != nil {
 		return "", fmt.Errorf("unmarshal astralcodexten post failed: %s", err)
@@ -238,7 +176,7 @@ func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.ru cached posts failed: %s", err)
 	}
 
-	var posts []Post
+	var posts []models.Post
 
 	if postsCached != "" {
 		if err := json.Unmarshal([]byte(postsCached), &posts); err != nil {
@@ -251,7 +189,7 @@ func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
 		postsCollector := colly.NewCollector()
 
 		postsCollector.OnHTML("li.leaf.menu-depth-3,li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
-			posts = append(posts, Post{
+			posts = append(posts, models.Post{
 				Title: e.Text,
 				URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),
 			})
@@ -300,7 +238,7 @@ func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
 				htmlBody
 			}
 		}
-	}`, b.randomInt(LesswrongPostsMaxCount))
+	}`, b.randomInt(models.LesswrongPostsMaxCount))
 
 	request, err := json.Marshal(map[string]string{"query": query})
 	if err != nil {
@@ -314,7 +252,7 @@ func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
 
 	defer httpResponse.Body.Close()
 
-	var response LesswrongResponse
+	var response models.LesswrongResponse
 
 	if err := json.NewDecoder(httpResponse.Body).Decode(&response); err != nil {
 		return "", fmt.Errorf("unmarshal lesswrong.com random post failed: %s", err)
@@ -329,19 +267,19 @@ func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
 	return b.postToMarkdown(lesswrongPost.AsPost())
 }
 
-func (b *Bot) postToMarkdown(post Post) (string, error) {
+func (b *Bot) postToMarkdown(post models.Post) (string, error) {
 	markdown, err := b.mdConverter.ConvertString(post.HTML)
 	if err != nil {
 		return "", fmt.Errorf("convert lesswrong.ru html to markdown failed: %s", err)
 	}
 
 	// Cut post for preview mode.
-	if len(markdown) > PostMaxLength {
+	if len(markdown) > models.PostMaxLength {
 		// Convert to runes to properly split between unicode symbols.
 		runes := []rune(markdown)
-		markdown = string(runes[:PostMaxLength])
+		markdown = string(runes[:models.PostMaxLength])
 		// Truncate after next line end to not break markdown text.
-		rest := string(runes[PostMaxLength:])
+		rest := string(runes[models.PostMaxLength:])
 		if n := strings.IndexByte(rest, '\n'); n != -1 {
 			markdown += rest[:n]
 		}

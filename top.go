@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gocolly/colly"
+	"github.com/ndrewnee/lesswrong-bot/internal/models"
 )
 
 // As https://slatestarcodex.com top posts won't change anymore it's much more effecient to return hardcoded list.
@@ -33,15 +34,15 @@ const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 10. [Who By Very Slow Decay](https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/)`
 
-func (b *Bot) CommandTop(ctx context.Context, source Source) (string, error) {
+func (b *Bot) CommandTop(ctx context.Context, source models.Source) (string, error) {
 	switch source {
-	case SourceLesswrongRu:
+	case models.SourceLesswrongRu:
 		return b.CommandTopLesswrongRu(ctx)
-	case SourceSlate:
+	case models.SourceSlate:
 		return MessageTopSlate, nil
-	case SourceAstral:
+	case models.SourceAstral:
 		return b.CommandTopAstral(ctx)
-	case SourceLesswrong:
+	case models.SourceLesswrong:
 		return b.CommandTopLesswrong(ctx)
 	default:
 		return b.CommandTopLesswrongRu(ctx)
@@ -56,7 +57,7 @@ func (b *Bot) CommandTopAstral(ctx context.Context) (string, error) {
 
 	defer httpResponse.Body.Close()
 
-	var topPosts []AstralPost
+	var topPosts []models.AstralPost
 
 	if err := json.NewDecoder(httpResponse.Body).Decode(&topPosts); err != nil {
 		return "", fmt.Errorf("unmarshal astralcodexten top posts failed: %s", err)
@@ -85,7 +86,7 @@ func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.ru cached posts failed: %s", err)
 	}
 
-	var posts []Post
+	var posts []models.Post
 
 	if postsCached != "" {
 		if err := json.Unmarshal([]byte(postsCached), &posts); err != nil {
@@ -98,7 +99,7 @@ func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
 		postsCollector := colly.NewCollector()
 
 		postsCollector.OnHTML("li.leaf.menu-depth-3,li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
-			posts = append(posts, Post{
+			posts = append(posts, models.Post{
 				Title: e.Text,
 				URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),
 			})
@@ -125,7 +126,7 @@ func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
 	text := bytes.NewBufferString("🏆 Random posts from https://lesswrong.ru\n\n")
 
 	// As lesswrong.ru doesn't have page with top posts return random posts instead.
-	for i := 0; i < DefaultLimit; i++ {
+	for i := 0; i < models.DefaultLimit; i++ {
 		n := b.randomInt(len(posts))
 		post := posts[n]
 
@@ -160,7 +161,7 @@ func (b *Bot) CommandTopLesswrong(ctx context.Context) (string, error) {
 
 	defer httpResponse.Body.Close()
 
-	var response LesswrongResponse
+	var response models.LesswrongResponse
 
 	if err := json.NewDecoder(httpResponse.Body).Decode(&response); err != nil {
 		return "", fmt.Errorf("unmarshal lesswrong.com top posts failed: %s", err)

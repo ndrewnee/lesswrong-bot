@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/ndrewnee/lesswrong-bot/internal/config"
 	"github.com/ndrewnee/lesswrong-bot/internal/storage/memory"
 	"github.com/ndrewnee/lesswrong-bot/internal/storage/redis"
 )
@@ -13,7 +14,7 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	config := ParseConfig()
+	config := config.ParseConfig()
 
 	var (
 		storage Storage
