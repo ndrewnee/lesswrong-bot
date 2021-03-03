@@ -9,7 +9,7 @@ import (
 
 	"github.com/gocolly/colly"
 
-	"github.com/ndrewnee/lesswrong-bot/internal/models"
+	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
 // As https://slatestarcodex.com top posts won't change anymore it's much more effecient to return hardcoded list.

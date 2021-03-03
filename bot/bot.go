@@ -12,9 +12,9 @@ import (
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/ndrewnee/lesswrong-bot/internal/config"
-	"github.com/ndrewnee/lesswrong-bot/internal/models"
-	"github.com/ndrewnee/lesswrong-bot/internal/storage/memory"
+	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/models"
+	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 )
 
 const (

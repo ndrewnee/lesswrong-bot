@@ -10,7 +10,7 @@ import (
 
 	"github.com/gocolly/colly"
 
-	"github.com/ndrewnee/lesswrong-bot/internal/models"
+	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
 func (b *Bot) CommandRandom(ctx context.Context, source models.Source) (string, error) {

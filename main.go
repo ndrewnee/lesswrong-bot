@@ -6,10 +6,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ndrewnee/lesswrong-bot/internal/bot"
-	"github.com/ndrewnee/lesswrong-bot/internal/config"
-	"github.com/ndrewnee/lesswrong-bot/internal/storage/memory"
-	"github.com/ndrewnee/lesswrong-bot/internal/storage/redis"
+	"github.com/ndrewnee/lesswrong-bot/bot"
+	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/storage/memory"
+	"github.com/ndrewnee/lesswrong-bot/storage/redis"
 )
 
 func main() {

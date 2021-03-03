@@ -13,7 +13,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ndrewnee/lesswrong-bot/internal/config"
+	"github.com/ndrewnee/lesswrong-bot/config"
 )
 
 func TestBot_GetUpdatesChan(t *testing.T) {

@@ -11,8 +11,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ndrewnee/lesswrong-bot/internal/bot/mocks"
-	"github.com/ndrewnee/lesswrong-bot/internal/models"
+	"github.com/ndrewnee/lesswrong-bot/bot/mocks"
+	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
 func TestCommandRandom(t *testing.T) {
