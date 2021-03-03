@@ -91,12 +91,25 @@ func (b *Bot) CommandRandom(ctx context.Context, source Source) (string, error) 
 }
 
 func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
+	postsCached, err := b.storage.Get(ctx, "posts:slatestarcodex")
+	if err != nil {
+		return "", fmt.Errorf("get slatestarcodex cached posts failed: %s", err)
+	}
+
+	var posts []Post
+
+	if postsCached != "" {
+		if err := json.Unmarshal([]byte(postsCached), &posts); err != nil {
+			return "", fmt.Errorf("unmarshal slatestarcodex cached posts failed: %s", err)
+		}
+	}
+
 	// Load posts for the first time.
-	if len(b.cache.slatePosts) == 0 {
+	if len(posts) == 0 {
 		archivesCollector := colly.NewCollector()
 
 		archivesCollector.OnHTML("a[href][rel=bookmark]", func(e *colly.HTMLElement) {
-			b.cache.slatePosts = append(b.cache.slatePosts, Post{
+			posts = append(posts, Post{
 				Title: e.Text,
 				URL:   e.Attr("href"),
 			})
@@ -105,14 +118,23 @@ func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
 		if err := archivesCollector.Visit("https://slatestarcodex.com/archives/"); err != nil {
 			return "", fmt.Errorf("get slatestarcodex posts failed: %s", err)
 		}
+
+		postsCache, err := json.Marshal(posts)
+		if err != nil {
+			return "", fmt.Errorf("marshal slatestarcodex posts failed: %s", err)
+		}
+
+		if err := b.storage.Set(ctx, "posts:slatestarcodex", string(postsCache), b.config.CacheExpire); err != nil {
+			return "", fmt.Errorf("cache slatestarcodex posts failed: %s", err)
+		}
 	}
 
-	if len(b.cache.slatePosts) == 0 {
+	if len(posts) == 0 {
 		return "", fmt.Errorf("slatestarcodex posts not found")
 	}
 
-	i := b.randomInt(len(b.cache.slatePosts))
-	post := b.cache.slatePosts[i]
+	i := b.randomInt(len(posts))
+	post := posts[i]
 
 	postCollector := colly.NewCollector()
 
@@ -128,8 +150,21 @@ func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
 }
 
 func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
+	postsCached, err := b.storage.Get(ctx, "posts:astralcodexten")
+	if err != nil {
+		return "", fmt.Errorf("get astralcodexten cached posts failed: %s", err)
+	}
+
+	var posts []Post
+
+	if postsCached != "" {
+		if err := json.Unmarshal([]byte(postsCached), &posts); err != nil {
+			return "", fmt.Errorf("unmarshal astralcodexten cached posts failed: %s", err)
+		}
+	}
+
 	// Load posts for the first time.
-	if len(b.cache.astralPosts) == 0 {
+	if len(posts) == 0 {
 		// As substack limits list to 12 posts in one request we fetch all posts using offset.
 		for offset := 0; true; offset += DefaultLimit {
 			uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=%d&offset=%d",
@@ -159,18 +194,27 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 
 			for _, astralPost := range newPosts {
 				if astralPost.Audience != "only_paid" {
-					b.cache.astralPosts = append(b.cache.astralPosts, astralPost.AsPost())
+					posts = append(posts, astralPost.AsPost())
 				}
 			}
 		}
+
+		postsCache, err := json.Marshal(posts)
+		if err != nil {
+			return "", fmt.Errorf("marshal astralcodexten posts failed: %s", err)
+		}
+
+		if err := b.storage.Set(ctx, "posts:astralcodexten", string(postsCache), b.config.CacheExpire); err != nil {
+			return "", fmt.Errorf("cache astralcodexten posts failed: %s", err)
+		}
 	}
 
-	if len(b.cache.astralPosts) == 0 {
+	if len(posts) == 0 {
 		return "", fmt.Errorf("astralcodexten posts not found")
 	}
 
-	i := b.randomInt(len(b.cache.astralPosts))
-	post := b.cache.astralPosts[i]
+	i := b.randomInt(len(posts))
+	post := posts[i]
 
 	httpResponse, err := b.httpClient.Get(ctx, "https://astralcodexten.substack.com/api/v1/posts/"+post.Slug)
 	if err != nil {
@@ -189,12 +233,25 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 }
 
 func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
+	postsCached, err := b.storage.Get(ctx, "posts:lesswrong.ru")
+	if err != nil {
+		return "", fmt.Errorf("get lesswrong.ru cached posts failed: %s", err)
+	}
+
+	var posts []Post
+
+	if postsCached != "" {
+		if err := json.Unmarshal([]byte(postsCached), &posts); err != nil {
+			return "", fmt.Errorf("unmarshal lesswrong.ru cached posts failed: %s", err)
+		}
+	}
+
 	// Load posts for the first time.
-	if len(b.cache.lesswrongRuPosts) == 0 {
+	if len(posts) == 0 {
 		postsCollector := colly.NewCollector()
 
 		postsCollector.OnHTML("li.leaf.menu-depth-3,li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
-			b.cache.lesswrongRuPosts = append(b.cache.lesswrongRuPosts, Post{
+			posts = append(posts, Post{
 				Title: e.Text,
 				URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),
 			})
@@ -203,14 +260,23 @@ func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
 		if err := postsCollector.Visit("https://lesswrong.ru/w"); err != nil {
 			return "", fmt.Errorf("get lesswrong.ru posts failed: %s", err)
 		}
+
+		postsCache, err := json.Marshal(posts)
+		if err != nil {
+			return "", fmt.Errorf("marshal lesswrong.ru posts failed: %s", err)
+		}
+
+		if err := b.storage.Set(ctx, "posts:lesswrong.ru", string(postsCache), b.config.CacheExpire); err != nil {
+			return "", fmt.Errorf("cache lesswrong.ru posts failed: %s", err)
+		}
 	}
 
-	if len(b.cache.lesswrongRuPosts) == 0 {
+	if len(posts) == 0 {
 		return "", fmt.Errorf("lesswrong.ru posts not found")
 	}
 
-	i := b.randomInt(len(b.cache.lesswrongRuPosts))
-	post := b.cache.lesswrongRuPosts[i]
+	i := b.randomInt(len(posts))
+	post := posts[i]
 
 	postCollector := colly.NewCollector()
 

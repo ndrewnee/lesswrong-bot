@@ -73,7 +73,6 @@ type (
 		storage     Storage
 		mdConverter *md.Converter
 		randomInt   func(n int) int
-		cache       Cache
 	}
 
 	Options struct {
@@ -88,12 +87,6 @@ type (
 	HTTPClient interface {
 		Get(ctx context.Context, uri string) (*http.Response, error)
 		Post(ctx context.Context, url, contentType string, body io.Reader) (*http.Response, error)
-	}
-
-	Cache struct {
-		astralPosts      []Post
-		slatePosts       []Post
-		lesswrongRuPosts []Post
 	}
 
 	Storage interface {
@@ -222,7 +215,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		key := fmt.Sprintf("Source:%d", update.Message.From.ID)
+		key := fmt.Sprintf("source:%d", update.Message.From.ID)
 
 		source, err := b.storage.Get(ctx, key)
 		if err != nil {
@@ -235,7 +228,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		key := fmt.Sprintf("Source:%d", update.Message.From.ID)
+		key := fmt.Sprintf("source:%d", update.Message.From.ID)
 
 		source, err := b.storage.Get(ctx, key)
 		if err != nil {
@@ -254,7 +247,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 		}
 
 		msg.Text = "Changed source to " + source.String()
-		key := fmt.Sprintf("Source:%d", update.Message.From.ID)
+		key := fmt.Sprintf("source:%d", update.Message.From.ID)
 
 		if err := b.storage.Set(ctx, key, source.Value(), 0); err != nil {
 			log.Printf("[ERROR] Set source for user failed: %s", err)
