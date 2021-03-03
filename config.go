@@ -14,17 +14,13 @@ type Config struct {
 	Webhook     bool
 	Debug       bool
 	Timeout     time.Duration
+	CacheExpire time.Duration
 }
 
 func ParseConfig() Config {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		port = 9999
-	}
-
-	timeout, err := strconv.Atoi(os.Getenv("TIMEOUT"))
-	if err != nil {
-		timeout = 10
 	}
 
 	webhookHost := os.Getenv("WEBHOOK_HOST")
@@ -37,6 +33,16 @@ func ParseConfig() Config {
 		redisURL = "redis://localhost:6379/1"
 	}
 
+	timeout, err := strconv.Atoi(os.Getenv("TIMEOUT"))
+	if err != nil {
+		timeout = 10
+	}
+
+	expire, err := strconv.Atoi(os.Getenv("CACHE_EXPIRE"))
+	if err != nil {
+		expire = 24
+	}
+
 	return Config{
 		RedisURL:    redisURL,
 		Address:     ":" + strconv.Itoa(port),
@@ -45,5 +51,6 @@ func ParseConfig() Config {
 		Webhook:     os.Getenv("WEBHOOK") == "true",
 		Debug:       os.Getenv("DEBUG") == "true",
 		Timeout:     time.Duration(timeout) * time.Second,
+		CacheExpire: time.Duration(expire) * time.Hour,
 	}
 }

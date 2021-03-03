@@ -80,12 +80,25 @@ func (b *Bot) CommandTopAstral(ctx context.Context) (string, error) {
 }
 
 func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
+	postsCached, err := b.storage.Get(ctx, "posts:lesswrong.ru")
+	if err != nil {
+		return "", fmt.Errorf("get lesswrong.ru cached posts failed: %s", err)
+	}
+
+	var posts []Post
+
+	if postsCached != "" {
+		if err := json.Unmarshal([]byte(postsCached), &posts); err != nil {
+			return "", fmt.Errorf("unmarshal lesswrong.ru cached posts failed: %s", err)
+		}
+	}
+
 	// Load posts for the first time.
-	if len(b.cache.lesswrongRuPosts) == 0 {
+	if len(posts) == 0 {
 		postsCollector := colly.NewCollector()
 
 		postsCollector.OnHTML("li.leaf.menu-depth-3,li.leaf.menu-depth-4", func(e *colly.HTMLElement) {
-			b.cache.lesswrongRuPosts = append(b.cache.lesswrongRuPosts, Post{
+			posts = append(posts, Post{
 				Title: e.Text,
 				URL:   e.Request.AbsoluteURL(e.ChildAttr("a", "href")),
 			})
@@ -94,9 +107,18 @@ func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
 		if err := postsCollector.Visit("https://lesswrong.ru/w"); err != nil {
 			return "", fmt.Errorf("get lesswrong.ru posts failed: %s", err)
 		}
+
+		postsCache, err := json.Marshal(posts)
+		if err != nil {
+			return "", fmt.Errorf("marshal lesswrong.ru posts failed: %s", err)
+		}
+
+		if err := b.storage.Set(ctx, "posts:lesswrong.ru", string(postsCache), b.config.CacheExpire); err != nil {
+			return "", fmt.Errorf("cache lesswrong.ru posts failed: %s", err)
+		}
 	}
 
-	if len(b.cache.lesswrongRuPosts) == 0 {
+	if len(posts) == 0 {
 		return "", fmt.Errorf("lesswrong.ru posts not found")
 	}
 
@@ -104,8 +126,8 @@ func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
 
 	// As lesswrong.ru doesn't have page with top posts return random posts instead.
 	for i := 0; i < DefaultLimit; i++ {
-		n := b.randomInt(len(b.cache.lesswrongRuPosts))
-		post := b.cache.lesswrongRuPosts[n]
+		n := b.randomInt(len(posts))
+		post := posts[n]
 
 		text.WriteString(fmt.Sprintf("%d. [%s](%s)\n\n", i+1, post.Title, post.URL))
 	}

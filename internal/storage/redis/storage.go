@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -37,8 +38,8 @@ func (s *Storage) Get(ctx context.Context, key string) (string, error) {
 	return value, nil
 }
 
-func (s *Storage) Set(ctx context.Context, key, value string) error {
-	if _, err := s.client.Set(ctx, key, value, 0).Result(); err != nil {
+func (s *Storage) Set(ctx context.Context, key, value string, expire time.Duration) error {
+	if _, err := s.client.Set(ctx, key, value, expire).Result(); err != nil {
 		if err == redis.Nil {
 			return nil
 		}

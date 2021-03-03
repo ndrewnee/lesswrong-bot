@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -97,7 +98,7 @@ type (
 
 	Storage interface {
 		Get(ctx context.Context, key string) (string, error)
-		Set(ctx context.Context, key, value string) error
+		Set(ctx context.Context, key, value string, expire time.Duration) error
 	}
 )
 
@@ -255,7 +256,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 		msg.Text = "Changed source to " + source.String()
 		key := fmt.Sprintf("Source:%d", update.Message.From.ID)
 
-		if err := b.storage.Set(ctx, key, source.Value()); err != nil {
+		if err := b.storage.Set(ctx, key, source.Value(), 0); err != nil {
 			log.Printf("[ERROR] Set source for user failed: %s", err)
 			msg.Text = fmt.Sprintf("Change source to %s failed", source.String())
 		}
