@@ -24,8 +24,8 @@ func NewStorage(url string) (*Storage, error) {
 	}, nil
 }
 
-func (s *Storage) Get(key string) (string, error) {
-	value, err := s.client.Get(context.TODO(), key).Result()
+func (s *Storage) Get(ctx context.Context, key string) (string, error) {
+	value, err := s.client.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return value, nil
@@ -37,8 +37,8 @@ func (s *Storage) Get(key string) (string, error) {
 	return value, nil
 }
 
-func (s *Storage) Set(key, value string) error {
-	if _, err := s.client.Set(context.TODO(), key, value, 0).Result(); err != nil {
+func (s *Storage) Set(ctx context.Context, key, value string) error {
+	if _, err := s.client.Set(ctx, key, value, 0).Result(); err != nil {
 		if err == redis.Nil {
 			return nil
 		}

@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"strconv"
+	"time"
 )
 
 type Settings struct {
@@ -12,12 +13,18 @@ type Settings struct {
 	WebhookHost string
 	Webhook     bool
 	Debug       bool
+	Timeout     time.Duration
 }
 
 func ParseSettings() Settings {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		port = 9999
+	}
+
+	timeout, err := strconv.Atoi(os.Getenv("TIMEOUT"))
+	if err != nil {
+		timeout = 10
 	}
 
 	webhookHost := os.Getenv("WEBHOOK_HOST")
@@ -37,5 +44,6 @@ func ParseSettings() Settings {
 		Token:       os.Getenv("TOKEN"),
 		Webhook:     os.Getenv("WEBHOOK") == "true",
 		Debug:       os.Getenv("DEBUG") == "true",
+		Timeout:     time.Duration(timeout) * time.Second,
 	}
 }

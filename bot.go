@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -95,8 +96,8 @@ type (
 	}
 
 	Storage interface {
-		Get(key string) (string, error)
-		Set(key, value string) error
+		Get(ctx context.Context, key string) (string, error)
+		Set(ctx context.Context, key, value string) error
 	}
 )
 
@@ -197,7 +198,7 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 	return updates, nil
 }
 
-func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
+func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, error) {
 	var err error
 
 	if update.Message == nil {
@@ -222,7 +223,7 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 	case "top":
 		key := fmt.Sprintf("Source:%d", update.Message.From.ID)
 
-		source, err := b.storage.Get(key)
+		source, err := b.storage.Get(ctx, key)
 		if err != nil {
 			log.Printf("[ERROR] Get source for user failed: %s", err)
 		}
@@ -235,7 +236,7 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 	case "random":
 		key := fmt.Sprintf("Source:%d", update.Message.From.ID)
 
-		source, err := b.storage.Get(key)
+		source, err := b.storage.Get(ctx, key)
 		if err != nil {
 			log.Printf("[ERROR] Get source for user failed: %s", err)
 		}
@@ -254,7 +255,7 @@ func (b *Bot) MessageHandler(update tgbotapi.Update) (tgbotapi.Message, error) {
 		msg.Text = "Changed source to " + source.String()
 		key := fmt.Sprintf("Source:%d", update.Message.From.ID)
 
-		if err := b.storage.Set(key, source.Value()); err != nil {
+		if err := b.storage.Set(ctx, key, source.Value()); err != nil {
 			log.Printf("[ERROR] Set source for user failed: %s", err)
 			msg.Text = fmt.Sprintf("Change source to %s failed", source.String())
 		}

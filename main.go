@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"math/rand"
 	"time"
@@ -36,8 +37,12 @@ func main() {
 	}
 
 	for update := range updates {
-		if _, err := bot.MessageHandler(update); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), settings.Timeout)
+
+		if _, err := bot.MessageHandler(ctx, update); err != nil {
 			log.Println("[ERROR] Message not sent: ", err)
 		}
+
+		cancel()
 	}
 }

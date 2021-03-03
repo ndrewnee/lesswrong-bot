@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"strings"
@@ -538,7 +539,7 @@ Commands:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := bot.MessageHandler(tt.args.update)
+			got, err := bot.MessageHandler(context.TODO(), tt.args.update)
 			tt.wantErr(t, err)
 
 			if tt.check != nil {

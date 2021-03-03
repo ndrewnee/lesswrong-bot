@@ -1,5 +1,7 @@
 package memory
 
+import "context"
+
 type Storage struct {
 	cache map[string]string
 }
@@ -10,11 +12,11 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) Get(key string) (string, error) {
+func (s *Storage) Get(_ context.Context, key string) (string, error) {
 	return s.cache[key], nil
 }
 
-func (s *Storage) Set(key, value string) error {
+func (s *Storage) Set(_ context.Context, key, value string) error {
 	s.cache[key] = value
 	return nil
 }
