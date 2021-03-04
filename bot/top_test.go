@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ndrewnee/lesswrong-bot/bot/mocks"
@@ -59,7 +60,7 @@ func TestCommandTop(t *testing.T) {
 		nil,
 	)
 
-	tgbot, err := New(Options{HTTPClient: httpClient})
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
 	require.NoError(t, err)
 
 	type args struct {

@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 
+	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/gocolly/colly"
 
 	"github.com/ndrewnee/lesswrong-bot/models"
@@ -84,7 +85,7 @@ func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get slatestarcodex random post failed: %s", err)
 	}
 
-	return b.postToMarkdown(post)
+	return b.postToMarkdown(post, md.NewConverter(models.DomainSlate, true, nil))
 }
 
 func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
@@ -167,7 +168,7 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("unmarshal astralcodexten post failed: %s", err)
 	}
 
-	return b.postToMarkdown(astralPost.AsPost())
+	return b.postToMarkdown(astralPost.AsPost(), md.NewConverter(models.DomainAstral, true, nil))
 }
 
 func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
@@ -226,7 +227,7 @@ func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.ru random post failed: %s", err)
 	}
 
-	return b.postToMarkdown(post)
+	return b.postToMarkdown(post, md.NewConverter(models.DomainLesswrongRu, true, nil))
 }
 
 func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
@@ -262,13 +263,13 @@ func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("lesswrong.com random post not found")
 	}
 
-	lesswrongPost := response.Data.Posts.Results[0]
+	result := response.Data.Posts.Results[0]
 
-	return b.postToMarkdown(lesswrongPost.AsPost())
+	return b.postToMarkdown(result.AsPost(), md.NewConverter(models.DomainLesswrong, true, nil))
 }
 
-func (b *Bot) postToMarkdown(post models.Post) (string, error) {
-	markdown, err := b.mdConverter.ConvertString(post.HTML)
+func (b *Bot) postToMarkdown(post models.Post, mdConverter *md.Converter) (string, error) {
+	markdown, err := mdConverter.ConvertString(post.HTML)
 	if err != nil {
 		return "", fmt.Errorf("convert lesswrong.ru html to markdown failed: %s", err)
 	}
@@ -287,6 +288,8 @@ func (b *Bot) postToMarkdown(post models.Post) (string, error) {
 		// Stupid hotfixes for some invalid markdowns.
 		markdown = strings.ReplaceAll(markdown, "* * *", "")
 		markdown = strings.ReplaceAll(markdown, "```", "")
+		markdown = strings.ReplaceAll(markdown, "[[", "[")
+		markdown = strings.ReplaceAll(markdown, "]]", "]")
 		markdown = strings.ReplaceAll(markdown, "![]", "[Image]")
 	}
 

@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/ndrewnee/lesswrong-bot/config"
@@ -38,21 +37,19 @@ Commands:
 
 type (
 	Bot struct {
-		config      config.Config
-		botAPI      *tgbotapi.BotAPI
-		httpClient  HTTPClient
-		storage     Storage
-		mdConverter *md.Converter
-		randomInt   func(n int) int
+		config     config.Config
+		botAPI     *tgbotapi.BotAPI
+		httpClient HTTPClient
+		storage    Storage
+		randomInt  func(n int) int
 	}
 
 	Options struct {
-		Config      config.Config
-		BotAPI      *tgbotapi.BotAPI
-		HTTPClient  HTTPClient
-		Storage     Storage
-		MDConverter *md.Converter
-		RandomInt   func(n int) int
+		Config     config.Config
+		BotAPI     *tgbotapi.BotAPI
+		HTTPClient HTTPClient
+		Storage    Storage
+		RandomInt  func(n int) int
 	}
 
 	HTTPClient interface {
@@ -97,21 +94,16 @@ func New(options ...Options) (*Bot, error) {
 		opts.Storage = memory.NewStorage()
 	}
 
-	if opts.MDConverter == nil {
-		opts.MDConverter = md.NewConverter("", true, nil)
-	}
-
 	if opts.RandomInt == nil {
 		opts.RandomInt = rand.Intn
 	}
 
 	return &Bot{
-		botAPI:      opts.BotAPI,
-		config:      opts.Config,
-		httpClient:  opts.HTTPClient,
-		storage:     opts.Storage,
-		mdConverter: opts.MDConverter,
-		randomInt:   opts.RandomInt,
+		botAPI:     opts.BotAPI,
+		config:     opts.Config,
+		httpClient: opts.HTTPClient,
+		storage:    opts.Storage,
+		randomInt:  opts.RandomInt,
 	}, nil
 }
 
