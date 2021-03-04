@@ -18,7 +18,9 @@ import (
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func TestCommandTop(t *testing.T) {
+func TestTopPosts(t *testing.T) {
+	const userID = 1
+
 	httpClient := &mocks.HTTPClient{}
 
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10").Return(
@@ -141,7 +143,19 @@ func TestCommandTop(t *testing.T) {
 				return tt.args.randomPost
 			}
 
-			got, err := tgbot.CommandTop(context.TODO(), tt.args.source)
+			key := fmt.Sprintf("source:%d", userID)
+			err := tgbot.storage.Set(context.TODO(), key, tt.args.source.Value(), 0)
+			require.NoError(t, err)
+
+			update := tgbotapi.Update{
+				Message: &tgbotapi.Message{
+					From: &tgbotapi.User{
+						ID: userID,
+					},
+				},
+			}
+
+			got, err := tgbot.TopPosts(context.TODO(), update)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

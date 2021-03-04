@@ -12,7 +12,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/ndrewnee/lesswrong-bot/config"
-	"github.com/ndrewnee/lesswrong-bot/models"
 	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 )
 
@@ -178,35 +177,21 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		key := fmt.Sprintf("source:%d", update.Message.From.ID)
-
-		source, err := b.storage.Get(ctx, key)
-		if err != nil {
-			log.Printf("[ERROR] Get source for user failed: %s", err)
-		}
-
-		msg.Text, err = b.CommandTop(ctx, models.Source(source))
+		msg.Text, err = b.TopPosts(ctx, update)
 		if err != nil {
 			log.Printf("[ERROR] Command /top failed: %s", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		key := fmt.Sprintf("source:%d", update.Message.From.ID)
-
-		source, err := b.storage.Get(ctx, key)
-		if err != nil {
-			log.Printf("[ERROR] Get source for user failed: %s", err)
-		}
-
-		msg.Text, err = b.CommandRandom(ctx, models.Source(source))
+		msg.Text, err = b.RandomPost(ctx, update)
 		if err != nil {
 			log.Printf("[ERROR] Command /random failed: %s", err)
 			msg.Text = "Random post not found"
 		}
 	case "source":
-		msg.Text, err = b.ChangeSource(ctx, update.Message.From.ID, update.Message.CommandArguments())
+		msg.Text, err = b.ChangeSource(ctx, update)
 		if err != nil {
-			log.Printf("[ERROR] Change source failed: %s", err)
+			log.Printf("[ERROR] Command /source failed: %s", err)
 			msg.Text = "Change source failed"
 		}
 	default:

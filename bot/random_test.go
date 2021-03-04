@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -16,7 +17,9 @@ import (
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func TestCommandRandom(t *testing.T) {
+func TestRandomPost(t *testing.T) {
+	const userID = 2
+
 	httpClient := &mocks.HTTPClient{}
 
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=0").Return(
@@ -264,7 +267,19 @@ func TestCommandRandom(t *testing.T) {
 				return tt.args.randomPost
 			}
 
-			got, err := tgbot.CommandRandom(context.TODO(), tt.args.source)
+			key := fmt.Sprintf("source:%d", userID)
+			err := tgbot.storage.Set(context.TODO(), key, tt.args.source.Value(), 0)
+			require.NoError(t, err)
+
+			update := tgbotapi.Update{
+				Message: &tgbotapi.Message{
+					From: &tgbotapi.User{
+						ID: userID,
+					},
+				},
+			}
+
+			got, err := tgbot.RandomPost(context.TODO(), update)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

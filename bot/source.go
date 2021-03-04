@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func (b *Bot) ChangeSource(ctx context.Context, userID int, arg string) (string, error) {
-	key := fmt.Sprintf("source:%d", userID)
+func (b *Bot) ChangeSource(ctx context.Context, update tgbotapi.Update) (string, error) {
+	key := fmt.Sprintf("source:%d", update.Message.From.ID)
 
 	cachedSource, err := b.storage.Get(ctx, key)
 	if err != nil {
@@ -21,6 +23,7 @@ func (b *Bot) ChangeSource(ctx context.Context, userID int, arg string) (string,
 		source = models.SourceLesswrongRu
 	}
 
+	arg := update.Message.CommandArguments()
 	if arg == "" {
 		return "Current source is " + source.String(), nil
 	}

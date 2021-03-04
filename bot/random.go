@@ -9,27 +9,35 @@ import (
 	"strings"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/gocolly/colly"
 
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func (b *Bot) CommandRandom(ctx context.Context, source models.Source) (string, error) {
-	switch source {
+func (b *Bot) RandomPost(ctx context.Context, update tgbotapi.Update) (string, error) {
+	key := fmt.Sprintf("source:%d", update.Message.From.ID)
+
+	source, err := b.storage.Get(ctx, key)
+	if err != nil {
+		log.Printf("[ERROR] Get source failed: %s, key: %s", err, key)
+	}
+
+	switch models.Source(source) {
 	case models.SourceLesswrongRu:
-		return b.CommandRandomLesswrongRu(ctx)
+		return b.randomLesswrongRu(ctx)
 	case models.SourceSlate:
-		return b.CommandRandomSlate(ctx)
+		return b.randomSlate(ctx)
 	case models.SourceAstral:
-		return b.CommandRandomAstral(ctx)
+		return b.randomAstral(ctx)
 	case models.SourceLesswrong:
-		return b.CommandRandomLesswrong(ctx)
+		return b.randomLesswrong(ctx)
 	default:
-		return b.CommandRandomLesswrongRu(ctx)
+		return b.randomLesswrongRu(ctx)
 	}
 }
 
-func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
+func (b *Bot) randomSlate(ctx context.Context) (string, error) {
 	postsCached, err := b.storage.Get(ctx, "posts:slatestarcodex")
 	if err != nil {
 		return "", fmt.Errorf("get slatestarcodex cached posts failed: %s", err)
@@ -88,7 +96,7 @@ func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
 	return b.postToMarkdown(post, md.NewConverter(models.DomainSlate, true, nil))
 }
 
-func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
+func (b *Bot) randomAstral(ctx context.Context) (string, error) {
 	postsCached, err := b.storage.Get(ctx, "posts:astralcodexten")
 	if err != nil {
 		return "", fmt.Errorf("get astralcodexten cached posts failed: %s", err)
@@ -171,7 +179,7 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 	return b.postToMarkdown(astralPost.AsPost(), md.NewConverter(models.DomainAstral, true, nil))
 }
 
-func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
+func (b *Bot) randomLesswrongRu(ctx context.Context) (string, error) {
 	postsCached, err := b.storage.Get(ctx, "posts:lesswrong.ru")
 	if err != nil {
 		return "", fmt.Errorf("get lesswrong.ru cached posts failed: %s", err)
@@ -230,7 +238,7 @@ func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
 	return b.postToMarkdown(post, md.NewConverter(models.DomainLesswrongRu, true, nil))
 }
 
-func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
+func (b *Bot) randomLesswrong(ctx context.Context) (string, error) {
 	query := fmt.Sprintf(`{
 		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: %d}}) {
 			results {
