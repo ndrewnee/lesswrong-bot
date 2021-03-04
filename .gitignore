@@ -15,5 +15,5 @@ lesswrong-bot
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-.env.dev.sh
-.env.test.sh
+.env.dev
+.env.test
