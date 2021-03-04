@@ -11,13 +11,16 @@ import (
 	"testing"
 	"time"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ndrewnee/lesswrong-bot/bot/mocks"
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func TestCommandTop(t *testing.T) {
+func TestTopPosts(t *testing.T) {
+	const userID = 1
+
 	httpClient := &mocks.HTTPClient{}
 
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10").Return(
@@ -59,7 +62,7 @@ func TestCommandTop(t *testing.T) {
 		nil,
 	)
 
-	tgbot, err := New(Options{HTTPClient: httpClient})
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
 	require.NoError(t, err)
 
 	type args struct {
@@ -140,7 +143,19 @@ func TestCommandTop(t *testing.T) {
 				return tt.args.randomPost
 			}
 
-			got, err := tgbot.CommandTop(context.TODO(), tt.args.source)
+			key := fmt.Sprintf("source:%d", userID)
+			err := tgbot.storage.Set(context.TODO(), key, tt.args.source.Value(), 0)
+			require.NoError(t, err)
+
+			update := tgbotapi.Update{
+				Message: &tgbotapi.Message{
+					From: &tgbotapi.User{
+						ID: userID,
+					},
+				},
+			}
+
+			got, err := tgbot.TopPosts(context.TODO(), update)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

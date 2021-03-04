@@ -5,8 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/gocolly/colly"
 
 	"github.com/ndrewnee/lesswrong-bot/models"
@@ -35,22 +37,29 @@ const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 10. [Who By Very Slow Decay](https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/)`
 
-func (b *Bot) CommandTop(ctx context.Context, source models.Source) (string, error) {
-	switch source {
+func (b *Bot) TopPosts(ctx context.Context, update tgbotapi.Update) (string, error) {
+	key := fmt.Sprintf("source:%d", update.Message.From.ID)
+
+	source, err := b.storage.Get(ctx, key)
+	if err != nil {
+		log.Printf("[ERROR] Get source failed: %s, key: %s", err, key)
+	}
+
+	switch models.Source(source) {
 	case models.SourceLesswrongRu:
-		return b.CommandTopLesswrongRu(ctx)
+		return b.topLesswrongRu(ctx)
 	case models.SourceSlate:
 		return MessageTopSlate, nil
 	case models.SourceAstral:
-		return b.CommandTopAstral(ctx)
+		return b.topAstral(ctx)
 	case models.SourceLesswrong:
-		return b.CommandTopLesswrong(ctx)
+		return b.topLesswrong(ctx)
 	default:
-		return b.CommandTopLesswrongRu(ctx)
+		return b.topLesswrongRu(ctx)
 	}
 }
 
-func (b *Bot) CommandTopAstral(ctx context.Context) (string, error) {
+func (b *Bot) topAstral(ctx context.Context) (string, error) {
 	httpResponse, err := b.httpClient.Get(ctx, "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
 	if err != nil {
 		return "", fmt.Errorf("get astralcodexten posts failed: %s", err)
@@ -81,7 +90,7 @@ func (b *Bot) CommandTopAstral(ctx context.Context) (string, error) {
 	return text.String(), nil
 }
 
-func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
+func (b *Bot) topLesswrongRu(ctx context.Context) (string, error) {
 	postsCached, err := b.storage.Get(ctx, "posts:lesswrong.ru")
 	if err != nil {
 		return "", fmt.Errorf("get lesswrong.ru cached posts failed: %s", err)
@@ -137,7 +146,7 @@ func (b *Bot) CommandTopLesswrongRu(ctx context.Context) (string, error) {
 	return text.String(), nil
 }
 
-func (b *Bot) CommandTopLesswrong(ctx context.Context) (string, error) {
+func (b *Bot) topLesswrong(ctx context.Context) (string, error) {
 	query := fmt.Sprintf(`{
 		posts(input: {terms: {view: "top", limit: 12, meta: null, after: "%s"}}) {
 			results {

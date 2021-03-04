@@ -8,27 +8,36 @@ import (
 	"log"
 	"strings"
 
+	md "github.com/JohannesKaufmann/html-to-markdown"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/gocolly/colly"
 
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func (b *Bot) CommandRandom(ctx context.Context, source models.Source) (string, error) {
-	switch source {
+func (b *Bot) RandomPost(ctx context.Context, update tgbotapi.Update) (string, error) {
+	key := fmt.Sprintf("source:%d", update.Message.From.ID)
+
+	source, err := b.storage.Get(ctx, key)
+	if err != nil {
+		log.Printf("[ERROR] Get source failed: %s, key: %s", err, key)
+	}
+
+	switch models.Source(source) {
 	case models.SourceLesswrongRu:
-		return b.CommandRandomLesswrongRu(ctx)
+		return b.randomLesswrongRu(ctx)
 	case models.SourceSlate:
-		return b.CommandRandomSlate(ctx)
+		return b.randomSlate(ctx)
 	case models.SourceAstral:
-		return b.CommandRandomAstral(ctx)
+		return b.randomAstral(ctx)
 	case models.SourceLesswrong:
-		return b.CommandRandomLesswrong(ctx)
+		return b.randomLesswrong(ctx)
 	default:
-		return b.CommandRandomLesswrongRu(ctx)
+		return b.randomLesswrongRu(ctx)
 	}
 }
 
-func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
+func (b *Bot) randomSlate(ctx context.Context) (string, error) {
 	postsCached, err := b.storage.Get(ctx, "posts:slatestarcodex")
 	if err != nil {
 		return "", fmt.Errorf("get slatestarcodex cached posts failed: %s", err)
@@ -84,10 +93,10 @@ func (b *Bot) CommandRandomSlate(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get slatestarcodex random post failed: %s", err)
 	}
 
-	return b.postToMarkdown(post)
+	return b.postToMarkdown(post, md.NewConverter(models.DomainSlate, true, nil))
 }
 
-func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
+func (b *Bot) randomAstral(ctx context.Context) (string, error) {
 	postsCached, err := b.storage.Get(ctx, "posts:astralcodexten")
 	if err != nil {
 		return "", fmt.Errorf("get astralcodexten cached posts failed: %s", err)
@@ -112,14 +121,14 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 
 			httpResponse, err := b.httpClient.Get(ctx, uri)
 			if err != nil {
-				log.Println("[ERROR] Get astralcodexten posts failed: ", err)
+				log.Printf("[ERROR] Get astralcodexten posts failed: %s", err)
 				break
 			}
 
 			var newPosts []models.AstralPost
 
 			if err := json.NewDecoder(httpResponse.Body).Decode(&newPosts); err != nil {
-				log.Println("[ERROR] Unmarshal astralcodexten new posts failed: ", err)
+				log.Printf("[ERROR] Unmarshal astralcodexten new posts failed: %s", err)
 				httpResponse.Body.Close()
 				break
 			}
@@ -167,10 +176,10 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("unmarshal astralcodexten post failed: %s", err)
 	}
 
-	return b.postToMarkdown(astralPost.AsPost())
+	return b.postToMarkdown(astralPost.AsPost(), md.NewConverter(models.DomainAstral, true, nil))
 }
 
-func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
+func (b *Bot) randomLesswrongRu(ctx context.Context) (string, error) {
 	postsCached, err := b.storage.Get(ctx, "posts:lesswrong.ru")
 	if err != nil {
 		return "", fmt.Errorf("get lesswrong.ru cached posts failed: %s", err)
@@ -226,10 +235,10 @@ func (b *Bot) CommandRandomLesswrongRu(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.ru random post failed: %s", err)
 	}
 
-	return b.postToMarkdown(post)
+	return b.postToMarkdown(post, md.NewConverter(models.DomainLesswrongRu, true, nil))
 }
 
-func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
+func (b *Bot) randomLesswrong(ctx context.Context) (string, error) {
 	query := fmt.Sprintf(`{
 		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: %d}}) {
 			results {
@@ -262,13 +271,13 @@ func (b *Bot) CommandRandomLesswrong(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("lesswrong.com random post not found")
 	}
 
-	lesswrongPost := response.Data.Posts.Results[0]
+	result := response.Data.Posts.Results[0]
 
-	return b.postToMarkdown(lesswrongPost.AsPost())
+	return b.postToMarkdown(result.AsPost(), md.NewConverter(models.DomainLesswrong, true, nil))
 }
 
-func (b *Bot) postToMarkdown(post models.Post) (string, error) {
-	markdown, err := b.mdConverter.ConvertString(post.HTML)
+func (b *Bot) postToMarkdown(post models.Post, mdConverter *md.Converter) (string, error) {
+	markdown, err := mdConverter.ConvertString(post.HTML)
 	if err != nil {
 		return "", fmt.Errorf("convert lesswrong.ru html to markdown failed: %s", err)
 	}
@@ -287,10 +296,12 @@ func (b *Bot) postToMarkdown(post models.Post) (string, error) {
 		// Stupid hotfixes for some invalid markdowns.
 		markdown = strings.ReplaceAll(markdown, "* * *", "")
 		markdown = strings.ReplaceAll(markdown, "```", "")
+		markdown = strings.ReplaceAll(markdown, "[[", "[")
+		markdown = strings.ReplaceAll(markdown, "]]", "]")
 		markdown = strings.ReplaceAll(markdown, "![]", "[Image]")
 	}
 
 	link := fmt.Sprintf("[%s](%s)", post.Title, post.URL)
 
-	return fmt.Sprintf("📝 %s\n\n%s\n\n%s", link, markdown, link), nil
+	return fmt.Sprintf("📝 %s\n\n%s\n\n%s", link, markdown, post.URL), nil
 }

@@ -9,11 +9,9 @@ import (
 	"net/http"
 	"time"
 
-	md "github.com/JohannesKaufmann/html-to-markdown"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/ndrewnee/lesswrong-bot/config"
-	"github.com/ndrewnee/lesswrong-bot/models"
 	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 )
 
@@ -38,21 +36,19 @@ Commands:
 
 type (
 	Bot struct {
-		config      config.Config
-		botAPI      *tgbotapi.BotAPI
-		httpClient  HTTPClient
-		storage     Storage
-		mdConverter *md.Converter
-		randomInt   func(n int) int
+		config     config.Config
+		botAPI     *tgbotapi.BotAPI
+		httpClient HTTPClient
+		storage    Storage
+		randomInt  func(n int) int
 	}
 
 	Options struct {
-		Config      config.Config
-		BotAPI      *tgbotapi.BotAPI
-		HTTPClient  HTTPClient
-		Storage     Storage
-		MDConverter *md.Converter
-		RandomInt   func(n int) int
+		Config     config.Config
+		BotAPI     *tgbotapi.BotAPI
+		HTTPClient HTTPClient
+		Storage    Storage
+		RandomInt  func(n int) int
 	}
 
 	HTTPClient interface {
@@ -97,21 +93,16 @@ func New(options ...Options) (*Bot, error) {
 		opts.Storage = memory.NewStorage()
 	}
 
-	if opts.MDConverter == nil {
-		opts.MDConverter = md.NewConverter("", true, nil)
-	}
-
 	if opts.RandomInt == nil {
 		opts.RandomInt = rand.Intn
 	}
 
 	return &Bot{
-		botAPI:      opts.BotAPI,
-		config:      opts.Config,
-		httpClient:  opts.HTTPClient,
-		storage:     opts.Storage,
-		mdConverter: opts.MDConverter,
-		randomInt:   opts.RandomInt,
+		botAPI:     opts.BotAPI,
+		config:     opts.Config,
+		httpClient: opts.HTTPClient,
+		storage:    opts.Storage,
+		randomInt:  opts.RandomInt,
 	}, nil
 }
 
@@ -129,14 +120,14 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 		}
 
 		if info.LastErrorDate != 0 {
-			log.Println("[ERROR] Telegram callback failed", info.LastErrorMessage)
+			log.Printf("[ERROR] Telegram callback failed: %s", info.LastErrorMessage)
 		}
 
 		updates := b.botAPI.ListenForWebhook("/" + b.botAPI.Token)
 
 		go func() {
 			if err := http.ListenAndServe(b.config.Address, nil); err != nil {
-				log.Println("[ERROR] Listen and serve failed: ", err)
+				log.Printf("[ERROR] Listen and serve failed: %s", err)
 			}
 		}()
 
@@ -186,43 +177,22 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 	case "help":
 		msg.Text = MessageHelp
 	case "top":
-		key := fmt.Sprintf("source:%d", update.Message.From.ID)
-
-		source, err := b.storage.Get(ctx, key)
+		msg.Text, err = b.TopPosts(ctx, update)
 		if err != nil {
-			log.Printf("[ERROR] Get source for user failed: %s", err)
-		}
-
-		msg.Text, err = b.CommandTop(ctx, models.Source(source))
-		if err != nil {
-			log.Println("[ERROR] Command /top failed: ", err)
+			log.Printf("[ERROR] Command /top failed: %s", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
-		key := fmt.Sprintf("source:%d", update.Message.From.ID)
-
-		source, err := b.storage.Get(ctx, key)
+		msg.Text, err = b.RandomPost(ctx, update)
 		if err != nil {
-			log.Printf("[ERROR] Get source for user failed: %s", err)
-		}
-
-		msg.Text, err = b.CommandRandom(ctx, models.Source(source))
-		if err != nil {
-			log.Println("[ERROR] Command /random failed: ", err)
+			log.Printf("[ERROR] Command /random failed: %s", err)
 			msg.Text = "Random post not found"
 		}
 	case "source":
-		source := models.Source(update.Message.CommandArguments())
-		if !source.IsValid() {
-			source = models.SourceLesswrongRu
-		}
-
-		msg.Text = "Changed source to " + source.String()
-		key := fmt.Sprintf("source:%d", update.Message.From.ID)
-
-		if err := b.storage.Set(ctx, key, source.Value(), 0); err != nil {
-			log.Printf("[ERROR] Set source for user failed: %s", err)
-			msg.Text = fmt.Sprintf("Change source to %s failed", source.String())
+		msg.Text, err = b.ChangeSource(ctx, update)
+		if err != nil {
+			log.Printf("[ERROR] Command /source failed: %s", err)
+			msg.Text = "Change source failed"
 		}
 	default:
 		msg.Text = "I don't know that command"

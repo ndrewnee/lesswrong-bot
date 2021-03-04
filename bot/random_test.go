@@ -4,18 +4,22 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ndrewnee/lesswrong-bot/bot/mocks"
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func TestCommandRandom(t *testing.T) {
+func TestRandomPost(t *testing.T) {
+	const userID = 2
+
 	httpClient := &mocks.HTTPClient{}
 
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=0").Return(
@@ -63,7 +67,7 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	query := `{
+	query1 := `{
 		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: 0}}) {
 			results {
 				title
@@ -73,10 +77,10 @@ func TestCommandRandom(t *testing.T) {
 		}
 	}`
 
-	request, err := json.Marshal(map[string]string{"query": query})
+	request1, err := json.Marshal(map[string]string{"query": query1})
 	require.NoError(t, err)
 
-	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
+	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request1)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.json")
@@ -88,7 +92,32 @@ func TestCommandRandom(t *testing.T) {
 		nil,
 	)
 
-	tgbot, err := New(Options{HTTPClient: httpClient})
+	query2 := `{
+		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: 1}}) {
+			results {
+				title
+				pageUrl
+				htmlBody
+			}
+		}
+	}`
+
+	request2, err := json.Marshal(map[string]string{"query": query2})
+	require.NoError(t, err)
+
+	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request2)).Return(
+		&http.Response{
+			Body: func() io.ReadCloser {
+				file, err := ioutil.ReadFile("testdata/lesswrong_random_post_invalid_domain.json")
+				require.NoError(t, err)
+
+				return ioutil.NopCloser(bytes.NewBuffer(file))
+			}(),
+		},
+		nil,
+	)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
 	require.NoError(t, err)
 
 	type args struct {
@@ -217,6 +246,19 @@ func TestCommandRandom(t *testing.T) {
 			},
 			wantErr: require.NoError,
 		},
+		{
+			name: "Should get random post from https://lesswrong.com (invalid domain)",
+			args: args{
+				randomPost: 1,
+				source:     models.SourceLesswrong,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/lesswrong_random_post_invalid_domain.md")
+				require.NoError(t, err)
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
 	}
 
 	for _, tt := range tests {
@@ -225,7 +267,19 @@ func TestCommandRandom(t *testing.T) {
 				return tt.args.randomPost
 			}
 
-			got, err := tgbot.CommandRandom(context.TODO(), tt.args.source)
+			key := fmt.Sprintf("source:%d", userID)
+			err := tgbot.storage.Set(context.TODO(), key, tt.args.source.Value(), 0)
+			require.NoError(t, err)
+
+			update := tgbotapi.Update{
+				Message: &tgbotapi.Message{
+					From: &tgbotapi.User{
+						ID: userID,
+					},
+				},
+			}
+
+			got, err := tgbot.RandomPost(context.TODO(), update)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

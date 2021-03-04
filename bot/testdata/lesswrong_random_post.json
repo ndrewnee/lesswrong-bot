@@ -9,25 +9,5 @@
                 }
             ]
         }
-    },
-    "extensions": {
-        "cacheControl": {
-            "version": 1,
-            "hints": [
-                {
-                    "path": [
-                        "posts"
-                    ],
-                    "maxAge": 0
-                },
-                {
-                    "path": [
-                        "posts",
-                        "results"
-                    ],
-                    "maxAge": 0
-                }
-            ]
-        }
     }
 }
