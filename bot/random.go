@@ -93,7 +93,7 @@ func (b *Bot) randomSlate(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get slatestarcodex random post failed: %s", err)
 	}
 
-	return b.postToMarkdown(post, md.NewConverter(models.DomainSlate, true, nil))
+	return b.postToMarkdown(post, md.NewConverter(models.DomainSlate, true, nil), false)
 }
 
 func (b *Bot) randomAstral(ctx context.Context) (string, error) {
@@ -176,7 +176,7 @@ func (b *Bot) randomAstral(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("unmarshal astralcodexten post failed: %s", err)
 	}
 
-	return b.postToMarkdown(astralPost.AsPost(), md.NewConverter(models.DomainAstral, true, nil))
+	return b.postToMarkdown(astralPost.AsPost(), md.NewConverter(models.DomainAstral, true, nil), false)
 }
 
 func (b *Bot) randomLesswrongRu(ctx context.Context) (string, error) {
@@ -235,7 +235,7 @@ func (b *Bot) randomLesswrongRu(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.ru random post failed: %s", err)
 	}
 
-	return b.postToMarkdown(post, md.NewConverter(models.DomainLesswrongRu, true, nil))
+	return b.postToMarkdown(post, md.NewConverter(models.DomainLesswrongRu, true, nil), true)
 }
 
 func (b *Bot) randomLesswrong(ctx context.Context) (string, error) {
@@ -273,10 +273,10 @@ func (b *Bot) randomLesswrong(ctx context.Context) (string, error) {
 
 	result := response.Data.Posts.Results[0]
 
-	return b.postToMarkdown(result.AsPost(), md.NewConverter(models.DomainLesswrong, true, nil))
+	return b.postToMarkdown(result.AsPost(), md.NewConverter(models.DomainLesswrong, true, nil), false)
 }
 
-func (b *Bot) postToMarkdown(post models.Post, mdConverter *md.Converter) (string, error) {
+func (b *Bot) postToMarkdown(post models.Post, mdConverter *md.Converter, urlWithText bool) (string, error) {
 	markdown, err := mdConverter.ConvertString(post.HTML)
 	if err != nil {
 		return "", fmt.Errorf("convert lesswrong.ru html to markdown failed: %s", err)
@@ -303,5 +303,10 @@ func (b *Bot) postToMarkdown(post models.Post, mdConverter *md.Converter) (strin
 
 	link := fmt.Sprintf("[%s](%s)", post.Title, post.URL)
 
-	return fmt.Sprintf("📝 %s\n\n%s\n\n%s", link, markdown, post.URL), nil
+	postURL := post.URL
+	if urlWithText {
+		postURL = link
+	}
+
+	return fmt.Sprintf("📝 %s\n\n%s\n\n%s", link, markdown, postURL), nil
 }
