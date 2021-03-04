@@ -203,6 +203,60 @@ Commands:
 			wantErr: require.NoError,
 		},
 		{
+			name: "Should show current source",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						From: &tgbotapi.User{
+							ID: userID,
+						},
+						Entities: &[]tgbotapi.MessageEntity{
+							{
+								Offset: 0,
+								Type:   "bot_command",
+								Length: 7,
+							},
+						},
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+						Text: "/source",
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.Equal(t, "Current source is https://lesswrong.ru", got.Text)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Shouldn't change source if it's invalid",
+			args: args{
+				update: tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						From: &tgbotapi.User{
+							ID: userID,
+						},
+						Entities: &[]tgbotapi.MessageEntity{
+							{
+								Offset: 0,
+								Type:   "bot_command",
+								Length: 7,
+							},
+						},
+						Chat: &tgbotapi.Chat{
+							ID: chatID,
+						},
+						Text: "/source invalid",
+					},
+				},
+			},
+			check: func(t *testing.T, got tgbotapi.Message) {
+				require.Equal(t, "New source is invalid. Current source is https://lesswrong.ru", got.Text)
+			},
+			wantErr: require.NoError,
+		},
+		{
 			name: "Should change source to https://slatestarcodex.com",
 			args: args{
 				update: tgbotapi.Update{

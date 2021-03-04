@@ -113,14 +113,14 @@ func (b *Bot) CommandRandomAstral(ctx context.Context) (string, error) {
 
 			httpResponse, err := b.httpClient.Get(ctx, uri)
 			if err != nil {
-				log.Println("[ERROR] Get astralcodexten posts failed: ", err)
+				log.Printf("[ERROR] Get astralcodexten posts failed: %s", err)
 				break
 			}
 
 			var newPosts []models.AstralPost
 
 			if err := json.NewDecoder(httpResponse.Body).Decode(&newPosts); err != nil {
-				log.Println("[ERROR] Unmarshal astralcodexten new posts failed: ", err)
+				log.Printf("[ERROR] Unmarshal astralcodexten new posts failed: %s", err)
 				httpResponse.Body.Close()
 				break
 			}

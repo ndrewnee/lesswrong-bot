@@ -42,7 +42,7 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
 
 		if _, err := tgbot.MessageHandler(ctx, update); err != nil {
-			log.Println("[ERROR] Message not sent: ", err)
+			log.Printf("[ERROR] Message not sent: %s", err)
 		}
 
 		cancel()

@@ -35,7 +35,7 @@ Take bot access token.
 Before running copy example file and replace env vars with your credentials
 
 ```sh
-cp .env.dev.example.sh .env.dev.sh
+cp .example.env.dev.sh .env.dev.sh
 source .env.dev.sh
 ```
 
@@ -68,7 +68,7 @@ To run integration tests you need working redis server.
 Before running tests copy example env file and replace env vars with your credentials
 
 ```sh
-cp .env.test.example.sh .env.test.sh
+cp .example.env.test.sh .env.test.sh
 source .env.test.sh
 ```
 

@@ -121,14 +121,14 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 		}
 
 		if info.LastErrorDate != 0 {
-			log.Println("[ERROR] Telegram callback failed", info.LastErrorMessage)
+			log.Printf("[ERROR] Telegram callback failed: %s", info.LastErrorMessage)
 		}
 
 		updates := b.botAPI.ListenForWebhook("/" + b.botAPI.Token)
 
 		go func() {
 			if err := http.ListenAndServe(b.config.Address, nil); err != nil {
-				log.Println("[ERROR] Listen and serve failed: ", err)
+				log.Printf("[ERROR] Listen and serve failed: %s", err)
 			}
 		}()
 
@@ -187,7 +187,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 
 		msg.Text, err = b.CommandTop(ctx, models.Source(source))
 		if err != nil {
-			log.Println("[ERROR] Command /top failed: ", err)
+			log.Printf("[ERROR] Command /top failed: %s", err)
 			msg.Text = "Top posts not found"
 		}
 	case "random":
@@ -200,21 +200,14 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 
 		msg.Text, err = b.CommandRandom(ctx, models.Source(source))
 		if err != nil {
-			log.Println("[ERROR] Command /random failed: ", err)
+			log.Printf("[ERROR] Command /random failed: %s", err)
 			msg.Text = "Random post not found"
 		}
 	case "source":
-		source := models.Source(update.Message.CommandArguments())
-		if !source.IsValid() {
-			source = models.SourceLesswrongRu
-		}
-
-		msg.Text = "Changed source to " + source.String()
-		key := fmt.Sprintf("source:%d", update.Message.From.ID)
-
-		if err := b.storage.Set(ctx, key, source.Value(), 0); err != nil {
-			log.Printf("[ERROR] Set source for user failed: %s", err)
-			msg.Text = fmt.Sprintf("Change source to %s failed", source.String())
+		msg.Text, err = b.ChangeSource(ctx, update.Message.From.ID, update.Message.CommandArguments())
+		if err != nil {
+			log.Printf("[ERROR] Change source failed: %s", err)
+			msg.Text = "Change source failed"
 		}
 	default:
 		msg.Text = "I don't know that command"
