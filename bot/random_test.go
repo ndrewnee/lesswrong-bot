@@ -67,6 +67,18 @@ func TestRandomPost(t *testing.T) {
 		nil,
 	)
 
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/open-thread-159").Return(
+		&http.Response{
+			Body: func() io.ReadCloser {
+				file, err := ioutil.ReadFile("testdata/astral_random_post_link_bug.json")
+				require.NoError(t, err)
+
+				return ioutil.NopCloser(bytes.NewBuffer(file))
+			}(),
+		},
+		nil,
+	)
+
 	query1 := `{
 		posts(input: {terms: {view: "new", limit: 1, meta: null, offset: 0}}) {
 			results {
@@ -202,6 +214,19 @@ func TestRandomPost(t *testing.T) {
 			},
 			want: func(t *testing.T, got string) {
 				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.md")
+				require.NoError(t, err)
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "Should get random post from https://astralcodexten.substack.com (link bug)",
+			args: args{
+				randomPost: 13,
+				source:     models.SourceAstral,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/astral_random_post_link_bug.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},

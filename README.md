@@ -32,11 +32,11 @@ Register new bot at https://t.me/BotFather or use previously created one.
 
 Take bot access token.
 
-Before running copy example file and replace env vars with your credentials
+Before running copy sample file and replace env vars with your credentials
 
 ```sh
-cp .example.env.dev.sh .env.dev.sh
-source .env.dev.sh
+cp .env.dev.sample .env.dev
+source .env.dev
 ```
 
 Run application locally:
@@ -68,8 +68,8 @@ To run integration tests you need working redis server.
 Before running tests copy example env file and replace env vars with your credentials
 
 ```sh
-cp .example.env.test.sh .env.test.sh
-source .env.test.sh
+cp .env.test.sample .env.test
+source .env.test
 ```
 
 and then run integration tests

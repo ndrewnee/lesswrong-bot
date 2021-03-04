@@ -1,0 +1,90 @@
+{
+    "id": 32309642,
+    "uuid": "c7e58ba0-3a50-403e-83e0-0d70b055a82a",
+    "publication_id": 89120,
+    "type": "newsletter",
+    "title": "Open Thread 159",
+    "social_title": null,
+    "search_engine_title": null,
+    "search_engine_description": null,
+    "subtitle": "...",
+    "slug": "open-thread-159",
+    "post_date": "2021-02-08T03:15:39.057Z",
+    "podcast_url": "",
+    "podcast_duration": null,
+    "audience": "everyone",
+    "write_comment_permissions": "everyone",
+    "default_comment_sort": null,
+    "canonical_url": "https://astralcodexten.substack.com/p/open-thread-159",
+    "latest_comment_id": 1272127,
+    "comment_count": 338,
+    "reactions": {
+        "❤": 23
+    },
+    "top_exclusions": [],
+    "pins": [],
+    "next_slug": "metaculus-monday-2821",
+    "prev_slug": "journalism-and-legible-expertise",
+    "cover_image": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/cb904702-c992-4ef5-920f-e6824a6220de_496x341.png",
+    "description": "...",
+    "body_html": "<p>This is the weekly visible open thread. Odd-numbered open threads will be <strong>no-politics</strong>,  even-numbered threads will be politics-allowed. This one is  odd-numbered, so be careful. Otherwise, post about anything else you  want. Also:  </p><p><strong>1.  </strong>I understand Substack is still working on various concerns about the commenting system. While you’re waiting, if your specific concern is about getting reply emails when people heart your comments, “you can set up a filter to delete emails from <a href=\"mailto:reaction@mg1.substack.com\">reaction@mg1.substack.com</a>. Reply notifications come from a different email address,  <a href=\"mailto:forum@mg1.substack.com\">forum@mg1.substack.com</a>, so they won't be affected.” Thanks to u/HonestyIsForTheBirds <a href=\"https://www.reddit.com/r/slatestarcodex/comments/lac63p/metaculus_monday/glo7g42/\">from the subreddit</a> for this tip.</p>",
+    "publishedBylines": [
+        {
+            "id": 12009663,
+            "name": "Scott Alexander",
+            "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/7b500d22-1176-42ad-afaa-5d72bc36a809_44x44.png",
+            "bio": null
+        }
+    ],
+    "reaction": null,
+    "comments": [
+        {
+            "id": 1213428,
+            "user_id": 1324411,
+            "publication_id": 89120,
+            "post_id": 32309642,
+            "ancestor_path": "",
+            "body": "Hey I am writing a series about philosophy as it relates to the cryptocurrency industry for CoinDesk\nThis is my second post in the series on libertarianism (the first was on crypto anarchy)\nPosting it here because I reference Scott’s archipelago in this one\nhttps://www.coindesk.com/crypto-is-the-libertarian-cheat-code-in-the-final-battle-over-state-coercion",
+            "date": "2021-02-08T03:21:11.921Z",
+            "deleted": false,
+            "name": "Brady Dale",
+            "photo_url": "https://bucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com/public/images/0a6e8c79-6096-4068-a2d9-8b340ff0ff22_1203x1687.jpeg",
+            "reactions": {
+                "❤": 0
+            },
+            "is_author": false,
+            "reactor_names": [],
+            "reaction": null,
+            "children": [],
+            "bans": [],
+            "user_banned": false,
+            "user_banned_for_comment": false,
+            "score": 0.005952380952380952,
+            "childrenSummary": "1 reply"
+        },
+        {
+            "id": 1213429,
+            "user_id": 10447091,
+            "publication_id": 89120,
+            "post_id": 32309642,
+            "ancestor_path": "",
+            "body": "Let's discuss COVID variant strains and vaccines. The news of today is that AstraZeneca is halting their vaccine trial in South Africa after data showing that it is ineffective against the B.1.351 variant. https://www.sciencemag.org/news/2021/02/south-africa-suspends-use-astrazenecas-covid-19-vaccine-after-it-fails-clearly-stop\n\nGiven the country's reliance on that vaccine, it is very bad news. There may be some protection against disease severity but lack of protection against infection is not encouraging.\n\nIn other news, apparently the J&J vaccine won't receive FDA authorization until at least March. This is atrocious. https://www.fiercebiotech.com/biotech/fda-arranges-feb-26-adcomm-to-discuss-j-j-covid-19-vaccine-eua",
+            "date": "2021-02-08T03:21:29.587Z",
+            "deleted": false,
+            "name": "Metacelsus",
+            "photo_url": null,
+            "reactions": {
+                "❤": 3
+            },
+            "is_author": false,
+            "reactor_names": [],
+            "reaction": null,
+            "children": [],
+            "bans": [],
+            "user_banned": false,
+            "user_banned_for_comment": false,
+            "score": 0.023809523809523808,
+            "childrenSummary": "50 replies"
+        }
+    ]
+}
