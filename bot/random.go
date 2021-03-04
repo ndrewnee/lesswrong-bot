@@ -277,20 +277,25 @@ func (b *Bot) randomLesswrong(ctx context.Context) (string, error) {
 }
 
 func (b *Bot) postToMarkdown(post models.Post, mdConverter *md.Converter, urlWithText bool) (string, error) {
-	markdown, err := mdConverter.ConvertString(post.HTML)
+	markdownOrig, err := mdConverter.ConvertString(post.HTML)
 	if err != nil {
 		return "", fmt.Errorf("convert lesswrong.ru html to markdown failed: %s", err)
 	}
+
+	markdown := markdownOrig
 
 	// Cut post for preview mode.
 	if len(markdown) > models.PostMaxLength {
 		// Convert to runes to properly split between unicode symbols.
 		runes := []rune(markdown)
 		markdown = string(runes[:models.PostMaxLength])
+
 		// Truncate after next line end to not break markdown text.
 		rest := string(runes[models.PostMaxLength:])
 		if n := strings.IndexByte(rest, '\n'); n != -1 {
 			markdown += rest[:n]
+		} else {
+			markdown = markdownOrig
 		}
 
 		// Stupid hotfixes for some invalid markdowns.
