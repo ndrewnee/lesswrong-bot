@@ -303,5 +303,5 @@ func (b *Bot) postToMarkdown(post models.Post, mdConverter *md.Converter) (strin
 
 	link := fmt.Sprintf("[%s](%s)", post.Title, post.URL)
 
-	return fmt.Sprintf("📝 %s\n\n%s\n\n%s", link, markdown, link), nil
+	return fmt.Sprintf("📝 %s\n\n%s\n\n%s", link, markdown, post.URL), nil
 }

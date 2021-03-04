@@ -2,7 +2,7 @@ package models
 
 const (
 	DefaultLimit           = 12
-	PostMaxLength          = 1500
+	PostMaxLength          = 500
 	LesswrongPostsMaxCount = 25000
 )
 
