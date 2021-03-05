@@ -34,6 +34,31 @@ Commands:
 /help - Help`
 )
 
+var (
+	mainKeyboard = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("/top"),
+			tgbotapi.NewKeyboardButton("/random"),
+			tgbotapi.NewKeyboardButton("/source"),
+		),
+	)
+
+	sourceKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Lesswrong.ru", "1"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Slate Start Codex", "2"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Astral Codex Ten", "3"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Lesswrong.com", "4"),
+		),
+	)
+)
+
 type (
 	Bot struct {
 		config     config.Config
@@ -155,7 +180,17 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 }
 
 func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, error) {
-	var err error
+	if update.CallbackQuery != nil {
+		text, err := b.ChangeSource(ctx, update.CallbackQuery.From.ID, update.CallbackQuery.Data)
+		if err != nil {
+			log.Printf("[ERROR] Command /source failed: %s", err)
+			text = "Change source failed"
+		}
+
+		b.botAPI.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, text))
+
+		return tgbotapi.Message{}, nil
+	}
 
 	if update.Message == nil {
 		return tgbotapi.Message{}, nil
@@ -174,26 +209,37 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 	msg.DisableWebPagePreview = true
 
 	switch update.Message.Command() {
-	case "help":
+	case "start", "help":
+		msg.ReplyMarkup = mainKeyboard
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = b.TopPosts(ctx, update)
+		text, err := b.TopPosts(ctx, update)
 		if err != nil {
 			log.Printf("[ERROR] Command /top failed: %s", err)
-			msg.Text = "Top posts not found"
+			text = "Top posts not found"
 		}
+
+		msg.Text = text
 	case "random":
-		msg.Text, err = b.RandomPost(ctx, update)
+		text, err := b.RandomPost(ctx, update)
 		if err != nil {
 			log.Printf("[ERROR] Command /random failed: %s", err)
-			msg.Text = "Random post not found"
+			text = "Random post not found"
 		}
+
+		msg.Text = text
 	case "source":
-		msg.Text, err = b.ChangeSource(ctx, update)
+		if update.Message.CommandArguments() == "" {
+			msg.ReplyMarkup = sourceKeyboard
+		}
+
+		text, err := b.ChangeSource(ctx, update.Message.From.ID, update.Message.CommandArguments())
 		if err != nil {
 			log.Printf("[ERROR] Command /source failed: %s", err)
-			msg.Text = "Change source failed"
+			text = "Change source failed"
 		}
+
+		msg.Text = text
 	default:
 		msg.Text = "I don't know that command"
 	}
