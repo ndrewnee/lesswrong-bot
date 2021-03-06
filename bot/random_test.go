@@ -296,15 +296,7 @@ func TestRandomPost(t *testing.T) {
 			err := tgbot.storage.Set(context.TODO(), key, tt.args.source.Value(), 0)
 			require.NoError(t, err)
 
-			update := tgbotapi.Update{
-				Message: &tgbotapi.Message{
-					From: &tgbotapi.User{
-						ID: userID,
-					},
-				},
-			}
-
-			got, err := tgbot.RandomPost(context.TODO(), update)
+			got, err := tgbot.RandomPost(context.TODO(), userID)
 			tt.wantErr(t, err)
 			tt.want(t, got)
 		})

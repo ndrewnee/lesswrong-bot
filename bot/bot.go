@@ -12,6 +12,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/models"
 	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 )
 
@@ -32,6 +33,14 @@ Commands:
   4. [Lesswrong.com](https://lesswrong.com)
 
 /help - Help`
+)
+
+var mainKeyboard = tgbotapi.NewReplyKeyboard(
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("/top"),
+		tgbotapi.NewKeyboardButton("/random"),
+		tgbotapi.NewKeyboardButton("/source"),
+	),
 )
 
 type (
@@ -154,11 +163,24 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 	return updates, nil
 }
 
-func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, error) {
-	var err error
+func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, tgbotapi.APIResponse, error) {
+	if update.CallbackQuery != nil {
+		text, _, err := b.ChangeSource(ctx, update.CallbackQuery.From.ID, models.Source(update.CallbackQuery.Data))
+		if err != nil {
+			log.Printf("[ERROR] Command /source failed: %s", err)
+			text = "Change source failed"
+		}
+
+		response, err := b.botAPI.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, text))
+		if err != nil {
+			return tgbotapi.Message{}, response, fmt.Errorf("answer callback failed: %s", err)
+		}
+
+		return tgbotapi.Message{}, response, nil
+	}
 
 	if update.Message == nil {
-		return tgbotapi.Message{}, nil
+		return tgbotapi.Message{}, tgbotapi.APIResponse{}, nil
 	}
 
 	if update.Message.From != nil {
@@ -166,7 +188,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 	}
 
 	if update.Message.Chat == nil {
-		return tgbotapi.Message{}, nil
+		return tgbotapi.Message{}, tgbotapi.APIResponse{}, nil
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
@@ -174,26 +196,34 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 	msg.DisableWebPagePreview = true
 
 	switch update.Message.Command() {
-	case "help":
+	case "start", "help":
+		msg.ReplyMarkup = mainKeyboard
 		msg.Text = MessageHelp
 	case "top":
-		msg.Text, err = b.TopPosts(ctx, update)
+		text, err := b.TopPosts(ctx, update.Message.From.ID)
 		if err != nil {
 			log.Printf("[ERROR] Command /top failed: %s", err)
-			msg.Text = "Top posts not found"
+			text = "Top posts not found"
 		}
+
+		msg.Text = text
 	case "random":
-		msg.Text, err = b.RandomPost(ctx, update)
+		text, err := b.RandomPost(ctx, update.Message.From.ID)
 		if err != nil {
 			log.Printf("[ERROR] Command /random failed: %s", err)
-			msg.Text = "Random post not found"
+			text = "Random post not found"
 		}
+
+		msg.Text = text
 	case "source":
-		msg.Text, err = b.ChangeSource(ctx, update)
+		text, keyboard, err := b.ChangeSource(ctx, update.Message.From.ID, models.Source(update.Message.CommandArguments()))
 		if err != nil {
 			log.Printf("[ERROR] Command /source failed: %s", err)
-			msg.Text = "Change source failed"
+			text = "Change source failed"
 		}
+
+		msg.Text = text
+		msg.ReplyMarkup = keyboard
 	default:
 		msg.Text = "I don't know that command"
 	}
@@ -204,8 +234,8 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 		errMsg.Text = "Oops, something went wrong!"
 		_, _ = b.botAPI.Send(errMsg)
 
-		return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
+		return tgbotapi.Message{}, tgbotapi.APIResponse{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
 	}
 
-	return sent, nil
+	return sent, tgbotapi.APIResponse{}, nil
 }

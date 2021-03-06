@@ -99,12 +99,35 @@ func TestBot_MessageHandler(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		check   func(t *testing.T, got tgbotapi.Message)
+		check   func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse)
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
 			name:    "Should handle nil message",
 			wantErr: require.NoError,
+		},
+		{
+			name: "Should fail to answer callback query",
+			args: args{
+				update: tgbotapi.Update{
+					CallbackQuery: &tgbotapi.CallbackQuery{
+						From: &tgbotapi.User{
+							ID: userID,
+						},
+						ID:   "invalid",
+						Data: "1",
+					},
+				},
+			},
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				wantCallback := tgbotapi.APIResponse{
+					Ok:          false,
+					ErrorCode:   400,
+					Description: "Bad Request: query is too old and response timeout expired or query ID is invalid",
+				}
+				require.Equal(t, wantCallback, callback)
+			},
+			wantErr: require.Error,
 		},
 		{
 			name: "Should handle command with nil chat",
@@ -133,8 +156,8 @@ func TestBot_MessageHandler(t *testing.T) {
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, "I don't know that command", got.Text)
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.Equal(t, "I don't know that command", msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -157,8 +180,8 @@ func TestBot_MessageHandler(t *testing.T) {
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, "I don't know that command", got.Text)
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.Equal(t, "I don't know that command", msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -181,7 +204,7 @@ func TestBot_MessageHandler(t *testing.T) {
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
 				want := `🤖 I'm a bot for reading posts:
 
 Commands:
@@ -198,7 +221,7 @@ Commands:
   4. Lesswrong.com
 
 /help - Help`
-				require.Equal(t, want, got.Text)
+				require.Equal(t, want, msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -224,8 +247,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, "Current source is https://lesswrong.ru", got.Text)
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.Equal(t, "Current source is https://lesswrong.ru", msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -251,8 +274,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, "New source is invalid. Current source is https://lesswrong.ru", got.Text)
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.Equal(t, "New source is invalid. Current source is https://lesswrong.ru", msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -278,8 +301,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, "Changed source to https://slatestarcodex.com", got.Text)
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.Equal(t, "Changed source to https://slatestarcodex.com", msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -305,7 +328,7 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
 				want := `🏆 Top posts from https://slatestarcodex.com
 
 1. Beware The Man Of One Study
@@ -327,7 +350,7 @@ Commands:
 9. The Categories Were Made For Man, Not Man For The Categories
 
 10. Who By Very Slow Decay`
-				require.Equal(t, want, got.Text)
+				require.Equal(t, want, msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -353,8 +376,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(got.Text, "📝"))
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.True(t, strings.HasPrefix(msg.Text, "📝"))
 			},
 			wantErr: require.NoError,
 		},
@@ -380,8 +403,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, "Changed source to https://astralcodexten.substack.com", got.Text)
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.Equal(t, "Changed source to https://astralcodexten.substack.com", msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -407,8 +430,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(got.Text, "🏆 Top posts from https://astralcodexten.substack.com"))
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts from https://astralcodexten.substack.com"))
 			},
 			wantErr: require.NoError,
 		},
@@ -434,8 +457,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(got.Text, "📝"))
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.True(t, strings.HasPrefix(msg.Text, "📝"))
 			},
 			wantErr: require.NoError,
 		},
@@ -461,8 +484,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, "Changed source to https://lesswrong.ru", got.Text)
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.Equal(t, "Changed source to https://lesswrong.ru", msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -488,8 +511,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(got.Text, "🏆 Random posts from https://lesswrong.ru"))
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.True(t, strings.HasPrefix(msg.Text, "🏆 Random posts from https://lesswrong.ru"))
 			},
 			wantErr: require.NoError,
 		},
@@ -515,8 +538,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(got.Text, "📝"))
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.True(t, strings.HasPrefix(msg.Text, "📝"))
 			},
 			wantErr: require.NoError,
 		},
@@ -542,8 +565,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.Equal(t, "Changed source to https://lesswrong.com", got.Text)
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.Equal(t, "Changed source to https://lesswrong.com", msg.Text)
 			},
 			wantErr: require.NoError,
 		},
@@ -569,8 +592,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(got.Text, "🏆 Top posts this week from https://lesswrong.com"))
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts this week from https://lesswrong.com"))
 			},
 			wantErr: require.NoError,
 		},
@@ -596,8 +619,8 @@ Commands:
 					},
 				},
 			},
-			check: func(t *testing.T, got tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(got.Text, "📝"))
+			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
+				require.True(t, strings.HasPrefix(msg.Text, "📝"))
 			},
 			wantErr: require.NoError,
 		},
@@ -605,11 +628,11 @@ Commands:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tgbot.MessageHandler(context.TODO(), tt.args.update)
+			msg, callback, err := tgbot.MessageHandler(context.TODO(), tt.args.update)
 			tt.wantErr(t, err)
 
 			if tt.check != nil {
-				tt.check(t, got)
+				tt.check(t, msg, callback)
 			}
 		})
 	}
