@@ -14,7 +14,6 @@ import (
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-
 	config := config.ParseConfig()
 
 	var (
@@ -41,7 +40,7 @@ func main() {
 	for update := range updates {
 		ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
 
-		if _, err := tgbot.MessageHandler(ctx, update); err != nil {
+		if _, _, err := tgbot.MessageHandler(ctx, update); err != nil {
 			log.Printf("[ERROR] Message not sent: %s", err)
 		}
 

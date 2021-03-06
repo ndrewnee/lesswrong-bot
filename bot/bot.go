@@ -34,29 +34,12 @@ Commands:
 /help - Help`
 )
 
-var (
-	mainKeyboard = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("/top"),
-			tgbotapi.NewKeyboardButton("/random"),
-			tgbotapi.NewKeyboardButton("/source"),
-		),
-	)
-
-	sourceKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Lesswrong.ru", "1"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Slate Start Codex", "2"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Astral Codex Ten", "3"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Lesswrong.com", "4"),
-		),
-	)
+var mainKeyboard = tgbotapi.NewReplyKeyboard(
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("/top"),
+		tgbotapi.NewKeyboardButton("/random"),
+		tgbotapi.NewKeyboardButton("/source"),
+	),
 )
 
 type (
@@ -179,21 +162,24 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 	return updates, nil
 }
 
-func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, error) {
+func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, tgbotapi.APIResponse, error) {
 	if update.CallbackQuery != nil {
-		text, err := b.ChangeSource(ctx, update.CallbackQuery.From.ID, update.CallbackQuery.Data)
+		text, _, err := b.ChangeSource(ctx, update.CallbackQuery.From.ID, update.CallbackQuery.Data)
 		if err != nil {
 			log.Printf("[ERROR] Command /source failed: %s", err)
 			text = "Change source failed"
 		}
 
-		b.botAPI.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, text))
+		response, err := b.botAPI.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, text))
+		if err != nil {
+			return tgbotapi.Message{}, response, fmt.Errorf("answer callback failed: %s", err)
+		}
 
-		return tgbotapi.Message{}, nil
+		return tgbotapi.Message{}, response, nil
 	}
 
 	if update.Message == nil {
-		return tgbotapi.Message{}, nil
+		return tgbotapi.Message{}, tgbotapi.APIResponse{}, nil
 	}
 
 	if update.Message.From != nil {
@@ -201,7 +187,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 	}
 
 	if update.Message.Chat == nil {
-		return tgbotapi.Message{}, nil
+		return tgbotapi.Message{}, tgbotapi.APIResponse{}, nil
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
@@ -213,7 +199,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 		msg.ReplyMarkup = mainKeyboard
 		msg.Text = MessageHelp
 	case "top":
-		text, err := b.TopPosts(ctx, update)
+		text, err := b.TopPosts(ctx, update.Message.From.ID)
 		if err != nil {
 			log.Printf("[ERROR] Command /top failed: %s", err)
 			text = "Top posts not found"
@@ -221,7 +207,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 
 		msg.Text = text
 	case "random":
-		text, err := b.RandomPost(ctx, update)
+		text, err := b.RandomPost(ctx, update.Message.From.ID)
 		if err != nil {
 			log.Printf("[ERROR] Command /random failed: %s", err)
 			text = "Random post not found"
@@ -229,17 +215,14 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 
 		msg.Text = text
 	case "source":
-		if update.Message.CommandArguments() == "" {
-			msg.ReplyMarkup = sourceKeyboard
-		}
-
-		text, err := b.ChangeSource(ctx, update.Message.From.ID, update.Message.CommandArguments())
+		text, keyboard, err := b.ChangeSource(ctx, update.Message.From.ID, update.Message.CommandArguments())
 		if err != nil {
 			log.Printf("[ERROR] Command /source failed: %s", err)
 			text = "Change source failed"
 		}
 
 		msg.Text = text
+		msg.ReplyMarkup = keyboard
 	default:
 		msg.Text = "I don't know that command"
 	}
@@ -250,8 +233,8 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 		errMsg.Text = "Oops, something went wrong!"
 		_, _ = b.botAPI.Send(errMsg)
 
-		return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
+		return tgbotapi.Message{}, tgbotapi.APIResponse{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
 	}
 
-	return sent, nil
+	return sent, tgbotapi.APIResponse{}, nil
 }

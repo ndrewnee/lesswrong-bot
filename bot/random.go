@@ -9,14 +9,13 @@ import (
 	"strings"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/gocolly/colly"
 
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func (b *Bot) RandomPost(ctx context.Context, update tgbotapi.Update) (string, error) {
-	key := fmt.Sprintf("source:%d", update.Message.From.ID)
+func (b *Bot) RandomPost(ctx context.Context, userID int) (string, error) {
+	key := fmt.Sprintf("source:%d", userID)
 
 	source, err := b.storage.Get(ctx, key)
 	if err != nil {
