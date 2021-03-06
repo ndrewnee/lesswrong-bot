@@ -25,24 +25,23 @@ var sourceKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	),
 )
 
-func (b *Bot) ChangeSource(ctx context.Context, userID int, arg string) (string, interface{}, error) {
+func (b *Bot) ChangeSource(ctx context.Context, userID int, newSource models.Source) (string, interface{}, error) {
 	key := fmt.Sprintf("source:%d", userID)
 
-	cachedSource, err := b.storage.Get(ctx, key)
+	sourceValue, err := b.storage.Get(ctx, key)
 	if err != nil {
 		log.Printf("[ERROR] Get source failed: %s, key: %s", err, key)
 	}
 
-	source := models.Source(cachedSource)
+	source := models.Source(sourceValue)
 	if !source.IsValid() {
 		source = models.SourceLesswrongRu
 	}
 
-	if arg == "" {
+	if newSource == "" {
 		return "Current source is " + source.String(), sourceKeyboard, nil
 	}
 
-	newSource := models.Source(arg)
 	if !newSource.IsValid() {
 		return "New source is invalid. Current source is " + source.String(), sourceKeyboard, nil
 	}

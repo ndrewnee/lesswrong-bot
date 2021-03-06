@@ -12,6 +12,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/models"
 	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 )
 
@@ -164,7 +165,7 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 
 func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, tgbotapi.APIResponse, error) {
 	if update.CallbackQuery != nil {
-		text, _, err := b.ChangeSource(ctx, update.CallbackQuery.From.ID, update.CallbackQuery.Data)
+		text, _, err := b.ChangeSource(ctx, update.CallbackQuery.From.ID, models.Source(update.CallbackQuery.Data))
 		if err != nil {
 			log.Printf("[ERROR] Command /source failed: %s", err)
 			text = "Change source failed"
@@ -215,7 +216,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 
 		msg.Text = text
 	case "source":
-		text, keyboard, err := b.ChangeSource(ctx, update.Message.From.ID, update.Message.CommandArguments())
+		text, keyboard, err := b.ChangeSource(ctx, update.Message.From.ID, models.Source(update.Message.CommandArguments()))
 		if err != nil {
 			log.Printf("[ERROR] Command /source failed: %s", err)
 			text = "Change source failed"
