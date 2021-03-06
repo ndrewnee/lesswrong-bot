@@ -297,13 +297,17 @@ func (b *Bot) postToMarkdown(post models.Post, mdConverter *md.Converter, urlWit
 			markdown = markdownOrig
 		}
 
-		// Stupid hotfixes for some invalid markdowns.
+		// Stupid hotfixes when markdown was cut in the middle.
 		markdown = strings.ReplaceAll(markdown, "* * *", "")
 		markdown = strings.ReplaceAll(markdown, "```", "")
-		markdown = strings.ReplaceAll(markdown, "[[", "[")
-		markdown = strings.ReplaceAll(markdown, "]]", "]")
-		markdown = strings.ReplaceAll(markdown, "![]", "[Image]")
 	}
+
+	// Stupid hotfixes for some invalid markdowns.
+	markdown = strings.ReplaceAll(markdown, "[[", "[")
+	markdown = strings.ReplaceAll(markdown, "]]", "]")
+	markdown = strings.ReplaceAll(markdown, "![]", "[Image]")
+	markdown = strings.ReplaceAll(markdown, "_[", "")
+	markdown = strings.ReplaceAll(markdown, "]_", "")
 
 	link := fmt.Sprintf("[%s](%s)", post.Title, post.URL)
 

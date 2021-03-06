@@ -194,6 +194,19 @@ func TestRandomPost(t *testing.T) {
 			wantErr: require.NoError,
 		},
 		{
+			name: "Should get random post from https://slatestarcodex.com (invalid emphasis)",
+			args: args{
+				randomPost: 70,
+				source:     models.SourceSlate,
+			},
+			want: func(t *testing.T, got string) {
+				file, err := ioutil.ReadFile("testdata/slate_random_post_invalid_emphasis.md")
+				require.NoError(t, err)
+				require.Equal(t, string(file), got)
+			},
+			wantErr: require.NoError,
+		},
+		{
 			name: "Should get random post from https://astralcodexten.substack.com",
 			args: args{
 				randomPost: 4,
