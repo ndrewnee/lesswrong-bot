@@ -207,20 +207,20 @@ func TestBot_MessageHandler(t *testing.T) {
 			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
 				want := `🤖 I'm a bot for reading posts:
 
-		Commands:
+Commands:
 
-		/top - Top posts
+/top - Top posts
 
-		/random - Read random post
+/random - Read random post
 
-		/source - Change source:
+/source - Change source:
 
-		  1. Lesswrong.ru (default)
-		  2. Slate Star Codex
-		  3. Astral Codex Ten
-		  4. Lesswrong.com
+  1. Lesswrong.ru (default)
+  2. Slate Star Codex
+  3. Astral Codex Ten
+  4. Lesswrong.com
 
-		/help - Help`
+/help - Help`
 				require.Equal(t, want, msg.Text)
 			},
 			wantErr: require.NoError,
@@ -331,25 +331,25 @@ func TestBot_MessageHandler(t *testing.T) {
 			check: func(t *testing.T, msg tgbotapi.Message, callback tgbotapi.APIResponse) {
 				want := `🏆 Top posts from https://slatestarcodex.com
 
-		1. Beware The Man Of One Study
+1. Beware The Man Of One Study
 
-		2. Meditations on Moloch
+2. Meditations on Moloch
 
-		3. I Can Tolerate Anything Except The Outgroup
+3. I Can Tolerate Anything Except The Outgroup
 
-		4. Book Review: Albion’s Seed
+4. Book Review: Albion’s Seed
 
-		5. Nobody Is Perfect, Everything Is Commensurable
+5. Nobody Is Perfect, Everything Is Commensurable
 
-		6. The Control Group Is Out Of Control
+6. The Control Group Is Out Of Control
 
-		7. Considerations On Cost Disease
+7. Considerations On Cost Disease
 
-		8. Archipelago And Atomic Communitarianism
+8. Archipelago And Atomic Communitarianism
 
-		9. The Categories Were Made For Man, Not Man For The Categories
+9. The Categories Were Made For Man, Not Man For The Categories
 
-		10. Who By Very Slow Decay`
+10. Who By Very Slow Decay`
 				require.Equal(t, want, msg.Text)
 			},
 			wantErr: require.NoError,
