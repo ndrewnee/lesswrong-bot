@@ -163,7 +163,7 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 	return updates, nil
 }
 
-func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, tgbotapi.APIResponse, error) {
+func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, error) {
 	if update.CallbackQuery != nil {
 		text, _, err := b.ChangeSource(ctx, update.CallbackQuery.From.ID, models.Source(update.CallbackQuery.Data))
 		if err != nil {
@@ -171,16 +171,24 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 			text = "Change source failed"
 		}
 
-		response, err := b.botAPI.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, text))
-		if err != nil {
-			return tgbotapi.Message{}, response, fmt.Errorf("answer callback failed: %s", err)
+		if _, err := b.botAPI.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, "")); err != nil {
+			return tgbotapi.Message{}, fmt.Errorf("answer callback failed: %s", err)
 		}
 
-		return tgbotapi.Message{}, response, nil
+		msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, text)
+		msg.ParseMode = tgbotapi.ModeMarkdown
+		msg.DisableWebPagePreview = true
+
+		sent, err := b.botAPI.Send(msg)
+		if err != nil {
+			return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
+		}
+
+		return sent, nil
 	}
 
 	if update.Message == nil {
-		return tgbotapi.Message{}, tgbotapi.APIResponse{}, nil
+		return tgbotapi.Message{}, nil
 	}
 
 	if update.Message.From != nil {
@@ -188,7 +196,7 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 	}
 
 	if update.Message.Chat == nil {
-		return tgbotapi.Message{}, tgbotapi.APIResponse{}, nil
+		return tgbotapi.Message{}, nil
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
@@ -234,8 +242,8 @@ func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbot
 		errMsg.Text = "Oops, something went wrong!"
 		_, _ = b.botAPI.Send(errMsg)
 
-		return tgbotapi.Message{}, tgbotapi.APIResponse{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
+		return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
 	}
 
-	return sent, tgbotapi.APIResponse{}, nil
+	return sent, nil
 }
