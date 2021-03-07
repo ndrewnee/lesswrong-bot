@@ -1,0 +1,31 @@
+.git/
+.github/
+
+.gitignore
+.golangci.yml
+Procfile
+
+README.md
+LICENSE
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+lesswrong-bot
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+.env.dev
+.env.test
+.env.dev.sample
+.env.test.sample

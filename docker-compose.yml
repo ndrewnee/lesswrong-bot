@@ -1,0 +1,19 @@
+version: "3"
+services:
+  lesswrong-bot:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - TOKEN
+    restart: always
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - 6379:6379

@@ -47,6 +47,12 @@ make run
 
 Redis is used as cache. If redis isn't available fallbacks to memory cache.
 
+Also you can run bot with redis in docker compose:
+
+```sh
+docker-compose up
+```
+
 ## 👷 Build
 
 Build binary
@@ -62,8 +68,6 @@ Run unit tests
 ```sh
 make test
 ```
-
-To run integration tests you need working redis server.
 
 Before running tests copy example env file and replace env vars with your credentials
 
