@@ -35,8 +35,8 @@ Take bot access token.
 Before running copy sample file and replace env vars with your credentials
 
 ```sh
-cp .env.dev.sample .env.dev
-source .env.dev
+cp .env.sample .env
+source .env
 ```
 
 Run application locally:
@@ -69,14 +69,7 @@ Run unit tests
 make test
 ```
 
-Before running tests copy example env file and replace env vars with your credentials
-
-```sh
-cp .env.test.sample .env.test
-source .env.test
-```
-
-and then run integration tests
+Run integration tests
 
 ```sh
 make test_integration
@@ -102,9 +95,10 @@ To deploy your app on Heroku read [documentation](https://devcenter.heroku.com/a
 brew install heroku/brew/heroku
 
 heroku login
-heroku create <app-name>
+heroku create lesswrong-bot
 heroku config:set WEBHOOK=true
 heroku config:set TOKEN=<token>
+heroku webhooks:add -i api:build -l notify -u https://deploy-hook-bot.herokuapp.com/hooks # To add deploy hook
 
 git push heroku main
 ```
