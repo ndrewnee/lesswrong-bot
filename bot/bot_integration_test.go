@@ -81,7 +81,7 @@ func TestBot_MessageHandler(t *testing.T) {
 	userID, err := strconv.Atoi(os.Getenv("TEST_USER_ID"))
 	require.NoError(t, err, "Env var TEST_USER_ID should be set")
 
-	config := config.ParseConfig()
+	config := config.Parse()
 	var storage Storage = memory.NewStorage()
 
 	if os.Getenv("TEST_USE_REDIS") == "true" {

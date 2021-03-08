@@ -14,7 +14,7 @@ import (
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	config := config.ParseConfig()
+	config := config.Parse()
 
 	var (
 		storage bot.Storage

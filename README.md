@@ -98,7 +98,7 @@ heroku login
 heroku create lesswrong-bot
 heroku config:set WEBHOOK=true
 heroku config:set TOKEN=<token>
-heroku webhooks:add -i api:build -l notify -u https://deploy-hook-bot.herokuapp.com/hooks # To add deploy hook
+heroku webhooks:add -i api:build -l notify -u https://deploy-hook-bot.herokuapp.com/hooks -t <auth_token> # To add deploy hook
 
 git push heroku main
 ```

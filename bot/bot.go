@@ -79,7 +79,7 @@ func New(options ...Options) (*Bot, error) {
 	}
 
 	if opts.Config == (config.Config{}) {
-		opts.Config = config.ParseConfig()
+		opts.Config = config.Parse()
 	}
 
 	if opts.BotAPI == nil {

@@ -17,7 +17,7 @@ type Config struct {
 	CacheExpire time.Duration
 }
 
-func ParseConfig() Config {
+func Parse() Config {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		port = 9999
