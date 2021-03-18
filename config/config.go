@@ -33,14 +33,14 @@ func Parse() Config {
 		redisURL = "redis://localhost:6379/1"
 	}
 
-	timeout, err := strconv.Atoi(os.Getenv("TIMEOUT"))
+	timeout, err := time.ParseDuration(os.Getenv("TIMEOUT"))
 	if err != nil {
-		timeout = 15
+		timeout = 15 * time.Second
 	}
 
-	expire, err := strconv.Atoi(os.Getenv("CACHE_EXPIRE"))
+	expire, err := time.ParseDuration(os.Getenv("CACHE_EXPIRE"))
 	if err != nil {
-		expire = 24
+		expire = 24 * time.Hour
 	}
 
 	return Config{
@@ -50,7 +50,7 @@ func Parse() Config {
 		Token:       os.Getenv("TOKEN"),
 		Webhook:     os.Getenv("WEBHOOK") == "true",
 		Debug:       os.Getenv("DEBUG") == "true",
-		Timeout:     time.Duration(timeout) * time.Second,
-		CacheExpire: time.Duration(expire) * time.Hour,
+		Timeout:     timeout,
+		CacheExpire: expire,
 	}
 }

@@ -119,5 +119,5 @@ make deploy
 | WEBHOOK      | Boolean | Enable webhook mode           | false                               |
 | PORT         | String  | Port for webhook              | 9999                                |
 | WEBHOOK_HOST | String  | Webhook host for telegram bot | https://lesswrong-bot.herokuapp.com |
-| TIMEOUT      | Integer | Request timeout in seconds    | 15                                  |
-| CACHE_EXPIRE | Integer | Posts cache expire in hours   | 24                                  |
+| TIMEOUT      | Integer | Request timeout in seconds    | 15s                                 |
+| CACHE_EXPIRE | Integer | Posts cache expire in hours   | 24h                                 |
