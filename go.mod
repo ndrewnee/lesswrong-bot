@@ -21,8 +21,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/temoto/robotstxt v1.1.1 // indirect
-	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
-	golang.org/x/text v0.3.5 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 )
