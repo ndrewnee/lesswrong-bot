@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"math/rand"
-	"time"
 
 	"github.com/ndrewnee/lesswrong-bot/bot"
 	"github.com/ndrewnee/lesswrong-bot/config"
@@ -13,7 +11,6 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
 	config := config.Parse()
 
 	var (
