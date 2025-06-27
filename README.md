@@ -19,10 +19,10 @@ Commands:
 
 /source - Change source:
 
-  1. [Lesswrong.ru](https://lesswrong.ru) (default)
-  2. [Slate Star Codex](https://slatestarcodex.com)
-  3. [Astral Codex Ten](https://astralcodexten.substack.com).
-  4. [Lesswrong.com](https://lesswrong.com)
+1. [Lesswrong.ru](https://lesswrong.ru) (default)
+2. [Slate Star Codex](https://slatestarcodex.com)
+3. [Astral Codex Ten](https://astralcodexten.substack.com).
+4. [Lesswrong.com](https://lesswrong.com)
 
 /help - Help
 
@@ -36,7 +36,6 @@ Before running copy sample file and replace env vars with your credentials
 
 ```sh
 cp .env.sample .env
-source .env
 ```
 
 Run application locally:
@@ -72,7 +71,7 @@ make test
 Run integration tests
 
 ```sh
-make test_integration
+make test-integration
 ```
 
 ## 🖍 Lint

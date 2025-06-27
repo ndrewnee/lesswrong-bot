@@ -8,16 +8,16 @@ BINARY_NAME=lesswrong-bot
 DOCKER_IMAGE=lesswrong-bot
 
 run: ## Run the application
-	go run .
+	export $(cat .env | xargs); go run .
 
 test: ## Run tests with race detection
-	go test -v -race ./...
+	go test -race ./...
 
 test-integration: ## Run integration tests
-	go test -v -race -tags=integration ./...
+	export $(cat .env.test | xargs); go test -race -tags=integration ./...
 
 test-coverage: ## Run tests with coverage
-	go test -v -race -coverprofile=coverage.out ./...
+	go test -race -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 
 lint: ## Run linter

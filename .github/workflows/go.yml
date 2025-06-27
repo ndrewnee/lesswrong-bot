@@ -37,7 +37,7 @@ jobs:
           go-version: 1.21
 
       - name: Run integration tests
-        run: make test_integration
+        run: make test-integration
         env:
           TOKEN: ${{ secrets.TOKEN }}
           TEST_CHAT_ID: ${{ secrets.TEST_CHAT_ID }}
