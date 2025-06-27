@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -26,10 +26,10 @@ func TestTopPosts(t *testing.T) {
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				file, err := ioutil.ReadFile("testdata/astral_top_posts.json")
+				file, err := os.ReadFile("testdata/astral_top_posts.json")
 				require.NoError(t, err)
 
-				return ioutil.NopCloser(bytes.NewBuffer(file))
+				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
@@ -53,10 +53,10 @@ func TestTopPosts(t *testing.T) {
 	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				file, err := ioutil.ReadFile("testdata/lesswrong_top_posts.json")
+				file, err := os.ReadFile("testdata/lesswrong_top_posts.json")
 				require.NoError(t, err)
 
-				return ioutil.NopCloser(bytes.NewBuffer(file))
+				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
@@ -82,7 +82,7 @@ func TestTopPosts(t *testing.T) {
 				randomPost: 2,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/lesswrong_ru_top_posts.md")
+				file, err := os.ReadFile("testdata/lesswrong_ru_top_posts.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -104,7 +104,7 @@ func TestTopPosts(t *testing.T) {
 				source: models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/astral_top_posts.md")
+				file, err := os.ReadFile("testdata/astral_top_posts.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -117,7 +117,7 @@ func TestTopPosts(t *testing.T) {
 				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/lesswrong_ru_top_posts.md")
+				file, err := os.ReadFile("testdata/lesswrong_ru_top_posts.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -129,7 +129,7 @@ func TestTopPosts(t *testing.T) {
 				source: models.SourceLesswrong,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/lesswrong_top_posts.md")
+				file, err := os.ReadFile("testdata/lesswrong_top_posts.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},

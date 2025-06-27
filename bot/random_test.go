@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"testing"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -25,10 +25,10 @@ func TestRandomPost(t *testing.T) {
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=0").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				file, err := ioutil.ReadFile("testdata/astral_new_posts.json")
+				file, err := os.ReadFile("testdata/astral_new_posts.json")
 				require.NoError(t, err)
 
-				return ioutil.NopCloser(bytes.NewBuffer(file))
+				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
@@ -37,7 +37,7 @@ func TestRandomPost(t *testing.T) {
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=12").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				return ioutil.NopCloser(bytes.NewBufferString("[]"))
+				return io.NopCloser(bytes.NewBufferString("[]"))
 			}(),
 		},
 		nil,
@@ -46,10 +46,10 @@ func TestRandomPost(t *testing.T) {
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/open-thread-160").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				file, err := ioutil.ReadFile("testdata/astral_random_post.json")
+				file, err := os.ReadFile("testdata/astral_random_post.json")
 				require.NoError(t, err)
 
-				return ioutil.NopCloser(bytes.NewBuffer(file))
+				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
@@ -58,10 +58,10 @@ func TestRandomPost(t *testing.T) {
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/coronavirus-links-discussion-open").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.json")
+				file, err := os.ReadFile("testdata/astral_random_post_invalid_cut.json")
 				require.NoError(t, err)
 
-				return ioutil.NopCloser(bytes.NewBuffer(file))
+				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
@@ -70,10 +70,10 @@ func TestRandomPost(t *testing.T) {
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/open-thread-159").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				file, err := ioutil.ReadFile("testdata/astral_random_post_link_bug.json")
+				file, err := os.ReadFile("testdata/astral_random_post_link_bug.json")
 				require.NoError(t, err)
 
-				return ioutil.NopCloser(bytes.NewBuffer(file))
+				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
@@ -95,10 +95,10 @@ func TestRandomPost(t *testing.T) {
 	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request1)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.json")
+				file, err := os.ReadFile("testdata/lesswrong_random_post.json")
 				require.NoError(t, err)
 
-				return ioutil.NopCloser(bytes.NewBuffer(file))
+				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
@@ -120,10 +120,10 @@ func TestRandomPost(t *testing.T) {
 	httpClient.On("Post", context.TODO(), "https://www.lesswrong.com/graphql", "application/json", bytes.NewBuffer(request2)).Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
-				file, err := ioutil.ReadFile("testdata/lesswrong_random_post_invalid_domain.json")
+				file, err := os.ReadFile("testdata/lesswrong_random_post_invalid_domain.json")
 				require.NoError(t, err)
 
-				return ioutil.NopCloser(bytes.NewBuffer(file))
+				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
@@ -149,7 +149,7 @@ func TestRandomPost(t *testing.T) {
 				randomPost: 2,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post.md")
+				file, err := os.ReadFile("testdata/lesswrong_ru_random_post.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -161,7 +161,7 @@ func TestRandomPost(t *testing.T) {
 				source: models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/slate_random_post.md")
+				file, err := os.ReadFile("testdata/slate_random_post.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -174,7 +174,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/slate_random_post_invalid_cut.md")
+				file, err := os.ReadFile("testdata/slate_random_post_invalid_cut.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -187,7 +187,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/slate_random_post_image_fix.md")
+				file, err := os.ReadFile("testdata/slate_random_post_image_fix.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -200,7 +200,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/slate_random_post_invalid_emphasis.md")
+				file, err := os.ReadFile("testdata/slate_random_post_invalid_emphasis.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -213,7 +213,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/astral_random_post.md")
+				file, err := os.ReadFile("testdata/astral_random_post.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -226,7 +226,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/astral_random_post_invalid_cut.md")
+				file, err := os.ReadFile("testdata/astral_random_post_invalid_cut.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -239,7 +239,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceAstral,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/astral_random_post_link_bug.md")
+				file, err := os.ReadFile("testdata/astral_random_post_link_bug.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -252,7 +252,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post.md")
+				file, err := os.ReadFile("testdata/lesswrong_ru_random_post.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -265,7 +265,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceLesswrongRu,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/lesswrong_ru_random_post_invalid_cut.md")
+				file, err := os.ReadFile("testdata/lesswrong_ru_random_post_invalid_cut.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -278,7 +278,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceLesswrong,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/lesswrong_random_post.md")
+				file, err := os.ReadFile("testdata/lesswrong_random_post.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
@@ -291,7 +291,7 @@ func TestRandomPost(t *testing.T) {
 				source:     models.SourceLesswrong,
 			},
 			want: func(t *testing.T, got string) {
-				file, err := ioutil.ReadFile("testdata/lesswrong_random_post_invalid_domain.md")
+				file, err := os.ReadFile("testdata/lesswrong_random_post_invalid_domain.md")
 				require.NoError(t, err)
 				require.Equal(t, string(file), got)
 			},
