@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Service containers to run with `test`
     services:
@@ -29,12 +29,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.15
+          go-version: 1.21
 
       - name: Run integration tests
         run: make test_integration
@@ -46,19 +46,19 @@ jobs:
 
   golangci-lint:
     name: Lint
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.15
+          go-version: 1.21
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v4
         with:
-          version: v1.37
+          version: v1.57
           skip-go-installation: true
