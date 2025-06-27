@@ -126,13 +126,10 @@ func (b *Bot) randomAstral(ctx context.Context) (string, error) {
 
 			var newPosts []models.AstralPost
 
-			if err := json.NewDecoder(httpResponse.Body).Decode(&newPosts); err != nil {
-				log.Printf("[ERROR] Unmarshal astralcodexten new posts failed: %s", err)
-				httpResponse.Body.Close()
+			if err := b.handleResponse(httpResponse, &newPosts); err != nil {
+				log.Printf("[ERROR] handle astralcodexten posts response: %s", err)
 				break
 			}
-
-			httpResponse.Body.Close()
 
 			if len(newPosts) == 0 {
 				break
@@ -167,12 +164,10 @@ func (b *Bot) randomAstral(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get astralcodexten random post failed: %s", err)
 	}
 
-	defer httpResponse.Body.Close()
-
 	var astralPost models.AstralPost
 
-	if err := json.NewDecoder(httpResponse.Body).Decode(&astralPost); err != nil {
-		return "", fmt.Errorf("unmarshal astralcodexten post failed: %s", err)
+	if err := b.handleResponse(httpResponse, &astralPost); err != nil {
+		return "", fmt.Errorf("handle astralcodexten post response: %s", err)
 	}
 
 	return b.postToMarkdown(astralPost.AsPost(), md.NewConverter(models.DomainAstral, true, nil), false)
@@ -258,15 +253,10 @@ func (b *Bot) randomLesswrong(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.com random post failed: %s", err)
 	}
 
-	bodyBytes, err := b.handleLesswrongResponse(httpResponse, "lesswrong.com")
-	if err != nil {
-		return "", err
-	}
-
 	var response models.LesswrongResponse
 
-	if err := json.Unmarshal(bodyBytes, &response); err != nil {
-		return "", fmt.Errorf("unmarshal lesswrong.com random post failed: %s", err)
+	if err := b.handleResponse(httpResponse, &response); err != nil {
+		return "", fmt.Errorf("handle lesswrong.com random post response: %s", err)
 	}
 
 	if len(response.Data.Posts.Results) == 0 {

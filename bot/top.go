@@ -64,12 +64,10 @@ func (b *Bot) topAstral(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get astralcodexten posts failed: %s", err)
 	}
 
-	defer httpResponse.Body.Close()
-
 	var topPosts []models.AstralPost
 
-	if err := json.NewDecoder(httpResponse.Body).Decode(&topPosts); err != nil {
-		return "", fmt.Errorf("unmarshal astralcodexten top posts failed: %s", err)
+	if err := b.handleResponse(httpResponse, &topPosts); err != nil {
+		return "", fmt.Errorf("handle astralcodexten top posts response: %s", err)
 	}
 
 	text := bytes.NewBufferString("🏆 Top posts from https://astralcodexten.substack.com\n\n")
@@ -168,15 +166,10 @@ func (b *Bot) topLesswrong(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.com top posts failed: %s", err)
 	}
 
-	bodyBytes, err := b.handleLesswrongResponse(httpResponse, "lesswrong.com top posts")
-	if err != nil {
-		return "", err
-	}
-
 	var response models.LesswrongResponse
 
-	if err := json.Unmarshal(bodyBytes, &response); err != nil {
-		return "", fmt.Errorf("unmarshal lesswrong.com top posts failed: %s", err)
+	if err := b.handleResponse(httpResponse, &response); err != nil {
+		return "", fmt.Errorf("handle lesswrong.com top posts response: %s", err)
 	}
 
 	text := bytes.NewBufferString("🏆 Top posts this week from https://lesswrong.com:\n\n")
