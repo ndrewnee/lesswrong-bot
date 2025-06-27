@@ -258,11 +258,14 @@ func (b *Bot) randomLesswrong(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.com random post failed: %s", err)
 	}
 
-	defer httpResponse.Body.Close()
+	bodyBytes, err := b.handleLesswrongResponse(httpResponse, "lesswrong.com")
+	if err != nil {
+		return "", err
+	}
 
 	var response models.LesswrongResponse
 
-	if err := json.NewDecoder(httpResponse.Body).Decode(&response); err != nil {
+	if err := json.Unmarshal(bodyBytes, &response); err != nil {
 		return "", fmt.Errorf("unmarshal lesswrong.com random post failed: %s", err)
 	}
 

@@ -22,7 +22,7 @@ const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 3. [I Can Tolerate Anything Except The Outgroup](https://slatestarcodex.com/2014/09/30/i-can-tolerate-anything-except-the-outgroup/)
 
-4. [Book Review: Albion’s Seed](https://slatestarcodex.com/2016/04/27/book-review-albions-seed/)
+4. [Book Review: Albion's Seed](https://slatestarcodex.com/2016/04/27/book-review-albions-seed/)
 
 5. [Nobody Is Perfect, Everything Is Commensurable](https://slatestarcodex.com/2014/12/19/nobody-is-perfect-everything-is-commensurable/)
 
@@ -168,11 +168,14 @@ func (b *Bot) topLesswrong(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("get lesswrong.com top posts failed: %s", err)
 	}
 
-	defer httpResponse.Body.Close()
+	bodyBytes, err := b.handleLesswrongResponse(httpResponse, "lesswrong.com top posts")
+	if err != nil {
+		return "", err
+	}
 
 	var response models.LesswrongResponse
 
-	if err := json.NewDecoder(httpResponse.Body).Decode(&response); err != nil {
+	if err := json.Unmarshal(bodyBytes, &response); err != nil {
 		return "", fmt.Errorf("unmarshal lesswrong.com top posts failed: %s", err)
 	}
 

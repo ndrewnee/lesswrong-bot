@@ -22,6 +22,10 @@ func (c *DefaultHTTPClient) Get(ctx context.Context, url string) (*http.Response
 		return nil, err
 	}
 
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; LesswrongBot/1.0)")
+	req.Header.Set("Accept", "application/json, text/html, */*")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+
 	return c.Do(req)
 }
 
@@ -32,6 +36,9 @@ func (c *DefaultHTTPClient) Post(ctx context.Context, url, contentType string, b
 	}
 
 	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; LesswrongBot/1.0)")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 
 	return c.Do(req)
 }
