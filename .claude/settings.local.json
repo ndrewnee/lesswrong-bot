@@ -4,7 +4,13 @@
       "Bash(make test:*)",
       "Bash(grep:*)",
       "Bash(sed:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(go test:*)",
+      "Bash(make lint)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }
