@@ -18,63 +18,8 @@ import (
 	"github.com/ndrewnee/lesswrong-bot/storage/redis"
 )
 
-func TestBot_GetUpdatesChan(t *testing.T) {
-	type args struct {
-		config config.Config
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		want    require.ValueAssertionFunc
-		wantErr require.ErrorAssertionFunc
-	}{
-		{
-			name: "Shouldn't get webhook chan because webhook host is empty",
-			args: args{
-				config: config.Config{
-					Webhook:     true,
-					WebhookHost: "",
-				},
-			},
-			want:    require.Nil,
-			wantErr: require.Error,
-		},
-		{
-			name: "Should get webhook chan",
-			args: args{
-				config: config.Config{
-					Webhook:     true,
-					WebhookHost: "https://lesswrong-bot.herokuapp.com",
-				},
-			},
-			want:    require.NotNil,
-			wantErr: require.NoError,
-		},
-		{
-			name:    "Should get polling chan",
-			want:    require.NotNil,
-			wantErr: require.NoError,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tgbot, err := New()
-			require.NoError(t, err)
-
-			tgbot.config = tt.args.config
-
-			got, err := tgbot.GetUpdatesChan()
-			tt.wantErr(t, err)
-			tt.want(t, got)
-			// To avoid error "Too Many Requests: retry after 1"
-			time.Sleep(time.Second)
-		})
-	}
-}
-
-func TestBot_MessageHandler(t *testing.T) {
+// Test helpers
+func setupTestBot(t *testing.T) (*Bot, int64, int) {
 	chatID, err := strconv.ParseInt(os.Getenv("TEST_CHAT_ID"), 10, 64)
 	require.NoError(t, err, "Env var TEST_CHAT_ID should be set")
 
@@ -92,115 +37,152 @@ func TestBot_MessageHandler(t *testing.T) {
 	tgbot, err := New(Options{Config: config, Storage: storage})
 	require.NoError(t, err)
 
-	type args struct {
-		update tgbotapi.Update
+	return tgbot, chatID, userID
+}
+
+func createUpdate(userID int, chatID int64, text string, cmdLength int) tgbotapi.Update {
+	update := tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			From: &tgbotapi.User{ID: userID},
+			Chat: &tgbotapi.Chat{ID: chatID},
+			Text: text,
+		},
 	}
 
-	tests := []struct {
-		name    string
-		args    args
-		check   func(t *testing.T, msg tgbotapi.Message)
-		wantErr require.ErrorAssertionFunc
-	}{
-		{
-			name: "Should fail to answer callback query",
-			args: args{
-				update: tgbotapi.Update{
-					CallbackQuery: &tgbotapi.CallbackQuery{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						ID:   "invalid",
-						Data: "1",
-					},
+	if cmdLength > 0 {
+		update.Message.Entities = &[]tgbotapi.MessageEntity{
+			{
+				Offset: 0,
+				Type:   "bot_command",
+				Length: cmdLength,
+			},
+		}
+	}
+
+	return update
+}
+
+// Individual GetUpdatesChan tests
+func TestBot_GetUpdatesChan_ShouldFailWithEmptyWebhookHost(t *testing.T) {
+	tgbot, err := New()
+	require.NoError(t, err)
+
+	tgbot.config = config.Config{
+		Webhook:     true,
+		WebhookHost: "",
+	}
+
+	got, err := tgbot.GetUpdatesChan()
+	require.Error(t, err)
+	require.Nil(t, got)
+	time.Sleep(time.Second)
+}
+
+func TestBot_GetUpdatesChan_ShouldGetWebhookChan(t *testing.T) {
+	tgbot, err := New()
+	require.NoError(t, err)
+
+	tgbot.config = config.Config{
+		Webhook:     true,
+		WebhookHost: "https://lesswrong-bot.herokuapp.com",
+	}
+
+	got, err := tgbot.GetUpdatesChan()
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	time.Sleep(time.Second)
+}
+
+func TestBot_GetUpdatesChan_ShouldGetPollingChan(t *testing.T) {
+	tgbot, err := New()
+	require.NoError(t, err)
+
+	got, err := tgbot.GetUpdatesChan()
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	time.Sleep(time.Second)
+}
+
+
+// Individual MessageHandler tests
+func TestBot_MessageHandler_ShouldFailToAnswerCallbackQuery(t *testing.T) {
+	tgbot, _, userID := setupTestBot(t)
+	
+	update := tgbotapi.Update{
+		CallbackQuery: &tgbotapi.CallbackQuery{
+			From: &tgbotapi.User{ID: userID},
+			ID:   "invalid",
+			Data: "1",
+		},
+	}
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.Error(t, err)
+	require.Empty(t, msg)
+}
+
+func TestBot_MessageHandler_ShouldHandleNilMessage(t *testing.T) {
+	tgbot, _, _ := setupTestBot(t)
+	
+	update := tgbotapi.Update{}
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Empty(t, msg)
+}
+
+func TestBot_MessageHandler_ShouldHandleCommandWithNilChat(t *testing.T) {
+	tgbot, _, _ := setupTestBot(t)
+	
+	update := tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			Entities: &[]tgbotapi.MessageEntity{
+				{
+					Offset: 0,
+					Type:   "bot_command",
 				},
 			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Empty(t, msg)
-			},
-			wantErr: require.Error,
 		},
-		{
-			name:    "Should handle nil message",
-			wantErr: require.NoError,
+	}
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Empty(t, msg)
+}
+
+func TestBot_MessageHandler_ShouldHandleNonCommandMessage(t *testing.T) {
+	tgbot, chatID, _ := setupTestBot(t)
+	
+	update := tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			Chat: &tgbotapi.Chat{ID: chatID},
 		},
-		{
-			name: "Should handle command with nil chat",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-							},
-						},
-					},
-				},
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should handle non-command message",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Equal(t, "I don't know that command", msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should handle unknown command",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 8,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/unknown",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Equal(t, "I don't know that command", msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should handle command /help",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 5,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/help",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				want := `🤖 I'm a bot for reading posts:
+	}
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Equal(t, "I don't know that command", msg.Text)
+}
+
+func TestBot_MessageHandler_ShouldHandleUnknownCommand(t *testing.T) {
+	tgbot, chatID, _ := setupTestBot(t)
+	
+	update := createUpdate(0, chatID, "/unknown", 8)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Equal(t, "I don't know that command", msg.Text)
+}
+
+func TestBot_MessageHandler_ShouldHandleHelpCommand(t *testing.T) {
+	tgbot, chatID, _ := setupTestBot(t)
+	
+	update := createUpdate(0, chatID, "/help", 5)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	
+	want := `🤖 I'm a bot for reading posts:
 
 Commands:
 
@@ -216,419 +198,193 @@ Commands:
   4. Lesswrong.com
 
 /help - Help`
-				require.Equal(t, want, msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should show current source",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/source",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Equal(t, "Current source is https://lesswrong.ru", msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Shouldn't change source if it's invalid",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/source invalid",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Equal(t, "New source is invalid. Current source is https://lesswrong.ru", msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should change source to https://slatestarcodex.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/source 2",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Equal(t, "Changed source to https://slatestarcodex.com", msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get top posts from https://slatestarcodex.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 4,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/top",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				want := `🏆 Top posts from https://slatestarcodex.com
+	require.Equal(t, want, msg.Text)
+}
 
-1. Beware The Man Of One Study
+func TestBot_MessageHandler_ShouldShowCurrentSource(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	update := createUpdate(userID, chatID, "/source", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Equal(t, "Current source is https://lesswrong.ru", msg.Text)
+}
 
-2. Meditations on Moloch
+func TestBot_MessageHandler_ShouldNotChangeInvalidSource(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	update := createUpdate(userID, chatID, "/source invalid", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Equal(t, "New source is invalid. Current source is https://lesswrong.ru", msg.Text)
+}
 
-3. I Can Tolerate Anything Except The Outgroup
+func TestBot_MessageHandler_ShouldChangeSourceToSlateStarCodex(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	update := createUpdate(userID, chatID, "/source 2", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Equal(t, "Changed source to https://slatestarcodex.com", msg.Text)
+}
 
-4. Book Review: Albion’s Seed
+func TestBot_MessageHandler_ShouldGetTopPostsFromSlateStarCodex(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	// First set source to SlateStarCodex
+	sourceUpdate := createUpdate(userID, chatID, "/source 2", 7)
+	_, err := tgbot.MessageHandler(context.TODO(), sourceUpdate)
+	require.NoError(t, err)
+	
+	// Then get top posts
+	update := createUpdate(userID, chatID, "/top", 4)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts from https://slatestarcodex.com"))
+}
 
-5. Nobody Is Perfect, Everything Is Commensurable
+func TestBot_MessageHandler_ShouldGetRandomPostFromSlateStarCodex(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	// First set source to SlateStarCodex
+	sourceUpdate := createUpdate(userID, chatID, "/source 2", 7)
+	_, err := tgbot.MessageHandler(context.TODO(), sourceUpdate)
+	require.NoError(t, err)
+	
+	// Then get random post
+	update := createUpdate(userID, chatID, "/random", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(msg.Text, "📝"))
+}
 
-6. The Control Group Is Out Of Control
+func TestBot_MessageHandler_ShouldChangeSourceToAstralCodexTen(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	update := createUpdate(userID, chatID, "/source 3", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Equal(t, "Changed source to https://astralcodexten.substack.com", msg.Text)
+}
 
-7. Considerations On Cost Disease
+func TestBot_MessageHandler_ShouldGetTopPostsFromAstralCodexTen(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	// First set source to AstralCodexTen
+	sourceUpdate := createUpdate(userID, chatID, "/source 3", 7)
+	_, err := tgbot.MessageHandler(context.TODO(), sourceUpdate)
+	require.NoError(t, err)
+	
+	// Then get top posts
+	update := createUpdate(userID, chatID, "/top", 4)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts from https://astralcodexten.substack.com"))
+}
 
-8. Archipelago And Atomic Communitarianism
+func TestBot_MessageHandler_ShouldGetRandomPostFromAstralCodexTen(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	// First set source to AstralCodexTen
+	sourceUpdate := createUpdate(userID, chatID, "/source 3", 7)
+	_, err := tgbot.MessageHandler(context.TODO(), sourceUpdate)
+	require.NoError(t, err)
+	
+	// Then get random post
+	update := createUpdate(userID, chatID, "/random", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(msg.Text, "📝"))
+}
 
-9. The Categories Were Made For Man, Not Man For The Categories
+func TestBot_MessageHandler_ShouldChangeSourceToLessWrongRu(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	update := createUpdate(userID, chatID, "/source 1", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Equal(t, "Changed source to https://lesswrong.ru", msg.Text)
+}
 
-10. Who By Very Slow Decay`
-				require.Equal(t, want, msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://slatestarcodex.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/random",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(msg.Text, "📝"))
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should change source to https://astralcodexten.substack.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/source 3",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Equal(t, "Changed source to https://astralcodexten.substack.com", msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get top posts from https://astralcodexten.substack.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 4,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/top",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts from https://astralcodexten.substack.com"))
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://astralcodexten.substack.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/random",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(msg.Text, "📝"))
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should change source to https://lesswrong.ru",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/source 1",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Equal(t, "Changed source to https://lesswrong.ru", msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get top posts from https://lesswrong.ru",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 4,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/top",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(msg.Text, "🏆 Random posts from https://lesswrong.ru"))
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://lesswrong.ru",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/random",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(msg.Text, "📝"))
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should change source to https://lesswrong.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/source 4",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.Equal(t, "Changed source to https://lesswrong.com", msg.Text)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get top posts from https://lesswrong.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 4,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/top",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts this week from https://lesswrong.com"))
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://lesswrong.com",
-			args: args{
-				update: tgbotapi.Update{
-					Message: &tgbotapi.Message{
-						From: &tgbotapi.User{
-							ID: userID,
-						},
-						Entities: &[]tgbotapi.MessageEntity{
-							{
-								Offset: 0,
-								Type:   "bot_command",
-								Length: 7,
-							},
-						},
-						Chat: &tgbotapi.Chat{
-							ID: chatID,
-						},
-						Text: "/random",
-					},
-				},
-			},
-			check: func(t *testing.T, msg tgbotapi.Message) {
-				require.True(t, strings.HasPrefix(msg.Text, "📝"))
-			},
-			wantErr: require.NoError,
-		},
-	}
+func TestBot_MessageHandler_ShouldGetTopPostsFromLessWrongRu(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	// First set source to LessWrong.ru
+	sourceUpdate := createUpdate(userID, chatID, "/source 1", 7)
+	_, err := tgbot.MessageHandler(context.TODO(), sourceUpdate)
+	require.NoError(t, err)
+	
+	// Then get top posts
+	update := createUpdate(userID, chatID, "/top", 4)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(msg.Text, "🏆 Random posts from https://lesswrong.ru"))
+}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			msg, err := tgbot.MessageHandler(context.TODO(), tt.args.update)
-			tt.wantErr(t, err)
+func TestBot_MessageHandler_ShouldGetRandomPostFromLessWrongRu(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	// First set source to LessWrong.ru
+	sourceUpdate := createUpdate(userID, chatID, "/source 1", 7)
+	_, err := tgbot.MessageHandler(context.TODO(), sourceUpdate)
+	require.NoError(t, err)
+	
+	// Then get random post
+	update := createUpdate(userID, chatID, "/random", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(msg.Text, "📝"))
+}
 
-			if tt.check != nil {
-				tt.check(t, msg)
-			}
-		})
-	}
+func TestBot_MessageHandler_ShouldChangeSourceToLessWrongCom(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	update := createUpdate(userID, chatID, "/source 4", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.Equal(t, "Changed source to https://lesswrong.com", msg.Text)
+}
+
+func TestBot_MessageHandler_ShouldGetTopPostsFromLessWrongCom(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	// First set source to LessWrong.com
+	sourceUpdate := createUpdate(userID, chatID, "/source 4", 7)
+	_, err := tgbot.MessageHandler(context.TODO(), sourceUpdate)
+	require.NoError(t, err)
+	
+	// Then get top posts
+	update := createUpdate(userID, chatID, "/top", 4)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts this week from https://lesswrong.com"))
+}
+
+func TestBot_MessageHandler_ShouldGetRandomPostFromLessWrongCom(t *testing.T) {
+	tgbot, chatID, userID := setupTestBot(t)
+	
+	// First set source to LessWrong.com
+	sourceUpdate := createUpdate(userID, chatID, "/source 4", 7)
+	_, err := tgbot.MessageHandler(context.TODO(), sourceUpdate)
+	require.NoError(t, err)
+	
+	// Then get random post
+	update := createUpdate(userID, chatID, "/random", 7)
+	
+	msg, err := tgbot.MessageHandler(context.TODO(), update)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(msg.Text, "📝"))
 }

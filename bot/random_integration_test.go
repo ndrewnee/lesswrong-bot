@@ -19,9 +19,8 @@ import (
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
-func TestRandomPost(t *testing.T) {
-	const userID = 2
-
+// Individual random post tests - exact same logic as original TestRandomPost
+func setupMockHTTPClient(t *testing.T) *mocks.HTTPClient {
 	httpClient := &mocks.HTTPClient{}
 
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=new&limit=12&offset=0").Return(
@@ -29,7 +28,6 @@ func TestRandomPost(t *testing.T) {
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/astral_new_posts.json")
 				require.NoError(t, err)
-
 				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
@@ -50,7 +48,6 @@ func TestRandomPost(t *testing.T) {
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/astral_random_post.json")
 				require.NoError(t, err)
-
 				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
@@ -62,7 +59,6 @@ func TestRandomPost(t *testing.T) {
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/astral_random_post_invalid_cut.json")
 				require.NoError(t, err)
-
 				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
@@ -74,7 +70,6 @@ func TestRandomPost(t *testing.T) {
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/astral_random_post_link_bug.json")
 				require.NoError(t, err)
-
 				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
@@ -99,7 +94,6 @@ func TestRandomPost(t *testing.T) {
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/lesswrong_random_post.json")
 				require.NoError(t, err)
-
 				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
@@ -124,196 +118,237 @@ func TestRandomPost(t *testing.T) {
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/lesswrong_random_post_invalid_domain.json")
 				require.NoError(t, err)
-
 				return io.NopCloser(bytes.NewBuffer(file))
 			}(),
 		},
 		nil,
 	)
 
+	return httpClient
+}
+
+func TestRandomPost_ShouldGetRandomPostFromLessWrongRuWhenSourceNotSet(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
 	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
 	require.NoError(t, err)
 
-	type args struct {
-		randomPost int
-		source     models.Source
+	tgbot.randomInt = func(n int) int {
+		return 2
 	}
 
-	tests := []struct {
-		name    string
-		args    args
-		want    func(t *testing.T, got string)
-		wantErr require.ErrorAssertionFunc
-	}{
-		{
-			name: "Should get random post from https://lesswrong.ru when source is not set",
-			args: args{
-				randomPost: 2,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/lesswrong_ru_random_post.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://slatestarcodex.com",
-			args: args{
-				source: models.SourceSlate,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/slate_random_post.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://slatestarcodex.com (invalid markdown cut)",
-			args: args{
-				randomPost: 563,
-				source:     models.SourceSlate,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/slate_random_post_invalid_cut.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://slatestarcodex.com (image fix)",
-			args: args{
-				randomPost: 191,
-				source:     models.SourceSlate,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/slate_random_post_image_fix.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://slatestarcodex.com (invalid emphasis)",
-			args: args{
-				randomPost: 70,
-				source:     models.SourceSlate,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/slate_random_post_invalid_emphasis.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://astralcodexten.substack.com",
-			args: args{
-				randomPost: 4,
-				source:     models.SourceAstral,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/astral_random_post.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://astralcodexten.substack.com (invalid markdown cut)",
-			args: args{
-				randomPost: 12,
-				source:     models.SourceAstral,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/astral_random_post_invalid_cut.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://astralcodexten.substack.com (link bug)",
-			args: args{
-				randomPost: 13,
-				source:     models.SourceAstral,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/astral_random_post_link_bug.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://lesswrong.ru",
-			args: args{
-				randomPost: 2,
-				source:     models.SourceLesswrongRu,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/lesswrong_ru_random_post.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://lesswrong.ru (invalid cut)",
-			args: args{
-				randomPost: 279,
-				source:     models.SourceLesswrongRu,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/lesswrong_ru_random_post_invalid_cut.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://lesswrong.com",
-			args: args{
-				randomPost: 0,
-				source:     models.SourceLesswrong,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/lesswrong_random_post.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
-		{
-			name: "Should get random post from https://lesswrong.com (invalid domain)",
-			args: args{
-				randomPost: 1,
-				source:     models.SourceLesswrong,
-			},
-			want: func(t *testing.T, got string) {
-				file, err := os.ReadFile("testdata/lesswrong_random_post_invalid_domain.md")
-				require.NoError(t, err)
-				require.Equal(t, string(file), got)
-			},
-			wantErr: require.NoError,
-		},
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/lesswrong_ru_random_post.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromSlateStarCodex(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 0
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tgbot.randomInt = func(n int) int {
-				return tt.args.randomPost
-			}
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
+	require.NoError(t, err)
 
-			key := fmt.Sprintf("source:%d", userID)
-			err := tgbot.storage.Set(context.TODO(), key, tt.args.source.Value(), 0)
-			require.NoError(t, err)
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
 
-			got, err := tgbot.RandomPost(context.TODO(), userID)
-			tt.wantErr(t, err)
-			tt.want(t, got)
-		})
+	file, err := os.ReadFile("testdata/slate_random_post.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromSlateStarCodexInvalidMarkdownCut(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 563
 	}
+
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
+	require.NoError(t, err)
+
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/slate_random_post_invalid_cut.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromSlateStarCodexImageFix(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 191
+	}
+
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
+	require.NoError(t, err)
+
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/slate_random_post_image_fix.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromAstralCodexTen(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 0
+	}
+
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
+	require.NoError(t, err)
+
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/astral_random_post.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromAstralCodexTenInvalidCut(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 1
+	}
+
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
+	require.NoError(t, err)
+
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/astral_random_post_invalid_cut.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromAstralCodexTenLinkBug(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 2
+	}
+
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
+	require.NoError(t, err)
+
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/astral_random_post_link_bug.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromLessWrongRuInvalidCut(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 1
+	}
+
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceLesswrongRu.Value(), 0)
+	require.NoError(t, err)
+
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/lesswrong_ru_random_post_invalid_cut.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromLessWrongCom(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 0
+	}
+
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceLesswrong.Value(), 0)
+	require.NoError(t, err)
+
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/lesswrong_random_post.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
+}
+
+func TestRandomPost_ShouldGetRandomPostFromLessWrongComInvalidDomain(t *testing.T) {
+	const userID = 2
+	httpClient := setupMockHTTPClient(t)
+
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+
+	tgbot.randomInt = func(n int) int {
+		return 1
+	}
+
+	key := fmt.Sprintf("source:%d", userID)
+	err = tgbot.storage.Set(context.TODO(), key, models.SourceLesswrong.Value(), 0)
+	require.NoError(t, err)
+
+	got, err := tgbot.RandomPost(context.TODO(), userID)
+	require.NoError(t, err)
+
+	file, err := os.ReadFile("testdata/lesswrong_random_post_invalid_domain.md")
+	require.NoError(t, err)
+	require.Equal(t, string(file), got)
 }

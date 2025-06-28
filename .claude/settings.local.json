@@ -3,7 +3,8 @@
     "allow": [
       "Bash(make test:*)",
       "Bash(grep:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
