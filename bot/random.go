@@ -84,7 +84,7 @@ func (b *Bot) randomSlate(ctx context.Context) (string, error) {
 
 	postCollector := colly.NewCollector()
 
-	postCollector.OnHTML("div .entry-content", func(e *colly.HTMLElement) {
+	postCollector.OnHTML("div.pjgm-postcontent", func(e *colly.HTMLElement) {
 		post.HTML, _ = e.DOM.Html()
 	})
 
