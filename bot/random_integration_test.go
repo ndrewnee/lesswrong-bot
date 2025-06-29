@@ -43,7 +43,7 @@ func setupMockHTTPClient(t *testing.T) *mocks.HTTPClient {
 		nil,
 	)
 
-	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/open-thread-160").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/a-modest-proposal-for-republicans").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/astral_random_post.json")
@@ -54,7 +54,7 @@ func setupMockHTTPClient(t *testing.T) *mocks.HTTPClient {
 		nil,
 	)
 
-	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/coronavirus-links-discussion-open").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/bay-area-plant-based-meat-reviews").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/astral_random_post_invalid_cut.json")
@@ -65,7 +65,7 @@ func setupMockHTTPClient(t *testing.T) *mocks.HTTPClient {
 		nil,
 	)
 
-	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/open-thread-159").Return(
+	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/posts/book-review-fussell-on-class").Return(
 		&http.Response{
 			Body: func() io.ReadCloser {
 				file, err := os.ReadFile("testdata/astral_random_post_link_bug.json")
