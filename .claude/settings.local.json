@@ -10,7 +10,11 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(curl:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(jq:*)",
+      "Bash(timeout:*)",
+      "Bash(go run:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

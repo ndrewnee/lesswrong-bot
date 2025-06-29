@@ -42,4 +42,4 @@ func (b *Bot) handleResponse(httpResponse *http.Response, target interface{}) er
 	}
 
 	return nil
-} 
+}
