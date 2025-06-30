@@ -128,9 +128,14 @@ func (b *Bot) randomAstral(ctx context.Context) (string, error) {
 
 			if err := b.handleResponse(httpResponse, &newPosts); err != nil {
 				log.Printf("[ERROR] handle astralcodexten posts response: %s", err)
-				// If rate limited and we have no posts yet, return a helpful error
-				if httpResponse.StatusCode == 429 && len(posts) == 0 {
-					return "", fmt.Errorf("astralcodexten API is temporarily rate limited, please try again later")
+				// If blocked by Cloudflare (403) or rate limited (429) and we have no posts yet, return fallback
+				if (httpResponse.StatusCode == 403 || httpResponse.StatusCode == 429) && len(posts) == 0 {
+					fallbackPost := models.Post{
+						Title: "Bounded Distrust",
+						URL:   "https://astralcodexten.substack.com/p/bounded-distrust",
+						HTML:  "<p>Content temporarily unavailable due to API restrictions. Please visit the link above to read the full post.</p>",
+					}
+					return b.postToMarkdown(fallbackPost, md.NewConverter(models.DomainAstral, true, nil), false)
 				}
 				break
 			}
@@ -171,12 +176,12 @@ func (b *Bot) randomAstral(ctx context.Context) (string, error) {
 	var astralPost models.AstralPost
 
 	if err := b.handleResponse(httpResponse, &astralPost); err != nil {
-		// Handle rate limiting gracefully - return a basic post with available info
-		if httpResponse.StatusCode == 429 {
+		// Handle Cloudflare blocking (403) or rate limiting (429) gracefully - return a basic post with available info
+		if httpResponse.StatusCode == 403 || httpResponse.StatusCode == 429 {
 			fallbackPost := models.Post{
 				Title: post.Title,
 				URL:   post.URL,
-				HTML:  "<p>Content temporarily unavailable due to API rate limiting. Please visit the link above to read the full post.</p>",
+				HTML:  "<p>Content temporarily unavailable due to API restrictions. Please visit the link above to read the full post.</p>",
 			}
 			return b.postToMarkdown(fallbackPost, md.NewConverter(models.DomainAstral, true, nil), false)
 		}

@@ -36,6 +36,29 @@ const MessageTopSlate = `🏆 Top posts from https://slatestarcodex.com
 
 10. [Who By Very Slow Decay](https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/)`
 
+// Fallback content for when Astral Codex Ten API is blocked by Cloudflare
+const MessageTopAstral = `🏆 Top posts from https://astralcodexten.substack.com
+
+1. [Bounded Distrust](https://astralcodexten.substack.com/p/bounded-distrust)
+
+2. [Your Book Review: Progress And Poverty](https://astralcodexten.substack.com/p/your-book-review-progress-and-poverty)
+
+3. [Highlights From The Comments On AI Timelines](https://astralcodexten.substack.com/p/highlights-from-the-comments-on-ai)
+
+4. [Mantic Monday 2/28/22](https://astralcodexten.substack.com/p/mantic-monday-22822)
+
+5. [Book Review: The Righteous Mind](https://astralcodexten.substack.com/p/book-review-the-righteous-mind)
+
+6. [Highlights From The Comments On Medical Coding](https://astralcodexten.substack.com/p/highlights-from-the-comments-on-medical)
+
+7. [Contra Hoel On Aristocratic Tutoring](https://astralcodexten.substack.com/p/contra-hoel-on-aristocratic-tutoring)
+
+8. [Model City Monday 8/2/21](https://astralcodexten.substack.com/p/model-city-monday-8221)
+
+9. [Your Book Review: On The Natural Faculties](https://astralcodexten.substack.com/p/your-book-review-on-the-natural-faculties)
+
+10. [Whither Tartaria?](https://astralcodexten.substack.com/p/whither-tartaria)`
+
 func (b *Bot) TopPosts(ctx context.Context, userID int) (string, error) {
 	key := fmt.Sprintf("source:%d", userID)
 
@@ -67,6 +90,11 @@ func (b *Bot) topAstral(ctx context.Context) (string, error) {
 	var topPosts []models.AstralPost
 
 	if err := b.handleResponse(httpResponse, &topPosts); err != nil {
+		// Handle Cloudflare blocking (403) or rate limiting (429) by returning fallback content
+		if httpResponse.StatusCode == 403 || httpResponse.StatusCode == 429 {
+			log.Printf("[WARN] Astral Codex Ten API blocked (status %d), using fallback content", httpResponse.StatusCode)
+			return MessageTopAstral, nil
+		}
 		return "", fmt.Errorf("handle astralcodexten top posts response: %s", err)
 	}
 
