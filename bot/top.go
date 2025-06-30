@@ -175,7 +175,8 @@ func (b *Bot) topLesswrong(ctx context.Context) (string, error) {
 	text := bytes.NewBufferString("🏆 Top posts this week from https://lesswrong.com:\n\n")
 
 	for i, post := range response.Data.Posts.Results {
-		text.WriteString(fmt.Sprintf("%d. [%s](%s) (%s)\n\n", i+1, post.Title, post.PageURL, post.User.DisplayName))
+		escapedAuthor := b.escapeMarkdown(post.User.DisplayName)
+		text.WriteString(fmt.Sprintf("%d. [%s](%s) (%s)\n\n", i+1, post.Title, post.PageURL, escapedAuthor))
 	}
 
 	return text.String(), nil
