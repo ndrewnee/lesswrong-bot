@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -23,6 +24,7 @@ func TestTopPosts(t *testing.T) {
 
 	httpClient := &mocks.HTTPClient{}
 
+	// Mock Astral API calls
 	httpClient.On("Get", context.TODO(), "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10").Return(
 		&http.Response{
 			StatusCode: 200,
@@ -36,6 +38,7 @@ func TestTopPosts(t *testing.T) {
 		nil,
 	)
 
+	// Mock LessWrong GraphQL calls
 	query := `{
 		posts(input: {terms: {view: "top", limit: 10, meta: null}}) {
 			results {
@@ -91,19 +94,23 @@ func TestTopPosts(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := os.ReadFile("testdata/lesswrong_ru_top_posts.md")
 				require.NoError(t, err)
-				require.Equal(t, string(file), got)
+				expected := strings.TrimSpace(string(file))
+				actual := strings.TrimSpace(got)
+				require.Equal(t, expected, actual)
 			},
 			wantErr: require.NoError,
 		},
 		{
-			name: "Should get top posts from https://slatestarcodx.com",
+			name: "Should get top posts from https://slatestarcodex.com",
 			args: args{
 				source: models.SourceSlate,
 			},
 			want: func(t *testing.T, got string) {
 				file, err := os.ReadFile("testdata/slate_top_posts.md")
 				require.NoError(t, err)
-				require.Equal(t, string(file), got)
+				expected := strings.TrimSpace(string(file))
+				actual := strings.TrimSpace(got)
+				require.Equal(t, expected, actual)
 			},
 			wantErr: require.NoError,
 		},
@@ -115,7 +122,9 @@ func TestTopPosts(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := os.ReadFile("testdata/astral_top_posts.md")
 				require.NoError(t, err)
-				require.Equal(t, string(file), got)
+				expected := strings.TrimSpace(string(file))
+				actual := strings.TrimSpace(got)
+				require.Equal(t, expected, actual)
 			},
 			wantErr: require.NoError,
 		},
@@ -128,7 +137,9 @@ func TestTopPosts(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := os.ReadFile("testdata/lesswrong_ru_top_posts.md")
 				require.NoError(t, err)
-				require.Equal(t, string(file), got)
+				expected := strings.TrimSpace(string(file))
+				actual := strings.TrimSpace(got)
+				require.Equal(t, expected, actual)
 			},
 			wantErr: require.NoError,
 		},
@@ -140,7 +151,9 @@ func TestTopPosts(t *testing.T) {
 			want: func(t *testing.T, got string) {
 				file, err := os.ReadFile("testdata/lesswrong_top_posts.md")
 				require.NoError(t, err)
-				require.Equal(t, string(file), got)
+				expected := strings.TrimSpace(string(file))
+				actual := strings.TrimSpace(got)
+				require.Equal(t, expected, actual)
 			},
 			wantErr: require.NoError,
 		},

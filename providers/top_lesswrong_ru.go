@@ -79,7 +79,12 @@ func (p *LessWrongRuTopProvider) formatTopPosts(posts []topPost) string {
 
 	for i := 0; i < limit; i++ {
 		post := posts[i]
-		sb.WriteString(fmt.Sprintf("%d. [%s](%s)\n\n", i+1, post.Title, post.URL))
+		if i == limit-1 {
+			// Last post - don't add extra newline
+			sb.WriteString(fmt.Sprintf("%d. [%s](%s)", i+1, post.Title, post.URL))
+		} else {
+			sb.WriteString(fmt.Sprintf("%d. [%s](%s)\n\n", i+1, post.Title, post.URL))
+		}
 	}
 
 	return sb.String()
