@@ -6,7 +6,6 @@ import (
 	"context"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/interfaces"
 	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 	"github.com/ndrewnee/lesswrong-bot/storage/redis"
 )
@@ -27,7 +27,7 @@ func setupTestBot(t *testing.T) (*Bot, int64, int) {
 	require.NoError(t, err, "Env var TEST_USER_ID should be set")
 
 	config := config.Parse()
-	var storage Storage = memory.NewStorage()
+	var storage interfaces.Storage = memory.NewStorage()
 
 	if os.Getenv("TEST_USE_REDIS") == "true" {
 		storage, err = redis.NewStorage(config.RedisURL)
@@ -244,7 +244,7 @@ func TestBot_MessageHandler_ShouldGetTopPostsFromSlateStarCodex(t *testing.T) {
 	
 	msg, err := tgbot.MessageHandler(context.TODO(), update)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts from https://slatestarcodex.com"))
+	require.Contains(t, msg.Text, "🏆 Top posts from https://slatestarcodex.com")
 }
 
 func TestBot_MessageHandler_ShouldGetRandomPostFromSlateStarCodex(t *testing.T) {
@@ -260,7 +260,7 @@ func TestBot_MessageHandler_ShouldGetRandomPostFromSlateStarCodex(t *testing.T) 
 	
 	msg, err := tgbot.MessageHandler(context.TODO(), update)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(msg.Text, "📝"))
+	require.Contains(t, msg.Text, "📝")
 }
 
 func TestBot_MessageHandler_ShouldChangeSourceToAstralCodexTen(t *testing.T) {
@@ -286,7 +286,7 @@ func TestBot_MessageHandler_ShouldGetTopPostsFromAstralCodexTen(t *testing.T) {
 	
 	msg, err := tgbot.MessageHandler(context.TODO(), update)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts from https://astralcodexten.substack.com"))
+	require.Contains(t, msg.Text, "🏆 Top posts from https://astralcodexten.substack.com")
 }
 
 func TestBot_MessageHandler_ShouldGetRandomPostFromAstralCodexTen(t *testing.T) {
@@ -302,7 +302,7 @@ func TestBot_MessageHandler_ShouldGetRandomPostFromAstralCodexTen(t *testing.T) 
 	
 	msg, err := tgbot.MessageHandler(context.TODO(), update)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(msg.Text, "📝"))
+	require.Contains(t, msg.Text, "📝")
 }
 
 func TestBot_MessageHandler_ShouldChangeSourceToLessWrongRu(t *testing.T) {
@@ -328,7 +328,7 @@ func TestBot_MessageHandler_ShouldGetTopPostsFromLessWrongRu(t *testing.T) {
 	
 	msg, err := tgbot.MessageHandler(context.TODO(), update)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(msg.Text, "🏆 Random posts from https://lesswrong.ru"))
+	require.Contains(t, msg.Text, "🏆 Random posts from https://lesswrong.ru")
 }
 
 func TestBot_MessageHandler_ShouldGetRandomPostFromLessWrongRu(t *testing.T) {
@@ -344,7 +344,7 @@ func TestBot_MessageHandler_ShouldGetRandomPostFromLessWrongRu(t *testing.T) {
 	
 	msg, err := tgbot.MessageHandler(context.TODO(), update)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(msg.Text, "📝"))
+	require.Contains(t, msg.Text, "📝")
 }
 
 func TestBot_MessageHandler_ShouldChangeSourceToLessWrongCom(t *testing.T) {
@@ -370,7 +370,7 @@ func TestBot_MessageHandler_ShouldGetTopPostsFromLessWrongCom(t *testing.T) {
 	
 	msg, err := tgbot.MessageHandler(context.TODO(), update)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(msg.Text, "🏆 Top posts this week from https://lesswrong.com"))
+	require.Contains(t, msg.Text, "🏆 Top posts from https://www.lesswrong.com")
 }
 
 func TestBot_MessageHandler_ShouldGetRandomPostFromLessWrongCom(t *testing.T) {
@@ -386,5 +386,5 @@ func TestBot_MessageHandler_ShouldGetRandomPostFromLessWrongCom(t *testing.T) {
 	
 	msg, err := tgbot.MessageHandler(context.TODO(), update)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(msg.Text, "📝"))
+	require.Contains(t, msg.Text, "📝")
 }

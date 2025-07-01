@@ -6,6 +6,7 @@ import (
 
 	"github.com/ndrewnee/lesswrong-bot/bot"
 	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/interfaces"
 	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 	"github.com/ndrewnee/lesswrong-bot/storage/redis"
 )
@@ -14,7 +15,7 @@ func main() {
 	config := config.Parse()
 
 	var (
-		storage bot.Storage
+		storage interfaces.Storage
 		err     error
 	)
 
