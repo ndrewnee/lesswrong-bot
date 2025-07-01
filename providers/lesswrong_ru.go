@@ -53,7 +53,7 @@ func (p *LessWrongRuProvider) GetTopPosts(ctx context.Context) (string, error) {
 	// Cache the result
 	if err := p.storage.Set(ctx, cacheKey, result, p.cacheExpire); err != nil {
 		// Log error but don't fail
-		log.Printf("[WARN] Failed to cache top posts: %s", err)
+		log.Printf("[ERROR] Failed to cache top posts: %s", err)
 	}
 
 	return result, nil

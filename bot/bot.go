@@ -275,7 +275,7 @@ func (b *Bot) sendMessage(msg tgbotapi.MessageConfig) (tgbotapi.Message, error) 
 	if err != nil {
 		// If it's a markdown parsing error and we're using markdown mode, try as plain text
 		if strings.Contains(err.Error(), "can't parse entities") && msg.ParseMode == tgbotapi.ModeMarkdown {
-			log.Printf("[WARN] Markdown parsing failed, retrying as plain text: %s", err)
+			log.Printf("[ERROR] Markdown parsing failed, retrying as plain text: %s", err)
 			msg.ParseMode = ""
 			sent, err = b.botAPI.Send(msg)
 			if err == nil {

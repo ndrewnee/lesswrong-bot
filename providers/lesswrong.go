@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/ndrewnee/lesswrong-bot/models"
@@ -60,7 +61,9 @@ func (p *LessWrongProvider) fetchTopPosts(ctx context.Context) ([]models.Lesswro
 	}
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		log.Printf("[ERROR] lesswrong.com top posts request failed with status %d: %s", resp.StatusCode, string(resp.Body))
+		// Return empty posts to trigger fallback in formatTopPosts
+		return []models.LesswrongResult{}, nil
 	}
 
 	var response models.LesswrongResponse
@@ -112,7 +115,7 @@ func (p *LessWrongProvider) GetRandomPost(ctx context.Context) (models.Post, err
 
 	var response models.LesswrongResponse
 
-	if err := p.handleResponse(httpResponse, &response); err != nil {
+	if err := json.Unmarshal(httpResponse.Body, &response); err != nil {
 		return models.Post{}, fmt.Errorf("handle lesswrong.com random post response: %s", err)
 	}
 
@@ -123,8 +126,4 @@ func (p *LessWrongProvider) GetRandomPost(ctx context.Context) (models.Post, err
 	result := response.Data.Posts.Results[0]
 
 	return result.AsPost(), nil
-}
-
-func (p *LessWrongProvider) handleResponse(httpResponse *HTTPResponse, target interface{}) error {
-	return json.Unmarshal(httpResponse.Body, target)
 }

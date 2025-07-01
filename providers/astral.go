@@ -50,7 +50,9 @@ func (p *AstralProvider) fetchTopPosts(ctx context.Context) ([]models.AstralPost
 	}
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		log.Printf("[ERROR] astralcodexten.com top posts request failed with status %d: %s", resp.StatusCode, string(resp.Body))
+		// Return empty posts to trigger fallback in formatTopPosts
+		return []models.AstralPost{}, nil
 	}
 
 	var posts []models.AstralPost
@@ -150,8 +152,8 @@ func (p *AstralProvider) fetchPosts(ctx context.Context) ([]models.Post, error) 
 			log.Printf("[ERROR] handle astralcodexten posts response: %s", err)
 			if (httpResponse.StatusCode == 403 || httpResponse.StatusCode == 429) && len(posts) == 0 {
 				fallbackPost := models.Post{
-					Title: "Bounded Distrust",
-					URL:   "https://astralcodexten.substack.com/p/bounded-distrust",
+					Title: "Astral Codex Ten",
+					URL:   "https://astralcodexten.substack.com",
 					HTML:  "<p>Content temporarily unavailable due to API restrictions. Please visit the link above to read the full post.</p>",
 				}
 				return []models.Post{fallbackPost}, nil
@@ -185,5 +187,11 @@ func (p *AstralProvider) fetchPosts(ctx context.Context) ([]models.Post, error) 
 }
 
 func (p *AstralProvider) handleResponse(httpResponse *HTTPResponse, target interface{}) error {
-	return json.Unmarshal(httpResponse.Body, target)
+	bodyBytes := httpResponse.Body
+	// Check if response starts with HTML (error page)
+	if len(bodyBytes) > 0 && bodyBytes[0] == '<' {
+		return fmt.Errorf("API returned HTML instead of JSON: %s", string(bodyBytes[:min(200, len(bodyBytes))]))
+	}
+
+	return json.Unmarshal(bodyBytes, target)
 }
