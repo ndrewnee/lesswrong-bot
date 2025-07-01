@@ -6,6 +6,22 @@ import (
 	"time"
 )
 
+const (
+	// Default values for configuration
+	DefaultPort         = 9999
+	DefaultWebhookHost  = "https://lesswrong-bot.herokuapp.com"
+	DefaultRedisURL     = "redis://localhost:6379/1"
+	DefaultTimeout      = 15 * time.Second
+	DefaultCacheExpire  = 24 * time.Hour
+	
+	// Application constants
+	DefaultPostLimit    = 12
+	TopPostsLimit       = 10
+	TopPostsWeeklyDays  = 7
+	PostMaxLength       = 500
+	LesswrongPostsMax   = 2000
+)
+
 type Config struct {
 	RedisURL    string
 	Address     string
@@ -20,27 +36,27 @@ type Config struct {
 func Parse() Config {
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
-		port = 9999
+		port = DefaultPort
 	}
 
 	webhookHost := os.Getenv("WEBHOOK_HOST")
 	if webhookHost == "" {
-		webhookHost = "https://lesswrong-bot.herokuapp.com"
+		webhookHost = DefaultWebhookHost
 	}
 
 	redisURL := os.Getenv("REDIS_URL")
 	if redisURL == "" {
-		redisURL = "redis://localhost:6379/1"
+		redisURL = DefaultRedisURL
 	}
 
 	timeout, err := time.ParseDuration(os.Getenv("TIMEOUT"))
 	if err != nil {
-		timeout = 15 * time.Second
+		timeout = DefaultTimeout
 	}
 
 	expire, err := time.ParseDuration(os.Getenv("CACHE_EXPIRE"))
 	if err != nil {
-		expire = 24 * time.Hour
+		expire = DefaultCacheExpire
 	}
 
 	return Config{

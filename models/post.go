@@ -1,9 +1,10 @@
 package models
 
+import "github.com/ndrewnee/lesswrong-bot/config"
+
 const (
-	DefaultLimit           = 12
-	PostMaxLength          = 500
-	LesswrongPostsMaxCount = 2000
+	DefaultLimit           = config.DefaultPostLimit
+	LesswrongPostsMaxCount = config.LesswrongPostsMax
 )
 
 type (

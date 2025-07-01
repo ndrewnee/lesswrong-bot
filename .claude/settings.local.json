@@ -14,7 +14,9 @@
       "Bash(jq:*)",
       "Bash(timeout:*)",
       "Bash(go run:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(make:*)"
     ],
     "deny": []
   }

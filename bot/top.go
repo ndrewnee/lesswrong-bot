@@ -10,6 +10,7 @@ import (
 
 	"github.com/gocolly/colly"
 
+	"github.com/ndrewnee/lesswrong-bot/config"
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
@@ -60,14 +61,9 @@ const MessageTopAstral = `🏆 Top posts from https://astralcodexten.substack.co
 10. [Whither Tartaria?](https://astralcodexten.substack.com/p/whither-tartaria)`
 
 func (b *Bot) TopPosts(ctx context.Context, userID int) (string, error) {
-	key := fmt.Sprintf("source:%d", userID)
+	source := b.getUserSource(ctx, userID)
 
-	source, err := b.storage.Get(ctx, key)
-	if err != nil {
-		log.Printf("[ERROR] Get source failed: %s, key: %s", err, key)
-	}
-
-	switch models.Source(source) {
+	switch source {
 	case models.SourceLesswrongRu:
 		return b.topLesswrongRu(ctx)
 	case models.SourceSlate:
@@ -82,7 +78,8 @@ func (b *Bot) TopPosts(ctx context.Context, userID int) (string, error) {
 }
 
 func (b *Bot) topAstral(ctx context.Context) (string, error) {
-	httpResponse, err := b.httpClient.Get(ctx, "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
+	uri := fmt.Sprintf("https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=%d", config.TopPostsLimit)
+	httpResponse, err := b.httpClient.Get(ctx, uri)
 	if err != nil {
 		return "", fmt.Errorf("get astralcodexten posts failed: %s", err)
 	}
@@ -161,7 +158,7 @@ func (b *Bot) topLesswrongRu(ctx context.Context) (string, error) {
 	text := bytes.NewBufferString("🏆 Random posts from https://lesswrong.ru\n\n")
 
 	// As lesswrong.ru doesn't have page with top posts return random posts instead.
-	for i := 0; i < models.DefaultLimit; i++ {
+	for i := 0; i < config.TopPostsLimit; i++ {
 		n := b.randomInt(len(posts))
 		post := posts[n]
 
@@ -173,7 +170,7 @@ func (b *Bot) topLesswrongRu(ctx context.Context) (string, error) {
 
 func (b *Bot) topLesswrong(ctx context.Context) (string, error) {
 	query := fmt.Sprintf(`{
-		posts(input: {terms: {view: "top", limit: 12, meta: null, after: "%s"}}) {
+		posts(input: {terms: {view: "top", limit: %d, meta: null, after: "%s"}}) {
 			results {
 				title
 				pageUrl
@@ -182,7 +179,7 @@ func (b *Bot) topLesswrong(ctx context.Context) (string, error) {
 				}
 			}
 		}
-	}`, time.Now().AddDate(0, 0, -7).Format("2006-01-02"))
+	}`, config.DefaultPostLimit, time.Now().AddDate(0, 0, -config.TopPostsWeeklyDays).Format("2006-01-02"))
 
 	body, err := json.Marshal(map[string]string{"query": query})
 	if err != nil {

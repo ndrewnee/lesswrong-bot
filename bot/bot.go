@@ -175,85 +175,130 @@ func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 
 func (b *Bot) MessageHandler(ctx context.Context, update tgbotapi.Update) (tgbotapi.Message, error) {
 	if update.CallbackQuery != nil {
-		text, _, err := b.ChangeSource(ctx, update.CallbackQuery.From.ID, models.Source(update.CallbackQuery.Data))
-		if err != nil {
-			log.Printf("[ERROR] Command /source failed: %s", err)
-			text = "Change source failed"
-		}
-
-		if _, err := b.botAPI.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, "")); err != nil {
-			return tgbotapi.Message{}, fmt.Errorf("answer callback failed: %s", err)
-		}
-
-		msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, text)
-		msg.ParseMode = tgbotapi.ModeMarkdown
-		msg.DisableWebPagePreview = true
-
-		sent, err := b.botAPI.Send(msg)
-		if err != nil {
-			return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
-		}
-
-		return sent, nil
+		return b.handleCallbackQuery(ctx, update.CallbackQuery)
 	}
 
 	if update.Message == nil {
 		return tgbotapi.Message{}, nil
 	}
 
-	if update.Message.From != nil {
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+	return b.handleMessage(ctx, update.Message)
+}
+
+func (b *Bot) handleCallbackQuery(ctx context.Context, callbackQuery *tgbotapi.CallbackQuery) (tgbotapi.Message, error) {
+	text, _, err := b.ChangeSource(ctx, callbackQuery.From.ID, models.Source(callbackQuery.Data))
+	if err != nil {
+		text = b.handleCommandError("source", err, "Change source failed")
 	}
 
-	if update.Message.Chat == nil {
-		return tgbotapi.Message{}, nil
+	if _, err := b.botAPI.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuery.ID, "")); err != nil {
+		return tgbotapi.Message{}, fmt.Errorf("answer callback failed: %s", err)
 	}
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+	msg := tgbotapi.NewMessage(callbackQuery.Message.Chat.ID, text)
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.DisableWebPagePreview = true
 
-	switch update.Message.Command() {
-	case "start", "help":
-		msg.ReplyMarkup = mainKeyboard
-		msg.Text = MessageHelp
-	case "top":
-		text, err := b.TopPosts(ctx, update.Message.From.ID)
-		if err != nil {
-			log.Printf("[ERROR] Command /top failed: %s", err)
-			text = "Top posts not found"
-		}
+	return b.sendMessage(msg)
+}
 
-		msg.Text = text
-	case "random":
-		text, err := b.RandomPost(ctx, update.Message.From.ID)
-		if err != nil {
-			log.Printf("[ERROR] Command /random failed: %s", err)
-			text = "Random post not found"
-		}
-
-		msg.Text = text
-	case "source":
-		text, keyboard, err := b.ChangeSource(ctx, update.Message.From.ID, models.Source(update.Message.CommandArguments()))
-		if err != nil {
-			log.Printf("[ERROR] Command /source failed: %s", err)
-			text = "Change source failed"
-		}
-
-		msg.Text = text
-		msg.ReplyMarkup = keyboard
-	default:
-		msg.Text = "I don't know that command"
+func (b *Bot) handleMessage(ctx context.Context, message *tgbotapi.Message) (tgbotapi.Message, error) {
+	if message.From != nil {
+		log.Printf("[%s] %s", message.From.UserName, message.Text)
 	}
 
+	if message.Chat == nil {
+		return tgbotapi.Message{}, nil
+	}
+
+	msg := b.createBaseMessage(message.Chat.ID)
+
+	switch message.Command() {
+	case "start", "help":
+		return b.handleHelpCommand(msg)
+	case "top":
+		return b.handleTopCommand(ctx, msg, message.From.ID)
+	case "random":
+		return b.handleRandomCommand(ctx, msg, message.From.ID)
+	case "source":
+		return b.handleSourceCommand(ctx, msg, message.From.ID, message.CommandArguments())
+	default:
+		return b.handleUnknownCommand(msg)
+	}
+}
+
+func (b *Bot) createBaseMessage(chatID int64) tgbotapi.MessageConfig {
+	msg := tgbotapi.NewMessage(chatID, "")
+	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.DisableWebPagePreview = true
+	return msg
+}
+
+func (b *Bot) handleHelpCommand(msg tgbotapi.MessageConfig) (tgbotapi.Message, error) {
+	msg.ReplyMarkup = mainKeyboard
+	msg.Text = MessageHelp
+	return b.sendMessage(msg)
+}
+
+func (b *Bot) handleTopCommand(ctx context.Context, msg tgbotapi.MessageConfig, userID int) (tgbotapi.Message, error) {
+	text, err := b.TopPosts(ctx, userID)
+	if err != nil {
+		text = b.handleCommandError("top", err, "Top posts not found")
+	}
+	msg.Text = text
+	return b.sendMessage(msg)
+}
+
+func (b *Bot) handleRandomCommand(ctx context.Context, msg tgbotapi.MessageConfig, userID int) (tgbotapi.Message, error) {
+	text, err := b.RandomPost(ctx, userID)
+	if err != nil {
+		text = b.handleCommandError("random", err, "Random post not found")
+	}
+	msg.Text = text
+	return b.sendMessage(msg)
+}
+
+func (b *Bot) handleSourceCommand(ctx context.Context, msg tgbotapi.MessageConfig, userID int, args string) (tgbotapi.Message, error) {
+	text, keyboard, err := b.ChangeSource(ctx, userID, models.Source(args))
+	if err != nil {
+		text = b.handleCommandError("source", err, "Change source failed")
+	}
+	msg.Text = text
+	msg.ReplyMarkup = keyboard
+	return b.sendMessage(msg)
+}
+
+func (b *Bot) handleUnknownCommand(msg tgbotapi.MessageConfig) (tgbotapi.Message, error) {
+	msg.Text = "I don't know that command"
+	return b.sendMessage(msg)
+}
+
+func (b *Bot) sendMessage(msg tgbotapi.MessageConfig) (tgbotapi.Message, error) {
 	sent, err := b.botAPI.Send(msg)
 	if err != nil {
 		errMsg := msg
 		errMsg.Text = "Oops, something went wrong!"
 		_, _ = b.botAPI.Send(errMsg)
-
 		return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
 	}
-
 	return sent, nil
+}
+
+func (b *Bot) getUserSource(ctx context.Context, userID int) models.Source {
+	key := fmt.Sprintf("source:%d", userID)
+	source, err := b.storage.Get(ctx, key)
+	if err != nil {
+		log.Printf("[ERROR] Get source failed: %s, key: %s", err, key)
+	}
+	
+	sourceModel := models.Source(source)
+	if !sourceModel.IsValid() {
+		return models.SourceLesswrongRu
+	}
+	return sourceModel
+}
+
+func (b *Bot) handleCommandError(command string, err error, fallbackMessage string) string {
+	log.Printf("[ERROR] Command /%s failed: %s", command, err)
+	return fallbackMessage
 }
