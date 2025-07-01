@@ -18,7 +18,8 @@
       "Bash(mkdir:*)",
       "Bash(make:*)",
       "Bash(find:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

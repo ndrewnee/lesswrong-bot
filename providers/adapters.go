@@ -4,21 +4,16 @@ import (
 	"context"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"time"
+
+	"github.com/ndrewnee/lesswrong-bot/interfaces"
 )
 
 type HTTPClientAdapter struct {
-	client interface {
-		Get(ctx context.Context, uri string) (*http.Response, error)
-		Post(ctx context.Context, url, contentType string, body io.Reader) (*http.Response, error)
-	}
+	client interfaces.HTTPClient
 }
 
-func NewHTTPClientAdapter(client interface {
-	Get(ctx context.Context, uri string) (*http.Response, error)
-	Post(ctx context.Context, url, contentType string, body io.Reader) (*http.Response, error)
-}) *HTTPClientAdapter {
+func NewHTTPClientAdapter(client interfaces.HTTPClient) *HTTPClientAdapter {
 	return &HTTPClientAdapter{client: client}
 }
 
@@ -64,16 +59,10 @@ func (a *HTTPClientAdapter) Post(ctx context.Context, url, contentType string, b
 }
 
 type StorageAdapter struct {
-	storage interface {
-		Get(ctx context.Context, key string) (string, error)
-		Set(ctx context.Context, key, value string, expire time.Duration) error
-	}
+	storage interfaces.Storage
 }
 
-func NewStorageAdapter(storage interface {
-	Get(ctx context.Context, key string) (string, error)
-	Set(ctx context.Context, key, value string, expire time.Duration) error
-}) *StorageAdapter {
+func NewStorageAdapter(storage interfaces.Storage) *StorageAdapter {
 	return &StorageAdapter{storage: storage}
 }
 

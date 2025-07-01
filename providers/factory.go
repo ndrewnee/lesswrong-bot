@@ -1,13 +1,9 @@
 package providers
 
 import (
-	"context"
-	"io"
-	"net/http"
-	"time"
-
 	md "github.com/JohannesKaufmann/html-to-markdown"
 
+	"github.com/ndrewnee/lesswrong-bot/interfaces"
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
 
@@ -19,14 +15,8 @@ type ProviderFactory struct {
 }
 
 func NewProviderFactory(
-	storage interface {
-		Get(ctx context.Context, key string) (string, error)
-		Set(ctx context.Context, key, value string, expire time.Duration) error
-	},
-	httpClient interface {
-		Get(ctx context.Context, uri string) (*http.Response, error)
-		Post(ctx context.Context, url, contentType string, body io.Reader) (*http.Response, error)
-	},
+	storage interfaces.Storage,
+	httpClient interfaces.HTTPClient,
 	cacheExpire int,
 	randomInt func(int) int,
 ) *ProviderFactory {
@@ -50,6 +40,21 @@ func (f *ProviderFactory) CreateProvider(source models.Source) PostProvider {
 		return NewLessWrongProvider(f.httpClient, f.randomInt)
 	default:
 		return NewLessWrongRuProvider(f.storage, f.cacheExpire, f.randomInt)
+	}
+}
+
+func (f *ProviderFactory) CreateTopPostsProvider(source models.Source) TopPostsProvider {
+	switch source {
+	case models.SourceLesswrongRu:
+		return NewLessWrongRuTopProvider(f.storage, f.cacheExpire)
+	case models.SourceSlate:
+		return NewSlateTopProvider()
+	case models.SourceAstral:
+		return NewAstralTopProvider(f.httpClient)
+	case models.SourceLesswrong:
+		return NewLessWrongTopProvider(f.httpClient)
+	default:
+		return NewLessWrongRuTopProvider(f.storage, f.cacheExpire)
 	}
 }
 

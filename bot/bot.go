@@ -3,16 +3,15 @@ package bot
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"math/rand"
 	"net/http"
 	"strings"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/ndrewnee/lesswrong-bot/config"
+	"github.com/ndrewnee/lesswrong-bot/interfaces"
 	"github.com/ndrewnee/lesswrong-bot/models"
 	"github.com/ndrewnee/lesswrong-bot/providers"
 	"github.com/ndrewnee/lesswrong-bot/storage/memory"
@@ -49,8 +48,8 @@ type (
 	Bot struct {
 		config          config.Config
 		botAPI          *tgbotapi.BotAPI
-		httpClient      HTTPClient
-		storage         Storage
+		httpClient      interfaces.HTTPClient
+		storage         interfaces.Storage
 		randomInt       func(n int) int
 		providerFactory *providers.ProviderFactory
 	}
@@ -58,19 +57,9 @@ type (
 	Options struct {
 		Config     config.Config
 		BotAPI     *tgbotapi.BotAPI
-		HTTPClient HTTPClient
-		Storage    Storage
+		HTTPClient interfaces.HTTPClient
+		Storage    interfaces.Storage
 		RandomInt  func(n int) int
-	}
-
-	HTTPClient interface {
-		Get(ctx context.Context, uri string) (*http.Response, error)
-		Post(ctx context.Context, url, contentType string, body io.Reader) (*http.Response, error)
-	}
-
-	Storage interface {
-		Get(ctx context.Context, key string) (string, error)
-		Set(ctx context.Context, key, value string, expire time.Duration) error
 	}
 )
 
@@ -128,32 +117,39 @@ func New(options ...Options) (*Bot, error) {
 
 func (b *Bot) GetUpdatesChan() (tgbotapi.UpdatesChannel, error) {
 	if b.config.Webhook {
-		webhook := tgbotapi.NewWebhook(b.config.WebhookHost + "/" + b.botAPI.Token)
+		return b.setupWebhook()
+	}
+	return b.setupPolling()
+}
 
-		if _, err := b.botAPI.SetWebhook(webhook); err != nil {
-			return nil, fmt.Errorf("set webhook failed: %s", err)
-		}
+func (b *Bot) setupWebhook() (tgbotapi.UpdatesChannel, error) {
+	webhook := tgbotapi.NewWebhook(b.config.WebhookHost + "/" + b.botAPI.Token)
 
-		info, err := b.botAPI.GetWebhookInfo()
-		if err != nil {
-			return nil, fmt.Errorf("get webhook info failed: %s", err)
-		}
-
-		if info.LastErrorDate != 0 {
-			log.Printf("[ERROR] Telegram callback failed: %s", info.LastErrorMessage)
-		}
-
-		updates := b.botAPI.ListenForWebhook("/" + b.botAPI.Token)
-
-		go func() {
-			if err := http.ListenAndServe(b.config.Address, nil); err != nil {
-				log.Printf("[ERROR] Listen and serve failed: %s", err)
-			}
-		}()
-
-		return updates, nil
+	if _, err := b.botAPI.SetWebhook(webhook); err != nil {
+		return nil, fmt.Errorf("set webhook failed: %s", err)
 	}
 
+	info, err := b.botAPI.GetWebhookInfo()
+	if err != nil {
+		return nil, fmt.Errorf("get webhook info failed: %s", err)
+	}
+
+	if info.LastErrorDate != 0 {
+		log.Printf("[ERROR] Telegram callback failed: %s", info.LastErrorMessage)
+	}
+
+	updates := b.botAPI.ListenForWebhook("/" + b.botAPI.Token)
+
+	go func() {
+		if err := http.ListenAndServe(b.config.Address, nil); err != nil {
+			log.Printf("[ERROR] Listen and serve failed: %s", err)
+		}
+	}()
+
+	return updates, nil
+}
+
+func (b *Bot) setupPolling() (tgbotapi.UpdatesChannel, error) {
 	response, err := b.botAPI.RemoveWebhook()
 	if err != nil {
 		return nil, fmt.Errorf("removed webhook failed: %s", err)
