@@ -62,10 +62,22 @@ func (f *MarkdownFormatter) cleanupTruncatedMarkdown(markdown string) string {
 }
 
 func (f *MarkdownFormatter) applyMarkdownFixes(markdown string) string {
-	// Apply various markdown fixes for better Telegram compatibility
+	// Fix the specific problematic patterns first (order matters)
 	fixes := []struct {
 		old, new string
 	}{
+		// Fix double-escaped sequences from markdown converter
+		{"_\\\\\\\\[", "["},  // Convert "_\\\\[" to "["
+		{"_\\\\[", "["},      // Convert "_\\[" to "["
+		{"\\\\\\\\[", "["},   // Convert "\\\\[" to "["
+		{"\\\\[", "["},       // Convert "\\[" to "["
+		{"\\\\]", "]"},       // Convert "\\]" to "]"
+		{"\\\\_", ""},        // Convert "\\_" to ""
+		// Fix single escape sequences
+		{"_\\[", "["},        // Convert "_\[" to "["
+		{"\\[", "["},         // Convert standalone "\[" to "["
+		{"\\]", "]"},         // Convert "\]" to "]"
+		// Then apply general fixes
 		{"[[", "["},
 		{"]]", "]"},
 		{"![]", "[Image]"},
@@ -77,5 +89,12 @@ func (f *MarkdownFormatter) applyMarkdownFixes(markdown string) string {
 		markdown = strings.ReplaceAll(markdown, fix.old, fix.new)
 	}
 
-	return markdown
+	// Remove incomplete escape sequences at the end of lines
+	lines := strings.Split(markdown, "\n")
+	for i, line := range lines {
+		// Remove trailing backslash that can break parsing
+		lines[i] = strings.TrimSuffix(line, "\\")
+	}
+
+	return strings.Join(lines, "\n")
 }

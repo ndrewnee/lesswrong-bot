@@ -16,7 +16,9 @@
       "Bash(go run:*)",
       "Bash(rm:*)",
       "Bash(mkdir:*)",
-      "Bash(make:*)"
+      "Bash(make:*)",
+      "Bash(find:*)",
+      "Bash(git revert:*)"
     ],
     "deny": []
   }

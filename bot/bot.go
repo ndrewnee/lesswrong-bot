@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -276,8 +277,19 @@ func (b *Bot) handleUnknownCommand(msg tgbotapi.MessageConfig) (tgbotapi.Message
 func (b *Bot) sendMessage(msg tgbotapi.MessageConfig) (tgbotapi.Message, error) {
 	sent, err := b.botAPI.Send(msg)
 	if err != nil {
+		// If it's a markdown parsing error and we're using markdown mode, try as plain text
+		if strings.Contains(err.Error(), "can't parse entities") && msg.ParseMode == tgbotapi.ModeMarkdown {
+			log.Printf("[WARN] Markdown parsing failed, retrying as plain text: %s", err)
+			msg.ParseMode = ""
+			sent, err = b.botAPI.Send(msg)
+			if err == nil {
+				return sent, nil
+			}
+		}
+		
 		errMsg := msg
 		errMsg.Text = "Oops, something went wrong!"
+		errMsg.ParseMode = ""
 		_, _ = b.botAPI.Send(errMsg)
 		return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
 	}
