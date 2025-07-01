@@ -17,6 +17,7 @@ import (
 
 	"github.com/ndrewnee/lesswrong-bot/bot/mocks"
 	"github.com/ndrewnee/lesswrong-bot/models"
+	"github.com/ndrewnee/lesswrong-bot/providers"
 )
 
 // Individual random post tests - exact same logic as original TestRandomPost
@@ -127,16 +128,32 @@ func setupMockHTTPClient(t *testing.T) *mocks.HTTPClient {
 	return httpClient
 }
 
+func setupBotWithMockHTTPClient(t *testing.T, httpClient *mocks.HTTPClient) *Bot {
+	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
+	require.NoError(t, err)
+	
+	return tgbot
+}
+
+func updateBotProviderFactory(tgbot *Bot, httpClient *mocks.HTTPClient) {
+	// Update the provider factory to use the same mock HTTP client and current randomInt
+	tgbot.providerFactory = providers.NewProviderFactory(
+		tgbot.storage,
+		httpClient,
+		int(tgbot.config.CacheExpire.Seconds()),
+		tgbot.randomInt,
+	)
+}
+
 func TestRandomPost_ShouldGetRandomPostFromLessWrongRuWhenSourceNotSet(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 2
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
 	require.NoError(t, err)
@@ -149,16 +166,15 @@ func TestRandomPost_ShouldGetRandomPostFromLessWrongRuWhenSourceNotSet(t *testin
 func TestRandomPost_ShouldGetRandomPostFromSlateStarCodex(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 0
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
@@ -172,16 +188,15 @@ func TestRandomPost_ShouldGetRandomPostFromSlateStarCodex(t *testing.T) {
 func TestRandomPost_ShouldGetRandomPostFromSlateStarCodexInvalidMarkdownCut(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 563
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
@@ -195,16 +210,15 @@ func TestRandomPost_ShouldGetRandomPostFromSlateStarCodexInvalidMarkdownCut(t *t
 func TestRandomPost_ShouldGetRandomPostFromSlateStarCodexImageFix(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 191
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceSlate.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
@@ -218,16 +232,15 @@ func TestRandomPost_ShouldGetRandomPostFromSlateStarCodexImageFix(t *testing.T) 
 func TestRandomPost_ShouldGetRandomPostFromAstralCodexTen(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 0
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
@@ -241,16 +254,15 @@ func TestRandomPost_ShouldGetRandomPostFromAstralCodexTen(t *testing.T) {
 func TestRandomPost_ShouldGetRandomPostFromAstralCodexTenInvalidCut(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 1
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
@@ -264,16 +276,15 @@ func TestRandomPost_ShouldGetRandomPostFromAstralCodexTenInvalidCut(t *testing.T
 func TestRandomPost_ShouldGetRandomPostFromAstralCodexTenLinkBug(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 2
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceAstral.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
@@ -287,16 +298,15 @@ func TestRandomPost_ShouldGetRandomPostFromAstralCodexTenLinkBug(t *testing.T) {
 func TestRandomPost_ShouldGetRandomPostFromLessWrongRuInvalidCut(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 1
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceLesswrongRu.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceLesswrongRu.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
@@ -310,16 +320,15 @@ func TestRandomPost_ShouldGetRandomPostFromLessWrongRuInvalidCut(t *testing.T) {
 func TestRandomPost_ShouldGetRandomPostFromLessWrongCom(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 0
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceLesswrong.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceLesswrong.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
@@ -333,16 +342,15 @@ func TestRandomPost_ShouldGetRandomPostFromLessWrongCom(t *testing.T) {
 func TestRandomPost_ShouldGetRandomPostFromLessWrongComInvalidDomain(t *testing.T) {
 	const userID = 2
 	httpClient := setupMockHTTPClient(t)
-
-	tgbot, err := New(Options{BotAPI: &tgbotapi.BotAPI{}, HTTPClient: httpClient})
-	require.NoError(t, err)
+	tgbot := setupBotWithMockHTTPClient(t, httpClient)
 
 	tgbot.randomInt = func(n int) int {
 		return 1
 	}
+	updateBotProviderFactory(tgbot, httpClient)
 
 	key := fmt.Sprintf("source:%d", userID)
-	err = tgbot.storage.Set(context.TODO(), key, models.SourceLesswrong.Value(), 0)
+	err := tgbot.storage.Set(context.TODO(), key, models.SourceLesswrong.Value(), 0)
 	require.NoError(t, err)
 
 	got, err := tgbot.RandomPost(context.TODO(), userID)
