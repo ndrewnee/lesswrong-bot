@@ -77,5 +77,78 @@ func (f *MarkdownFormatter) applyMarkdownFixes(markdown string) string {
 		markdown = strings.ReplaceAll(markdown, fix.old, fix.new)
 	}
 
+	// Additional Telegram-specific fixes
+	markdown = f.fixTelegramMarkdown(markdown)
+
 	return markdown
+}
+
+func (f *MarkdownFormatter) fixTelegramMarkdown(markdown string) string {
+	// Fix specific problematic patterns first
+	markdown = f.fixUnmatchedBrackets(markdown)
+	
+	// Then fix unmatched emphasis markers
+	markdown = f.fixUnmatchedUnderscores(markdown)
+	markdown = f.fixUnmatchedAsterisks(markdown)
+	
+	// Clean up line endings
+	lines := strings.Split(markdown, "\n")
+	for i, line := range lines {
+		lines[i] = f.cleanLineEnding(line)
+	}
+	
+	return strings.Join(lines, "\n")
+}
+
+func (f *MarkdownFormatter) fixUnmatchedUnderscores(text string) string {
+	// Count underscores and remove trailing ones if unmatched
+	underscoreCount := strings.Count(text, "_")
+	if underscoreCount%2 != 0 {
+		// Remove the last underscore if count is odd
+		lastIndex := strings.LastIndex(text, "_")
+		if lastIndex != -1 {
+			text = text[:lastIndex] + text[lastIndex+1:]
+		}
+	}
+	return text
+}
+
+func (f *MarkdownFormatter) fixUnmatchedBrackets(text string) string {
+	// Remove incomplete bracket sequences like "\[" at the end
+	text = strings.TrimSuffix(text, "\\[")
+	text = strings.TrimSuffix(text, "\\")
+	
+	// Fix common bracket patterns
+	text = strings.ReplaceAll(text, "\\[", "[")
+	text = strings.ReplaceAll(text, "\\]", "]")
+	
+	return text
+}
+
+func (f *MarkdownFormatter) fixUnmatchedAsterisks(text string) string {
+	// Handle both single (*italic*) and double (**bold**) asterisks
+	// Count remaining single asterisks after removing double asterisks
+	remainingText := strings.ReplaceAll(text, "**", "")
+	singleAsteriskCount := strings.Count(remainingText, "*")
+	
+	// If we have unmatched single asterisks, remove the last one
+	if singleAsteriskCount%2 != 0 {
+		lastIndex := strings.LastIndex(text, "*")
+		// Make sure we're not breaking a double asterisk
+		if lastIndex > 0 && text[lastIndex-1] != '*' && lastIndex < len(text)-1 && text[lastIndex+1] != '*' {
+			text = text[:lastIndex] + text[lastIndex+1:]
+		} else if lastIndex == len(text)-1 && (lastIndex == 0 || text[lastIndex-1] != '*') {
+			// It's a trailing single asterisk
+			text = text[:lastIndex]
+		}
+	}
+	
+	return text
+}
+
+func (f *MarkdownFormatter) cleanLineEnding(line string) string {
+	// Remove problematic characters at the end of lines
+	line = strings.TrimSuffix(line, "\\")
+	// Only trim trailing underscores/asterisks if they would be unmatched
+	return strings.TrimSpace(line)
 }

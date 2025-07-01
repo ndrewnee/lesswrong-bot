@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -274,14 +275,56 @@ func (b *Bot) handleUnknownCommand(msg tgbotapi.MessageConfig) (tgbotapi.Message
 }
 
 func (b *Bot) sendMessage(msg tgbotapi.MessageConfig) (tgbotapi.Message, error) {
+	// Validate markdown before sending if ParseMode is set
+	if msg.ParseMode == tgbotapi.ModeMarkdown {
+		if err := b.validateMarkdown(msg.Text); err != nil {
+			log.Printf("[WARN] Invalid markdown detected, sending as plain text: %s", err)
+			msg.ParseMode = ""
+		}
+	}
+
 	sent, err := b.botAPI.Send(msg)
 	if err != nil {
+		// If markdown parsing failed, try sending as plain text
+		if strings.Contains(err.Error(), "can't parse entities") && msg.ParseMode == tgbotapi.ModeMarkdown {
+			log.Printf("[WARN] Markdown parsing failed, retrying as plain text")
+			msg.ParseMode = ""
+			sent, err = b.botAPI.Send(msg)
+			if err == nil {
+				return sent, nil
+			}
+		}
+		
 		errMsg := msg
 		errMsg.Text = "Oops, something went wrong!"
+		errMsg.ParseMode = ""
 		_, _ = b.botAPI.Send(errMsg)
 		return tgbotapi.Message{}, fmt.Errorf("send message failed: %s. Text: \n%s", err, msg.Text)
 	}
 	return sent, nil
+}
+
+func (b *Bot) validateMarkdown(text string) error {
+	// Basic validation for common markdown issues
+	underscoreCount := strings.Count(text, "_")
+	asteriskCount := strings.Count(text, "*")
+	
+	// Check for unmatched underscores (should be even for proper emphasis)
+	if underscoreCount%2 != 0 {
+		return fmt.Errorf("unmatched underscores detected: %d", underscoreCount)
+	}
+	
+	// Check for unmatched asterisks (should be even for proper bold)
+	if asteriskCount%2 != 0 {
+		return fmt.Errorf("unmatched asterisks detected: %d", asteriskCount)
+	}
+	
+	// Check for problematic patterns
+	if strings.Contains(text, "\\[") && !strings.Contains(text, "\\]") {
+		return fmt.Errorf("incomplete escaped bracket sequence")
+	}
+	
+	return nil
 }
 
 func (b *Bot) getUserSource(ctx context.Context, userID int) models.Source {
