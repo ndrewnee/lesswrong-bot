@@ -8,13 +8,9 @@ import (
 
 type PostProvider interface {
 	GetRandomPost(ctx context.Context) (models.Post, error)
-	GetName() string
-	GetCacheKey() string
-}
-
-type TopPostsProvider interface {
 	GetTopPosts(ctx context.Context) (string, error)
 	GetName() string
+	GetCacheKey() string
 }
 
 // Internal interfaces for providers that may need different signatures

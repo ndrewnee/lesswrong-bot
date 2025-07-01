@@ -43,21 +43,6 @@ func (f *ProviderFactory) CreateProvider(source models.Source) PostProvider {
 	}
 }
 
-func (f *ProviderFactory) CreateTopPostsProvider(source models.Source) TopPostsProvider {
-	switch source {
-	case models.SourceLesswrongRu:
-		return NewLessWrongRuTopProvider(f.storage, f.cacheExpire)
-	case models.SourceSlate:
-		return NewSlateTopProvider()
-	case models.SourceAstral:
-		return NewAstralTopProvider(f.httpClient)
-	case models.SourceLesswrong:
-		return NewLessWrongTopProvider(f.httpClient)
-	default:
-		return NewLessWrongRuTopProvider(f.storage, f.cacheExpire)
-	}
-}
-
 func (f *ProviderFactory) GetMarkdownConverter(source models.Source) *md.Converter {
 	switch source {
 	case models.SourceLesswrongRu:

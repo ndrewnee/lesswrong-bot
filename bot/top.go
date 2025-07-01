@@ -6,6 +6,6 @@ import (
 
 func (b *Bot) TopPosts(ctx context.Context, userID int) (string, error) {
 	source := b.getUserSource(ctx, userID)
-	provider := b.providerFactory.CreateTopPostsProvider(source)
+	provider := b.providerFactory.CreateProvider(source)
 	return provider.GetTopPosts(ctx)
 }

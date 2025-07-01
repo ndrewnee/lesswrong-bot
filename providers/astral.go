@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/ndrewnee/lesswrong-bot/models"
 )
@@ -31,6 +32,51 @@ func (p *AstralProvider) GetName() string {
 
 func (p *AstralProvider) GetCacheKey() string {
 	return "posts:astralcodexten"
+}
+
+func (p *AstralProvider) GetTopPosts(ctx context.Context) (string, error) {
+	posts, err := p.fetchTopPosts(ctx)
+	if err != nil {
+		return "", fmt.Errorf("fetch top posts failed: %w", err)
+	}
+
+	return p.formatTopPosts(posts), nil
+}
+
+func (p *AstralProvider) fetchTopPosts(ctx context.Context) ([]models.AstralPost, error) {
+	resp, err := p.httpClient.Get(ctx, "https://astralcodexten.substack.com/api/v1/archive?sort=top&limit=10")
+	if err != nil {
+		return nil, fmt.Errorf("HTTP request failed: %w", err)
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var posts []models.AstralPost
+	if err := json.Unmarshal(resp.Body, &posts); err != nil {
+		return nil, fmt.Errorf("unmarshal failed: %w", err)
+	}
+
+	return posts, nil
+}
+
+func (p *AstralProvider) formatTopPosts(posts []models.AstralPost) string {
+	if len(posts) == 0 {
+		return "🏆 Top posts from https://astralcodexten.substack.com\n\nNo posts found."
+	}
+
+	var sb strings.Builder
+	sb.WriteString("🏆 Top posts from https://astralcodexten.substack.com\n\n")
+
+	for i, post := range posts {
+		if i >= 10 {
+			break
+		}
+		sb.WriteString(fmt.Sprintf("%d. [%s](%s)\n", i+1, post.Title, post.CanonicalURL))
+	}
+
+	return sb.String()
 }
 
 func (p *AstralProvider) GetRandomPost(ctx context.Context) (models.Post, error) {
