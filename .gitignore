@@ -16,3 +16,5 @@ lesswrong-bot
 # vendor/
 
 .env
+
+.claude/settings.local.json

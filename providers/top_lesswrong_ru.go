@@ -3,6 +3,7 @@ package providers
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/ndrewnee/lesswrong-bot/models"
@@ -33,7 +34,7 @@ func (p *LessWrongRuTopProvider) GetTopPosts(ctx context.Context) (string, error
 	}
 
 	// Scrape fresh data
-	posts, err := p.scrapePosts(ctx)
+	posts, err := p.scrapePosts()
 	if err != nil {
 		return "", fmt.Errorf("scrape top posts failed: %w", err)
 	}
@@ -43,13 +44,13 @@ func (p *LessWrongRuTopProvider) GetTopPosts(ctx context.Context) (string, error
 	// Cache the result
 	if err := p.storage.Set(ctx, cacheKey, result, p.cacheExpire); err != nil {
 		// Log error but don't fail
-		// log.Printf("Failed to cache top posts: %v", err)
+		log.Printf("[WARN] Failed to cache top posts: %s", err)
 	}
 
 	return result, nil
 }
 
-func (p *LessWrongRuTopProvider) scrapePosts(ctx context.Context) ([]topPost, error) {
+func (p *LessWrongRuTopProvider) scrapePosts() ([]topPost, error) {
 	// For now, return hardcoded top posts to avoid external dependencies
 	// In a real implementation, this would scrape the actual website
 	posts := []topPost{
