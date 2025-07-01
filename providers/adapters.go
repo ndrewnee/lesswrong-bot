@@ -3,7 +3,6 @@ package providers
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"time"
 
 	"github.com/ndrewnee/lesswrong-bot/interfaces"
@@ -24,7 +23,7 @@ func (a *HTTPClientAdapter) Get(ctx context.Context, url string) (*HTTPResponse,
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
