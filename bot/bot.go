@@ -13,6 +13,7 @@ import (
 
 	"github.com/ndrewnee/lesswrong-bot/config"
 	"github.com/ndrewnee/lesswrong-bot/models"
+	"github.com/ndrewnee/lesswrong-bot/providers"
 	"github.com/ndrewnee/lesswrong-bot/storage/memory"
 )
 
@@ -45,11 +46,12 @@ var mainKeyboard = tgbotapi.NewReplyKeyboard(
 
 type (
 	Bot struct {
-		config     config.Config
-		botAPI     *tgbotapi.BotAPI
-		httpClient HTTPClient
-		storage    Storage
-		randomInt  func(n int) int
+		config          config.Config
+		botAPI          *tgbotapi.BotAPI
+		httpClient      HTTPClient
+		storage         Storage
+		randomInt       func(n int) int
+		providerFactory *providers.ProviderFactory
 	}
 
 	Options struct {
@@ -106,12 +108,20 @@ func New(options ...Options) (*Bot, error) {
 		opts.RandomInt = rand.Intn
 	}
 
+	providerFactory := providers.NewProviderFactory(
+		opts.Storage,
+		opts.HTTPClient,
+		int(opts.Config.CacheExpire.Seconds()),
+		opts.RandomInt,
+	)
+
 	return &Bot{
-		botAPI:     opts.BotAPI,
-		config:     opts.Config,
-		httpClient: opts.HTTPClient,
-		storage:    opts.Storage,
-		randomInt:  opts.RandomInt,
+		botAPI:          opts.BotAPI,
+		config:          opts.Config,
+		httpClient:      opts.HTTPClient,
+		storage:         opts.Storage,
+		randomInt:       opts.RandomInt,
+		providerFactory: providerFactory,
 	}, nil
 }
 
