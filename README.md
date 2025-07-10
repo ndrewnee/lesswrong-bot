@@ -1,8 +1,8 @@
-# 🤖 lesswrong-bot
+# [@lesswrong_bot](https://t.me/lesswrong_bot) 🤖 Telegram bot code
 
 [![Go](https://github.com/ndrewnee/lesswrong-bot/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/ndrewnee/lesswrong-bot/actions/workflows/go.yml)
 
-[Telegram bot](https://t.me/lesswrong_bot) for reading posts from:
+Telegram bot for reading posts from:
 
 - [Lesswrong.ru](https://lesswrong.ru) (default)
 - [Slate Star Codex](https://slatestarcodex.com)
